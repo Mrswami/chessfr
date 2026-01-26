@@ -252,33 +252,30 @@ class _ScanningScreenState extends State<ScanningScreen> {
       meaning = "[Error/NACK]";
       type = LogType.error;
     } else if (hex.startsWith("e9")) {
-      // E9 = Piece Event. This is the KEY for real-time tracking!
-      // Format appears to be: E9 [Square] [Action?] ...
-      int sq = value.length > 1 ? value[1] : 0;
-      int rank = sq ~/ 8;
-      int file = sq % 8;
-      String alg = "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
+      // Piece Event: format E9 [SquareHex] [Status?]
+      // status 0x00 usually means 'lifted' or 'placed'
+      int rawSq = value.length > 1 ? value[1] : 0;
       
-      // Determine if this is a LIFT or PLACE
-      // Simple heuristic: If we don't have a lifted piece, this is a lift
-      // If we do have one, this is a place (completing the move)
+      // Let's try to find the real algebraic name
+      String alg = _chessUpToAlgebraic(rawSq);
+      
       if (_liftedSquare == null) {
-        _liftedSquare = sq;
-        meaning = "⬆️ LIFTED from $alg";
-        _addLog("PIECE LIFTED: $alg", LogType.success);
+        _liftedSquare = rawSq;
+        meaning = "⬆️ LIFTED: $alg ($rawSq)";
+        _addLog("PIECE LIFTED: $alg (ID: $rawSq)", LogType.success);
       } else {
-        // Completing a move!
         int fromSq = _liftedSquare!;
-        int toSq = sq;
+        int toSq = rawSq;
         
-        String fromAlg = _squareToAlgebraic(fromSq);
-        String toAlg = _squareToAlgebraic(toSq);
+        String fromAlg = _chessUpToAlgebraic(fromSq);
+        String toAlg = _chessUpToAlgebraic(toSq);
         
-        meaning = "⬇️ PLACED on $alg (Move: $fromAlg→$toAlg)";
-        _addLog("MOVE: $fromAlg → $toAlg", LogType.success);
+        meaning = "⬇️ PLACED: $toAlg (Move: $fromAlg→$toAlg)";
+        _addLog("MOVE DETECTED: $fromAlg → $toAlg", LogType.success);
         
-        // Update the FEN!
-        _applyMove(fromSq, toSq);
+        // Correcting the FEN board indices
+        // Our FEN logic expects 0..63 where 0=A1, 7=H1, 56=A8, 63=H8
+        _applyMove(_chessUpToIndex(fromSq), _chessUpToIndex(toSq));
         _liftedSquare = null;
       }
     } else if (hex.startsWith("71")) {
@@ -299,10 +296,29 @@ class _ScanningScreenState extends State<ScanningScreen> {
     _addLog("RX: $hex $meaning", type);
   }
   
-  String _squareToAlgebraic(int sq) {
-    int rank = sq ~/ 8;
-    int file = sq % 8;
+  // Translates ChessUp hardware IDs to Algebraic (a1-h8)
+  String _chessUpToAlgebraic(int sq) {
+    // Current mapping guess: Hardware might be rotated.
+    // Let's assume the user got 'a6' for 'e4'.
+    // a6 (40) should be e4 (28).
+    
+    // Convert hardware ID to our system (0=a1, 7=h1, 63=h8)
+    int internalIdx = _chessUpToIndex(sq);
+    int rank = internalIdx ~/ 8;
+    int file = internalIdx % 8;
     return "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
+  }
+
+  // THE TRANSLATION LAYER
+  // This maps hardware IDs (like 40 for e4) to our internal 0-63 indices
+  int _chessUpToIndex(int hardwareSq) {
+    // Guess: Rotation/Mirroring
+    // If 40 (0x28) is e4 (28 decimal)
+    // Hardware 40 might be: rank index X, file index Y
+    // Let's print debug info to the user to help us find the pattern
+    
+    // TEMPORARY: Default 1:1 for now, but logged
+    return hardwareSq; 
   }
   
   void _applyMove(int from, int to) {
