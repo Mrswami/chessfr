@@ -26,7 +26,15 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // DEBUG: Track re-renders
+    print("🎨 GameProjectionScreen.build() - FEN: ${widget.fen}");
+    
     List<String?> board = _parseFen(widget.fen);
+    
+    // DEBUG: Show board state
+    int pieceCount = board.where((p) => p != null).length;
+    print("🎨 Parsed board has $pieceCount pieces");
+    
     if (_isRotated) {
       board = board.reversed.toList();
     }
@@ -187,6 +195,12 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
   Widget _buildPiece(String? pieceCode) {
     if (pieceCode == null || pieceCode.isEmpty) return const SizedBox.shrink();
     
+    // Reject unknown pieces
+    if (pieceCode == '?' || !('pnbrqkPNBRQK'.contains(pieceCode))) {
+      debugPrint("⚠️ Trying to render unknown piece: '$pieceCode'");
+      return const SizedBox.shrink();
+    }
+    
     String symbol = "";
     bool isWhite = pieceCode == pieceCode.toUpperCase();
     
@@ -197,13 +211,16 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
       case 'B': symbol = isWhite ? "♗" : "♝"; break;
       case 'N': symbol = isWhite ? "♘" : "♞"; break;
       case 'P': symbol = isWhite ? "♙" : "♟"; break;
+      default:
+        debugPrint("⚠️ Unhandled piece in switch: '$pieceCode'");
+        return const SizedBox.shrink();
     }
 
     return Text(
       symbol,
       style: TextStyle(
-        fontSize: 28, // Much smaller for proper fit
-        color: isWhite ? Colors.white : const Color(0xFF151515), // charcoal
+        fontSize: 28,
+        color: isWhite ? Colors.white : const Color(0xFF151515),
         shadows: [
           Shadow(
             offset: const Offset(0, 0), 
@@ -235,7 +252,13 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
               file += skip;
             } else {
               if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
-                board[rank * 8 + file] = char;
+                // VALIDATION: Only accept valid piece characters
+                if ('pnbrqkPNBRQK'.contains(char)) {
+                  board[rank * 8 + file] = char;
+                } else if (char != '?') {
+                  // Log unknown characters (but don't crash)
+                  debugPrint("⚠️ Unknown FEN char: '$char' at rank $rank, file $file");
+                }
               }
               file++;
             }

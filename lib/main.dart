@@ -252,35 +252,42 @@ class _ScanningScreenState extends State<ScanningScreen> {
       meaning = "[Error/NACK]";
       type = LogType.error;
     } else if (hex.startsWith("e9")) {
-      // Piece Event: E9 [Action+Square] [??]
+      // E9 packets send PIECE IDs, not square coordinates!
+      // We can't reliably track moves with these - we need the full board state instead.
       int rawByte = value.length > 1 ? value[1] : 0;
-      
-      // Bit 0x40 (64) is the 'Lifted' flag (NOT placed, inverted from original guess)
       bool isLifted = (rawByte & 0x40) != 0;
-      int hardwareSq = rawByte & 0x3F; // Mask out the flag to get the 0-63 ID
-      
-      String alg = _chessUpToAlgebraic(hardwareSq);
+      int pieceId = rawByte & 0x3F;
       
       if (isLifted) {
-        // LIFTED / PICKUP
-        _liftedSquare = hardwareSq;
-        meaning = "PICKUP: $alg";
-        _addLog("⬆️ $alg (Lifted)", LogType.success);
+        meaning = "⬆️ Piece $pieceId lifted";
+        _addLog("⬆️ Piece ID $pieceId lifted", LogType.success);
       } else {
-        // PLACED / DROP
-        if (_liftedSquare != null) {
-          int fromSq = _liftedSquare!;
-          String fromAlg = _chessUpToAlgebraic(fromSq);
-          String toAlg = alg;
-          
-          meaning = "DROP: $toAlg ($fromAlg→$toAlg)";
-          _addLog("⬇️ $toAlg (Placed) | Move: $fromAlg→$toAlg", LogType.success);
-          
-          _applyMove(_chessUpToIndex(fromSq), _chessUpToIndex(hardwareSq));
-          _liftedSquare = null;
-        } else {
-          meaning = "DROP: $alg (No Lift)";
-          _addLog("⬇️ $alg (Placed)", LogType.success);
+        meaning = "⬇️ Piece $pieceId placed";
+        _addLog("⬇️ Piece ID $pieceId placed", LogType.success);
+        
+        // Request fresh board state after each move
+        _sendCommand("6401"); // Request board state
+      }
+    } else if (hex.startsWith("67")) {
+      // 0x67 = Board state packet with piece positions
+      meaning = "[Board State Response]";
+      _addLog("📍 Received board state (${value.length} bytes)", LogType.system);
+      
+      // Parse the 67 packet to build FEN
+      // Format: 67 [piece positions...]
+      if (value.length >= 66) {
+        try {
+          String newFen = _parse67Packet(value);
+          if (newFen.isNotEmpty && newFen != _currentFen) {
+            print("📌 Board state changed!");
+            print("📌 OLD: $_currentFen");
+            print("📌 NEW: $newFen");
+            setState(() {
+              _currentFen = newFen;
+            });
+          }
+        } catch (e) {
+          _addLog("Error parsing 67 packet: $e", LogType.error);
         }
       }
     } else if (hex.startsWith("71")) {
@@ -323,6 +330,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
       return rank * 8 + file;
     }
     return -1; // Out of chess bounds
+  }
+  
+  // Parse 0x67 board state packet
+  // This packet maps piece IDs to square positions
+  // For simplicity, we'll just request a 71 packet instead
+  String _parse67Packet(List<int> packet) {
+    // Request the 71 packet which uses the ChessProtocol parser
+    _sendCommand("7101");
+    return _currentFen; // Keep current until 71 arrives
   }
   
   void _applyMove(int from, int to) {
