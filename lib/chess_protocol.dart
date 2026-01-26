@@ -9,20 +9,17 @@
 class ChessProtocol {
   
   static String parseBoardState(List<int> packet) {
-    if (packet.length < 66) return "Invalid Packet Size"; // Expecting Header + 64 Squares
+    // The packet usually contains (Header 2 bytes) + (Grid data)
+    // For a 12-wide grid, 8 ranks = 96 bytes of data. 
+    // If the packet is smaller, we'll fall back.
+    int stride = (packet.length >= 98) ? 12 : 8;
 
-    // Packet often starts with 71 XX ...
-    // The board is 64 squares.
-    
-    // Let's assume the payload starts at index 2 (after 71 XX)
-    // and runs for 64 bytes.
-    
     StringBuffer fen = StringBuffer();
-    // Loop Ranks (8 down to 1)
+    // Loop Ranks (7 down to 0) - FEN is top-down (Black to White)
     for (int rank = 7; rank >= 0; rank--) {
       int emptyCount = 0;
       for (int file = 0; file < 8; file++) {
-        int index = 2 + (rank * 8) + file;
+        int index = 2 + (rank * stride) + file;
         if (index >= packet.length) break;
         
         int pieceByte = packet[index];
@@ -58,16 +55,15 @@ class ChessProtocol {
           case 0x05: return "Q";
           case 0x06: return "K";
           
-          // Black (Assuming bit 7 or similar offset)
-          // Often 0x81 or 0x09
-          case 0x81: case 0x09: return "p";
-          case 0x82: case 0x0A: return "n";
-          case 0x83: case 0x0B: return "b";
-          case 0x84: case 0x0C: return "r";
-          case 0x85: case 0x0D: return "q";
-          case 0x86: case 0x0E: return "k";
+          // Black (Commonly using bit 7 or secondary IDs)
+          case 0x81: case 0x11: case 0x09: return "p";
+          case 0x82: case 0x12: case 0x0A: return "n";
+          case 0x83: case 0x13: case 0x0B: return "b";
+          case 0x84: case 0x14: case 0x0C: return "r";
+          case 0x85: case 0x15: case 0x0D: return "q";
+          case 0x86: case 0x16: case 0x0E: return "k";
           
-          default: return "?"; // Unknown piece ID
+          default: return b > 0 ? "?" : ""; // Show unknown pieces as ?, blank as empty
       }
   }
 }

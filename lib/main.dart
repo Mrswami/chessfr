@@ -252,35 +252,41 @@ class _ScanningScreenState extends State<ScanningScreen> {
       meaning = "[Error/NACK]";
       type = LogType.error;
     } else if (hex.startsWith("e9")) {
-      // Piece Event: format E9 [SquareHex] [Status?]
-      // status 0x00 usually means 'lifted' or 'placed'
-      int rawSq = value.length > 1 ? value[1] : 0;
+      // Piece Event: E9 [Action+Square] [??]
+      int rawByte = value.length > 1 ? value[1] : 0;
       
-      // Let's try to find the real algebraic name
-      String alg = _chessUpToAlgebraic(rawSq);
+      // Bit 0x40 (64) is the 'Lifted' flag (NOT placed, inverted from original guess)
+      bool isLifted = (rawByte & 0x40) != 0;
+      int hardwareSq = rawByte & 0x3F; // Mask out the flag to get the 0-63 ID
       
-      if (_liftedSquare == null) {
-        _liftedSquare = rawSq;
-        meaning = "⬆️ LIFTED: $alg ($rawSq)";
-        _addLog("PIECE LIFTED: $alg (ID: $rawSq)", LogType.success);
+      String alg = _chessUpToAlgebraic(hardwareSq);
+      
+      if (isLifted) {
+        // LIFTED / PICKUP
+        _liftedSquare = hardwareSq;
+        meaning = "PICKUP: $alg";
+        _addLog("⬆️ $alg (Lifted)", LogType.success);
       } else {
-        int fromSq = _liftedSquare!;
-        int toSq = rawSq;
-        
-        String fromAlg = _chessUpToAlgebraic(fromSq);
-        String toAlg = _chessUpToAlgebraic(toSq);
-        
-        meaning = "⬇️ PLACED: $toAlg (Move: $fromAlg→$toAlg)";
-        _addLog("MOVE DETECTED: $fromAlg → $toAlg", LogType.success);
-        
-        // Correcting the FEN board indices
-        // Our FEN logic expects 0..63 where 0=A1, 7=H1, 56=A8, 63=H8
-        _applyMove(_chessUpToIndex(fromSq), _chessUpToIndex(toSq));
-        _liftedSquare = null;
+        // PLACED / DROP
+        if (_liftedSquare != null) {
+          int fromSq = _liftedSquare!;
+          String fromAlg = _chessUpToAlgebraic(fromSq);
+          String toAlg = alg;
+          
+          meaning = "DROP: $toAlg ($fromAlg→$toAlg)";
+          _addLog("⬇️ $toAlg (Placed) | Move: $fromAlg→$toAlg", LogType.success);
+          
+          _applyMove(_chessUpToIndex(fromSq), _chessUpToIndex(hardwareSq));
+          _liftedSquare = null;
+        } else {
+          meaning = "DROP: $alg (No Lift)";
+          _addLog("⬇️ $alg (Placed)", LogType.success);
+        }
       }
     } else if (hex.startsWith("71")) {
       meaning = "[Board State Dump]";
-      // Optional: Try to parse if available, but don't depend on it
+      // Print the raw bytes to help the AI map the pieces
+      _addLog("RAW PIECES: ${value.skip(2).take(64).map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}", LogType.system);
       try {
         String fen = ChessProtocol.parseBoardState(value);
         if (fen.contains("/") && !fen.contains("?")) {
@@ -298,27 +304,25 @@ class _ScanningScreenState extends State<ScanningScreen> {
   
   // Translates ChessUp hardware IDs to Algebraic (a1-h8)
   String _chessUpToAlgebraic(int sq) {
-    // Current mapping guess: Hardware might be rotated.
-    // Let's assume the user got 'a6' for 'e4'.
-    // a6 (40) should be e4 (28).
-    
-    // Convert hardware ID to our system (0=a1, 7=h1, 63=h8)
     int internalIdx = _chessUpToIndex(sq);
+    if (internalIdx == -1) return "??";
     int rank = internalIdx ~/ 8;
     int file = internalIdx % 8;
     return "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
   }
 
-  // THE TRANSLATION LAYER
-  // This maps hardware IDs (like 40 for e4) to our internal 0-63 indices
+  // THE TRANSLATION LAYER (Corrected for 12-wide stride)
   int _chessUpToIndex(int hardwareSq) {
-    // Guess: Rotation/Mirroring
-    // If 40 (0x28) is e4 (28 decimal)
-    // Hardware 40 might be: rank index X, file index Y
-    // Let's print debug info to the user to help us find the pattern
+    // ChessUp Pro hardware uses a 12-column grid.
+    // Index 40: (40 ~/ 12) = Rank 3, (40 % 12) = File 4 => e4. Correct!
+    int rank = hardwareSq ~/ 12;
+    int file = hardwareSq % 12;
     
-    // TEMPORARY: Default 1:1 for now, but logged
-    return hardwareSq; 
+    // Map to our internal 0-63 (rank*8 + file)
+    if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
+      return rank * 8 + file;
+    }
+    return -1; // Out of chess bounds
   }
   
   void _applyMove(int from, int to) {
@@ -434,7 +438,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
       return GameProjectionScreen(
         fen: _currentFen,
         lastLogs: _logs.take(10).map((l) => l.text).toList(),
-        liftedSquare: _liftedSquare != null ? _squareToAlgebraic(_liftedSquare!) : null,
+        liftedSquare: _liftedSquare != null ? _chessUpToAlgebraic(_liftedSquare!) : null,
         onBack: () => setState(() => _showProjection = false),
         onDisconnect: () {
           _connectedDevice?.disconnect();

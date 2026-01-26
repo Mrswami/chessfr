@@ -22,10 +22,14 @@ class GameProjectionScreen extends StatefulWidget {
 
 class _GameProjectionScreenState extends State<GameProjectionScreen> {
   bool _showDebug = false;
+  bool _isRotated = false;
 
   @override
   Widget build(BuildContext context) {
     List<String?> board = _parseFen(widget.fen);
+    if (_isRotated) {
+      board = board.reversed.toList();
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F), // Ultra dark for TV
@@ -34,31 +38,23 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
           // THE BIG BOARD
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
               child: AspectRatio(
                 aspectRatio: 1.0,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.8),
-                        blurRadius: 40,
-                        spreadRadius: 10,
-                      )
-                    ],
-                  ),
-                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
-                    child: Column(
+                    border: Border.all(color: Colors.white12, width: 2),
+                  ),
+                  child: Column(
                       children: List.generate(8, (rank) {
                         return Expanded(
                           child: Row(
                             children: List.generate(8, (file) {
                               bool isDark = (rank + file) % 2 == 1;
                               Color squareColor = isDark 
-                                  ? const Color(0xFF4B7399) // Premium Blue-Grey
-                                  : const Color(0xFFEAE9D2); // Premium Cream
+                                  ? const Color(0xFF556B2F) // Olive Dark
+                                  : const Color(0xFFF0E68C); // Khaki Light
                               
                               int index = (rank * 8) + file;
                               String? piece = (index < board.length) ? board[index] : null;
@@ -78,7 +74,6 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
                     ),
                   ),
                 ),
-              ),
             ),
           ),
 
@@ -92,28 +87,38 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
               children: [
                 _HeaderBtn(
                   icon: Icons.arrow_back, 
-                  label: "Studio", 
+                  label: "Dashboard", 
                   onPressed: widget.onBack
                 ),
                 Text(
-                  "CHESSUP LIVE CAST",
+                  "CHESSUP PRO PROJECTOR",
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    letterSpacing: 4,
-                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.3),
+                    letterSpacing: 6,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold
                   ),
                 ),
-                _HeaderBtn(
-                  icon: Icons.bug_report, 
-                  label: "Logs", 
-                  onPressed: () => setState(() => _showDebug = !_showDebug),
-                  isActive: _showDebug,
+                Row(
+                  children: [
+                    _HeaderBtn(
+                      icon: Icons.rotate_right, 
+                      label: "Flip", 
+                      onPressed: () => setState(() => _isRotated = !_isRotated),
+                    ),
+                    const SizedBox(width: 8),
+                    _HeaderBtn(
+                      icon: Icons.terminal, 
+                      label: "Logs", 
+                      onPressed: () => setState(() => _showDebug = !_showDebug),
+                      isActive: _showDebug,
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-
+          
           // LIFTED SQUARE INDICATOR (Top center)
           if (widget.liftedSquare != null)
             Positioned(
@@ -128,7 +133,7 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    "PIECE LIFTED: ${widget.liftedSquare}",
+                    "PICKUP: ${widget.liftedSquare}",
                     style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -176,9 +181,7 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
   Widget _buildPiece(String? pieceCode) {
     if (pieceCode == null || pieceCode.isEmpty) return const SizedBox.shrink();
     
-    // Using high-res Unicode or we could use SVG assets here
     String symbol = "";
-    Color color = Colors.black;
     bool isWhite = pieceCode == pieceCode.toUpperCase();
     
     switch (pieceCode.toUpperCase()) {
@@ -193,11 +196,16 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
     return Text(
       symbol,
       style: TextStyle(
-        fontSize: 48, 
-        color: isWhite ? Colors.white : Colors.black,
-        shadows: isWhite ? [
-          const Shadow(offset: Offset(0, 2), blurRadius: 4, color: Colors.black45)
-        ] : [],
+        fontSize: 28, // Much smaller for proper fit
+        color: isWhite ? Colors.white : const Color(0xFF151515), // charcoal
+        shadows: [
+          Shadow(
+            offset: const Offset(0, 0), 
+            blurRadius: 4, 
+            color: isWhite ? Colors.black45 : Colors.white60
+          ),
+          if (isWhite) const Shadow(offset: Offset(0, 2), blurRadius: 4, color: Colors.black45)
+        ],
       ),
     );
   }
