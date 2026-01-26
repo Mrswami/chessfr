@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'chess_protocol.dart';
+import 'game_screen.dart';
 import 'dart:async';
 
 void main() {
@@ -14,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChessUp Pro RE',
+      title: 'ChessUp Pro',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF6C22F5),
@@ -42,13 +45,20 @@ class _ScanningScreenState extends State<ScanningScreen> {
   bool _isScanning = false;
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _writeChar;
+  String? _autoConnectId;
   
-  // Research State
+  // Board State - START WITH KNOWN POSITION
+  // Standard starting FEN - we'll track moves from here
+  static const String _startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+  String _currentFen = _startingFen;
+  int? _liftedSquare; // Track which square has a lifted piece
+  bool _showProjection = false; // Toggle between debug and projection view
+  
   final List<LogEntry> _logs = [];
   final TextEditingController _hexController = TextEditingController();
   final ScrollController _logScroll = ScrollController();
 
-  // Constants
+  // BLE UUIDs (Nordic UART Service)
   final String serviceUuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
   final String chWriteUuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
   final String chReadUuid = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
@@ -56,28 +66,47 @@ class _ScanningScreenState extends State<ScanningScreen> {
   @override
   void initState() {
     super.initState();
-    _checkPermissions();
+    _loadSavedDevice();
+    _requestPermissions();
   }
 
-  Future<void> _checkPermissions() async {
+  // ══════════════════════════════════════════════════════════════════════════
+  // INITIALIZATION
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Future<void> _loadSavedDevice() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _autoConnectId = prefs.getString('last_device_id');
+    });
+  }
+
+  Future<void> _requestPermissions() async {
     await [
       Permission.bluetooth,
       Permission.bluetoothScan,
       Permission.bluetoothConnect,
       Permission.location,
     ].request();
-    _startScan(); // Auto-start scan on launch
+    _startScan();
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LOGGING
+  // ══════════════════════════════════════════════════════════════════════════
 
   void _addLog(String text, LogType type) {
     if (!mounted) return;
     setState(() {
       _logs.insert(0, LogEntry(timestamp: DateTime.now(), text: text, type: type));
-      if (_logs.length > 200) _logs.removeLast(); // Keep history manageable
+      if (_logs.length > 200) _logs.removeLast();
     });
-    // Also print to console so the AI can read it via terminal
     print("[${type.name.toUpperCase()}] $text");
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // BLUETOOTH SCANNING
+  // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> _startScan() async {
     setState(() {
@@ -87,114 +116,287 @@ class _ScanningScreenState extends State<ScanningScreen> {
     _addLog("Scanning for ChessUp...", LogType.system);
 
     try {
-      // Filter is tricky on some Androids, so we scan all and filter in list
       await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
     } catch (e) {
       _addLog("Scan Error: $e", LogType.error);
     }
 
     FlutterBluePlus.scanResults.listen((results) {
-      if (mounted) {
-        setState(() {
-          // FILTER: Only show devices connected or with "Chess" in name
-          _scanResults = results.where((r) {
-            String name = r.device.platformName;
-            return name.toLowerCase().contains("chess");
-          }).toList();
-        });
+      if (!mounted) return;
+      
+      setState(() {
+        _scanResults = results.where((r) {
+          return r.device.platformName.toLowerCase().contains("chess");
+        }).toList();
+      });
+
+      // Auto-connect to previously paired device
+      if (_connectedDevice == null && _autoConnectId != null) {
+        try {
+          final found = _scanResults.firstWhere(
+            (r) => r.device.remoteId.toString() == _autoConnectId
+          );
+          _addLog("Auto-Connecting to known board...", LogType.system);
+          _connect(found.device);
+          _autoConnectId = null; // Prevent duplicate connections
+        } catch (_) {
+          // Device not found yet, keep scanning
+        }
       }
     });
 
     FlutterBluePlus.isScanning.listen((scanning) {
-      if (mounted) {
-        setState(() => _isScanning = scanning);
-      }
+      if (mounted) setState(() => _isScanning = scanning);
     });
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // BLUETOOTH CONNECTION
+  // ══════════════════════════════════════════════════════════════════════════
+
   Future<void> _connect(BluetoothDevice device) async {
+    if (_isScanning) await FlutterBluePlus.stopScan();
+
     _addLog("Connecting to ${device.platformName}...", LogType.system);
+    
     try {
+      // Monitor connection state for unexpected disconnects
+      device.connectionState.listen((state) {
+        if (state == BluetoothConnectionState.disconnected && _connectedDevice != null) {
+          _handleDisconnect();
+        }
+      });
+
       await device.connect(autoConnect: false);
+      
+      // Save for auto-connect next time
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_device_id', device.remoteId.toString());
+
       _addLog("Connected! Discovering services...", LogType.system);
       
       List<BluetoothService> services = await device.discoverServices();
-      bool found = false;
+      bool foundService = false;
 
       for (var service in services) {
         if (service.uuid.toString() == serviceUuid) {
-          found = true;
+          foundService = true;
           for (var c in service.characteristics) {
             if (c.uuid.toString() == chWriteUuid) {
               _writeChar = c;
-              _addLog("Write Channel Open 🟢", LogType.success);
+              _addLog("Write Channel Ready 🟢", LogType.success);
             }
             if (c.uuid.toString() == chReadUuid) {
-              _addLog("Notifier Hooked 🔵", LogType.success);
+              _addLog("Notifications Enabled 🔵", LogType.success);
               await c.setNotifyValue(true);
-              c.lastValueStream.listen((value) => _handlePacket(value));
+              c.lastValueStream.listen(_handlePacket);
             }
           }
         }
       }
 
-      if (found) {
+      if (foundService) {
         setState(() => _connectedDevice = device);
       } else {
-        _addLog("Error: ChessUp Service not found!", LogType.error);
+        _addLog("ChessUp service not found!", LogType.error);
         device.disconnect();
       }
-
     } catch (e) {
       _addLog("Connection failed: $e", LogType.error);
     }
   }
 
-  // THE BRAIN: Decodes packets in real-time
+  void _handleDisconnect() {
+    if (!mounted) return;
+    
+    setState(() {
+      _connectedDevice = null;
+      _currentFen = "No Board Data";
+    });
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text("⚠️ Connection Lost"),
+        content: const Text("The ChessUp board has disconnected."),
+        actions: [
+          TextButton(
+            child: const Text("Reconnect"),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _startScan();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PACKET HANDLING (THE BRAIN)
+  // ══════════════════════════════════════════════════════════════════════════
+
   void _handlePacket(List<int> value) {
     String hex = value.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    
+    // DEBUG: Log EVERY packet immediately
+    print("📦 RAW PACKET: $hex (${value.length} bytes)");
     
     String meaning = "";
     LogType type = LogType.rx;
 
     if (hex.startsWith("b2")) {
-        meaning = "[Status Report]";
-    }
-    else if (hex.startsWith("26")) {
-        meaning = "[Error/NACK]";
-        type = LogType.error;
-    }
-    else if (hex.startsWith("e9")) {
-        // [Command] [SourceSq] [DestSq?] ...
-        int sq = value.length > 1 ? value[1] : 0;
-        int rank = sq ~/ 8;
-        int file = sq % 8;
-        String alg = "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
-        meaning = "[Piece Event] $alg ($sq)";
-    }
-    else if (hex.startsWith("71")) {
-        meaning = "[Board State Dump]";
-    } 
-    // NEW: Catch-all for interesting unknown packets
-    else {
-        meaning = "🔥🔥 UNKNOWN/INTERESTING 🔥🔥";
-        type = LogType.success; // Use Green to highlight
+      meaning = "[Status Report]";
+    } else if (hex.startsWith("26")) {
+      meaning = "[Error/NACK]";
+      type = LogType.error;
+    } else if (hex.startsWith("e9")) {
+      // E9 = Piece Event. This is the KEY for real-time tracking!
+      // Format appears to be: E9 [Square] [Action?] ...
+      int sq = value.length > 1 ? value[1] : 0;
+      int rank = sq ~/ 8;
+      int file = sq % 8;
+      String alg = "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
+      
+      // Determine if this is a LIFT or PLACE
+      // Simple heuristic: If we don't have a lifted piece, this is a lift
+      // If we do have one, this is a place (completing the move)
+      if (_liftedSquare == null) {
+        _liftedSquare = sq;
+        meaning = "⬆️ LIFTED from $alg";
+        _addLog("PIECE LIFTED: $alg", LogType.success);
+      } else {
+        // Completing a move!
+        int fromSq = _liftedSquare!;
+        int toSq = sq;
+        
+        String fromAlg = _squareToAlgebraic(fromSq);
+        String toAlg = _squareToAlgebraic(toSq);
+        
+        meaning = "⬇️ PLACED on $alg (Move: $fromAlg→$toAlg)";
+        _addLog("MOVE: $fromAlg → $toAlg", LogType.success);
+        
+        // Update the FEN!
+        _applyMove(fromSq, toSq);
+        _liftedSquare = null;
+      }
+    } else if (hex.startsWith("71")) {
+      meaning = "[Board State Dump]";
+      // Optional: Try to parse if available, but don't depend on it
+      try {
+        String fen = ChessProtocol.parseBoardState(value);
+        if (fen.contains("/") && !fen.contains("?")) {
+          setState(() => _currentFen = fen);
+          _addLog("SYNC: $fen", LogType.success);
+        }
+      } catch (_) {}
+    } else {
+      meaning = "🔥 UNKNOWN";
+      type = LogType.success;
     }
 
     _addLog("RX: $hex $meaning", type);
   }
+  
+  String _squareToAlgebraic(int sq) {
+    int rank = sq ~/ 8;
+    int file = sq % 8;
+    return "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
+  }
+  
+  void _applyMove(int from, int to) {
+    if (from < 0 || from > 63 || to < 0 || to > 63) {
+        _addLog("Move Error: Square out of bounds ($from -> $to)", LogType.error);
+        return;
+    }
+    // Convert FEN to a mutable board array, apply move, convert back
+    List<String?> board = _fenToBoard(_currentFen);
+    
+    // Move the piece
+    String? piece = board[from];
+    board[from] = null;
+    board[to] = piece;
+    
+    // Convert back to FEN
+    setState(() {
+      _currentFen = _boardToFen(board);
+    });
+  }
+  
+  List<String?> _fenToBoard(String fen) {
+    List<String?> board = List.filled(64, null);
+    try {
+      String placement = fen.split(' ')[0];
+      int rank = 7;
+      int file = 0;
+      
+      for (int i = 0; i < placement.length; i++) {
+        String c = placement[i];
+        if (c == '/') {
+          rank--;
+          file = 0;
+        } else {
+          int? skip = int.tryParse(c);
+          if (skip != null) {
+            file += skip;
+          } else {
+            if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
+              board[rank * 8 + file] = c;
+            }
+            file++;
+          }
+        }
+      }
+    } catch (e) {
+      _addLog("FEN Parse Error: $e", LogType.error);
+    }
+    return board;
+  }
+  
+  String _boardToFen(List<String?> board) {
+    StringBuffer fen = StringBuffer();
+    for (int rank = 7; rank >= 0; rank--) {
+      int empty = 0;
+      for (int file = 0; file < 8; file++) {
+        int sq = rank * 8 + file;
+        String? piece = board[sq];
+        if (piece == null) {
+          empty++;
+        } else {
+          if (empty > 0) {
+            fen.write(empty);
+            empty = 0;
+          }
+          fen.write(piece);
+        }
+      }
+      if (empty > 0) fen.write(empty);
+      if (rank > 0) fen.write('/');
+    }
+    return fen.toString();
+  }
 
   Future<void> _sendCommand(String hex) async {
+    // Handle special commands
+    if (hex == "RESET") {
+      setState(() {
+        _currentFen = _startingFen;
+        _liftedSquare = null;
+      });
+      _addLog("Position Reset to Starting", LogType.system);
+      return;
+    }
+    
     if (_connectedDevice == null || _writeChar == null) {
       _addLog("Not connected", LogType.error);
       return;
     }
     
-    // Cleanup input
     hex = hex.replaceAll(" ", "").toLowerCase();
     
-    List<int> bytes = [];
     try {
+      List<int> bytes = [];
       for (int i = 0; i < hex.length; i += 2) {
         bytes.add(int.parse(hex.substring(i, i + 2), radix: 16));
       }
@@ -205,108 +407,67 @@ class _ScanningScreenState extends State<ScanningScreen> {
     }
   }
 
-  bool _isBruteForcing = false;
-  String? _lastSent;
-  String? _crashCommand;
-  // Captured from btsnoop_hci.log
-  final TextEditingController _fuzzStartController = TextEditingController(text: "50");
-  final TextEditingController _fuzzSuffixController = TextEditingController(text: "00");
-  
-  final List<String> _capturedCommands = [
-    "121600192A", // Init/Version?
-    "40000000",   // Start Game Mode?
-    "1E5555555555555550", // Setup Grid?
-    "3503010303", // Highlights?
-    "3504060405",
-    "3506070505",
-    "1C55555555555555",
-    "24555555555555555555",
-  ];
-
-  Future<void> _replayLog() async {
-     _addLog("Replaying Captured Sequence...", LogType.system);
-     for (String cmd in _capturedCommands) {
-        if (_connectedDevice == null) break;
-        await _sendCommand(cmd);
-        // Wait 300ms between commands to let board digest
-        await Future.delayed(const Duration(milliseconds: 300));
-     }
-     _addLog("Replay Complete.", LogType.system);
-  }
-
-  Future<void> _bruteForceScan() async {
-    // ... (Existing implementation, skipped for brevity in diff)
-    // Reference original code for full implementation if needed
-    setState(() {
-         _isBruteForcing = true;
-         _crashCommand = null;
-    });
-    
-    int start = int.tryParse(_fuzzStartController.text, radix: 16) ?? 0;
-    String suffix = _fuzzSuffixController.text.replaceAll(" ", "");
-    
-    _addLog("Fuzzing $start..FF + Suffix '$suffix'...", LogType.system);
-    
-    for (int i = start; i < 0xFF; i++) {
-        if (!_isBruteForcing) break;
-        if (_connectedDevice == null) {
-            break;
-        }
-
-        // SAFETY: Skip known crash zone 60-6F
-        if (i >= 0x60 && i <= 0x6F) {
-            continue;
-        }
-
-        String cmd = i.toRadixString(16).padLeft(2, '0');
-        if (["b2", "e9", "71", "ef", "26"].contains(cmd)) continue;
-        
-        String fullPacket = cmd + suffix;
-        setState(() => _lastSent = fullPacket);
-        await _sendCommand(fullPacket);
-        await Future.delayed(const Duration(milliseconds: 200));
-    }
-    
-    if (_isBruteForcing) {
-        setState(() => _isBruteForcing = false);
-        _addLog("Scan Complete.", LogType.system);
-    }
-  }
+  // ══════════════════════════════════════════════════════════════════════════
+  // UI BUILD
+  // ══════════════════════════════════════════════════════════════════════════
 
   @override
   Widget build(BuildContext context) {
-    if (_connectedDevice != null) return _buildControlPanel();
+    // Show Projection Screen if toggled ON
+    if (_connectedDevice != null && _showProjection) {
+      return GameProjectionScreen(
+        fen: _currentFen,
+        lastLogs: _logs.take(10).map((l) => l.text).toList(),
+        liftedSquare: _liftedSquare != null ? _squareToAlgebraic(_liftedSquare!) : null,
+        onBack: () => setState(() => _showProjection = false),
+        onDisconnect: () {
+          _connectedDevice?.disconnect();
+          setState(() {
+            _connectedDevice = null;
+            _currentFen = _startingFen;
+            _showProjection = false;
+          });
+        },
+      );
+    }
+    
+    // Show Control Panel if connected
+    if (_connectedDevice != null) {
+      return _buildControlPanel();
+    }
+    
+    // Show Scanner
     return _buildScanner();
   }
 
   Widget _buildScanner() {
     return Scaffold(
-      appBar: AppBar(title: const Text("ChessUp Pro Finder")),
+      appBar: AppBar(title: const Text("ChessUp Pro")),
       floatingActionButton: FloatingActionButton(
         onPressed: _isScanning ? null : _startScan,
         backgroundColor: _isScanning ? Colors.grey : const Color(0xFF6C22F5),
         child: Icon(_isScanning ? Icons.hourglass_top : Icons.search),
       ),
-      body: _scanResults.isEmpty 
-        ? Center(child: Text(_isScanning ? "Scanning..." : "No ChessUp found."))
-        : ListView.builder(
-            itemCount: _scanResults.length,
-            itemBuilder: (c, i) {
-              final d = _scanResults[i].device;
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: ListTile(
-                  leading: const Icon(Icons.bluetooth, color: Colors.blue),
-                  title: Text(d.platformName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(d.remoteId.toString()),
-                  trailing: ElevatedButton(
-                    onPressed: () => _connect(d),
-                    child: const Text("CONNECT"),
+      body: _scanResults.isEmpty
+          ? Center(child: Text(_isScanning ? "Scanning..." : "No ChessUp boards found."))
+          : ListView.builder(
+              itemCount: _scanResults.length,
+              itemBuilder: (c, i) {
+                final d = _scanResults[i].device;
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: ListTile(
+                    leading: const Icon(Icons.bluetooth, color: Colors.blue),
+                    title: Text(d.platformName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(d.remoteId.toString()),
+                    trailing: ElevatedButton(
+                      onPressed: () => _connect(d),
+                      child: const Text("CONNECT"),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
     );
   }
 
@@ -326,93 +487,41 @@ class _ScanningScreenState extends State<ScanningScreen> {
       ),
       body: Column(
         children: [
-          // 1. Dashboard
+          // FEN Display
           Container(
             padding: const EdgeInsets.all(12),
             color: Colors.black26,
             child: Column(
-                children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _QuickBtn("Config (B2)", "b20004"),
-                        _QuickBtn("State (71)", "7101"),
-                        _QuickBtn("Reset (EF)", "ef01"),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    // LED TEST ROW
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _QuickBtn("LED 1", "500C01"), // Try CMD 50 + Square + On
-                        _QuickBtn("LED 2", "550C01"), // Try CMD 55
-                        _QuickBtn("LED 3", "210C01"), // Try CMD 21
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const SizedBox(height: 8),
-                     SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: _isBruteForcing ? Colors.red : Colors.amber,
-                                foregroundColor: Colors.black,
-                            ),
-                            icon: Icon(_isBruteForcing ? Icons.stop : Icons.radar),
-                            label: Text(_isBruteForcing ? "STOP SCAN" : "AUTO-SCAN PROTOCOLS"),
-                            onPressed: () {
-                                if (_isBruteForcing) {
-                                    setState(() => _isBruteForcing = false);
-                                } else {
-                                    _bruteForceScan();
-                                }
-                            },
-                        ),
-                     ),
-                ],
-            ),
-          ),
-          
-          // 2. Fuzzing Controls
-          Container(
-            padding: const EdgeInsets.all(8),
-            color: Colors.grey[900],
-            child: Column(
               children: [
-                 Text("Last Sent: ${_lastSent ?? 'None'}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.amber)),
-                 if (_crashCommand != null) 
-                    Text("CRASHED AT: $_crashCommand", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red)),
-                 Row(
-                   children: [
-                     Expanded(child: TextField(
-                       controller: _fuzzStartController, 
-                       decoration: const InputDecoration(labelText: "Start (50)", isDense: true),
-                     )),
-                     const SizedBox(width: 4),
-                     Expanded(child: TextField(
-                       controller: _fuzzSuffixController, 
-                       decoration: const InputDecoration(labelText: "Suffix (00)", isDense: true),
-                     )),
-                     const SizedBox(width: 8),
-                     ElevatedButton(
-                       onPressed: _isBruteForcing ? () => setState(() => _isBruteForcing = false) : _bruteForceScan,
-                       style: ElevatedButton.styleFrom(backgroundColor: _isBruteForcing ? Colors.red : Colors.green),
-                       child: Text(_isBruteForcing ? "STOP" : "FUZZ"),
-                     ),
-                     const SizedBox(width: 8),
-                     ElevatedButton(
-                        onPressed: _replayLog,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-                        child: const Text("REPLAY LOG"),
-                     )
-                   ],
-                 )
+                Text(_currentFen, style: const TextStyle(fontSize: 14, fontFamily: 'monospace', color: Colors.greenAccent)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _QuickBtn("Reset Pos", "RESET"),
+                    _QuickBtn("Force Start", "4000"),
+                    _QuickBtn("Sync (71)", "7101"),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    icon: const Icon(Icons.tv),
+                    label: const Text("SHOW BOARD (Projection)", style: TextStyle(fontSize: 18)),
+                    onPressed: () => setState(() => _showProjection = true),
+                  ),
+                ),
               ],
             ),
           ),
           
-          // 3. Manual Input
+          // Manual Input
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -421,7 +530,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
                   child: TextField(
                     controller: _hexController,
                     decoration: const InputDecoration(
-                      labelText: "Raw Hex Packet",
+                      labelText: "Raw Hex Command",
                       border: OutlineInputBorder(),
                       isDense: true,
                     ),
@@ -439,7 +548,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
 
           const Divider(),
 
-          // 3. Logger
+          // Log View
           Expanded(
             child: ListView.builder(
               controller: _logScroll,
@@ -457,8 +566,8 @@ class _ScanningScreenState extends State<ScanningScreen> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   child: Text(
-                    "${log.timestamp.second}:${log.timestamp.millisecond} ${log.text}",
-                    style: TextStyle(color: color, fontFamily: 'monospace', fontSize: 13),
+                    "${log.timestamp.second}:${log.timestamp.millisecond.toString().padLeft(3, '0')} ${log.text}",
+                    style: TextStyle(color: color, fontFamily: 'monospace', fontSize: 12),
                   ),
                 );
               },
@@ -472,14 +581,17 @@ class _ScanningScreenState extends State<ScanningScreen> {
   Widget _QuickBtn(String label, String cmd) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
       ),
       onPressed: () => _sendCommand(cmd),
-      child: Text(label, style: const TextStyle(fontSize: 12)),
+      child: Text(label),
     );
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA MODELS
+// ══════════════════════════════════════════════════════════════════════════════
 
 enum LogType { system, rx, tx, error, success }
 
