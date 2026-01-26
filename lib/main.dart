@@ -197,6 +197,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
 
       if (foundService) {
         setState(() => _connectedDevice = device);
+        _addLog("✅ Connected! Board is in free play mode.", LogType.success);
       } else {
         _addLog("ChessUp service not found!", LogType.error);
         device.disconnect();
@@ -265,8 +266,8 @@ class _ScanningScreenState extends State<ScanningScreen> {
         meaning = "⬇️ Piece $pieceId placed";
         _addLog("⬇️ Piece ID $pieceId placed", LogType.success);
         
-        // Request fresh board state after each move
-        _sendCommand("6401"); // Request board state
+        // DISABLED: This command might lock the board
+        // _sendCommand("6401"); // Request board state
       }
     } else if (hex.startsWith("67")) {
       // 0x67 = Board state packet with piece positions
@@ -585,6 +586,14 @@ class _ScanningScreenState extends State<ScanningScreen> {
                     ),
                     onSubmitted: (val) => _sendCommand(val),
                   ),
+                ),
+                const SizedBox(width: 10),
+                // Added Sync button next to hex input
+                _ControlButton(
+                  label: "Sync (71)",
+                  icon: Icons.sync,
+                  onPressed: () => _sendCommand("7101"),
+                  color: Colors.blue,
                 ),
                 const SizedBox(width: 10),
                 FloatingActionButton.small(
