@@ -168,7 +168,13 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
                         ),
                       ),
                     ),
-                    Text("FEN: ${widget.fen}", style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                    const Divider(),
+                    const Text("CURRENT POSITION:", style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 10)),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      widget.fen, 
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'monospace')
+                    ),
                   ],
                 ),
               ),
@@ -211,19 +217,31 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
   }
 
   List<String?> _parseFen(String fen) {
-    List<String?> squares = List.filled(64, null);
+    List<String?> board = List.filled(64, null);
     String placement = fen.split(' ')[0];
-    int rank = 0, file = 0;
+    
+    // FEN is top-down: rank 8 (index 56-63) down to rank 1 (index 0-7)
+    int rank = 7;  // Start at rank 7 (top)
+    int file = 0;
+    
     for (int i = 0; i < placement.length; i++) {
         String char = placement[i];
-        if (char == '/') { rank++; file = 0; }
-        else {
+        if (char == '/') {
+          rank--;  // Move down one rank
+          file = 0;
+        } else {
             int? skip = int.tryParse(char);
-            if (skip != null) { file += skip; }
-            else { if (rank < 8 && file < 8) squares[rank * 8 + file] = char; file++; }
+            if (skip != null) {
+              file += skip;
+            } else {
+              if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
+                board[rank * 8 + file] = char;
+              }
+              file++;
+            }
         }
     }
-    return squares;
+    return board;
   }
 }
 

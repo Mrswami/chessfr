@@ -327,20 +327,33 @@ class _ScanningScreenState extends State<ScanningScreen> {
   
   void _applyMove(int from, int to) {
     if (from < 0 || from > 63 || to < 0 || to > 63) {
-        _addLog("Move Error: Square out of bounds ($from -> $to)", LogType.error);
+        _addLog("Move Error: Out of bounds ($from → $to)", LogType.error);
         return;
     }
+    
+    // Debug: Log the move indices
+    _addLog("APPLY: index $from → $to", LogType.system);
+    
     // Convert FEN to a mutable board array, apply move, convert back
     List<String?> board = _fenToBoard(_currentFen);
     
-    // Move the piece
+    // Debug: Show what piece is being moved
     String? piece = board[from];
+    _addLog("Moving piece: ${piece ?? 'EMPTY'}", LogType.system);
+    
+    if (piece == null) {
+      _addLog("Warning: No piece at source square!", LogType.error);
+    }
+    
     board[from] = null;
     board[to] = piece;
     
-    // Convert back to FEN
+    // Convert back to FEN and update state
+    String newFen = _boardToFen(board);
+    _addLog("New FEN: $newFen", LogType.system);
+    
     setState(() {
-      _currentFen = _boardToFen(board);
+      _currentFen = newFen;
     });
   }
   
