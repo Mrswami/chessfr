@@ -854,12 +854,12 @@ class _ScanningScreenState extends State<ScanningScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _isGameActive ? const Color(0xFF6C22F5) : Colors.grey,
+                        backgroundColor: const Color(0xFF6C22F5),
                         foregroundColor: Colors.white,
                       ),
                       icon: const Icon(Icons.tv),
-                      label: Text(_isGameActive ? "OPEN PROJECTION" : "Start Game on Board First"),
-                      onPressed: _isGameActive ? () => setState(() => _showProjection = true) : null,
+                      label: const Text("OPEN PROJECTION (Force)"),
+                      onPressed: () => setState(() => _showProjection = true),
                     ),
                   ),
                   const SizedBox(height: 12),
