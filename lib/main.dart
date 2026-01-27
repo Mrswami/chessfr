@@ -57,6 +57,17 @@ class _ScanningScreenState extends State<ScanningScreen> {
   final List<LogEntry> _logs = [];
   final TextEditingController _hexController = TextEditingController();
   final ScrollController _logScroll = ScrollController();
+  
+  // Screen/Mode Tracking
+  int _currentScreenId = 0;
+  // Known game screens based on observation (add more as discovered)
+  // 40 = Menu? 
+  // Need to discover valid game screen IDs
+  bool get _isGameActive => _currentScreenId != 40 && _currentScreenId != 0;
+  // Auto-sync
+  bool _autoSync = false;
+  Timer? _autoSyncTimer;
+  StreamSubscription<List<int>>? _packetSub;
 
   // BLE UUIDs (Nordic UART Service)
   final String serviceUuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
@@ -68,6 +79,30 @@ class _ScanningScreenState extends State<ScanningScreen> {
     super.initState();
     _loadSavedDevice();
     _requestPermissions();
+  }
+  
+  @override
+  void dispose() {
+    _autoSyncTimer?.cancel();
+    super.dispose();
+  }
+  
+  void _toggleAutoSync() {
+    setState(() {
+      _autoSync = !_autoSync;
+      if (_autoSync) {
+        _addLog("🔄 Auto-sync enabled (every 3s)", LogType.system);
+        _autoSyncTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+          if (_connectedDevice != null) {
+            _sendCommand("B0"); // Request board state
+          }
+        });
+      } else {
+        _addLog("⏸️ Auto-sync disabled", LogType.system);
+        _autoSyncTimer?.cancel();
+        _autoSyncTimer = null;
+      }
+    });
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -189,7 +224,10 @@ class _ScanningScreenState extends State<ScanningScreen> {
             if (c.uuid.toString() == chReadUuid) {
               _addLog("Notifications Enabled 🔵", LogType.success);
               await c.setNotifyValue(true);
-              c.lastValueStream.listen(_handlePacket);
+              
+              // FIX: Cancel existing listener to avoid duplicates
+              await _packetSub?.cancel();
+              _packetSub = c.lastValueStream.listen(_handlePacket);
             }
           }
         }
@@ -238,78 +276,220 @@ class _ScanningScreenState extends State<ScanningScreen> {
   // PACKET HANDLING (THE BRAIN)
   // ══════════════════════════════════════════════════════════════════════════
 
-  void _handlePacket(List<int> value) {
-    String hex = value.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-    
-    // DEBUG: Log EVERY packet immediately
-    print("📦 RAW PACKET: $hex (${value.length} bytes)");
-    
-    String meaning = "";
-    LogType type = LogType.rx;
+  final List<int> _packetBuffer = [];
+  bool _isAccumulating = false;
 
-    if (hex.startsWith("b2")) {
-      meaning = "[Status Report]";
-    } else if (hex.startsWith("26")) {
-      meaning = "[Error/NACK]";
-      type = LogType.error;
-    } else if (hex.startsWith("e9")) {
-      // E9 packets send PIECE IDs, not square coordinates!
-      // We can't reliably track moves with these - we need the full board state instead.
-      int rawByte = value.length > 1 ? value[1] : 0;
-      bool isLifted = (rawByte & 0x40) != 0;
-      int pieceId = rawByte & 0x3F;
+  /// Decode piece type index from BLE packet (discovered from APK decompilation)
+  /// Maps: 0=Pawn, 1=Rook, 2=Knight, 3=Bishop, 4=Queen, 5=King
+  String _decodePieceType(int index) {
+    switch (index) {
+      case 0: return 'Pawn';
+      case 1: return 'Rook';
+      case 2: return 'Knight';
+      case 3: return 'Bishop';
+      case 4: return 'Queen';
+      case 5: return 'King';
+      default: return 'Unknown($index)';
+    }
+  }
+
+  void _handlePacket(List<int> value) {
+    if (value.isEmpty) return;
+    
+    String hex = value.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    LogType type = LogType.rx;
+    String meaning = "";
+
+    // Header logic
+    int header = value[0];
+
+    // CASE 1: Start of a new Board State (0x67)
+    if (header == 0x67) {
+      _packetBuffer.clear();
+      _packetBuffer.addAll(value);
+      _isAccumulating = true;
       
-      if (isLifted) {
-        meaning = "⬆️ Piece $pieceId lifted";
-        _addLog("⬆️ Piece ID $pieceId lifted", LogType.success);
+      if (_packetBuffer.length >= 73) {
+        _processFullState(_packetBuffer);
+        _isAccumulating = false;
+        meaning = "[FULL STATE RECEIVED]";
       } else {
-        meaning = "⬇️ Piece $pieceId placed";
-        _addLog("⬇️ Piece ID $pieceId placed", LogType.success);
-        
-        // DISABLED: This command might lock the board
-        // _sendCommand("6401"); // Request board state
+        meaning = "[STATE START: ${value.length}/73 bytes]";
+        _addLog("📍 State chunk: ${value.length} bytes", LogType.system);
+        return; // Wait for more
       }
-    } else if (hex.startsWith("67")) {
-      // 0x67 = Board state packet with piece positions
-      meaning = "[Board State Response]";
-      _addLog("📍 Received board state (${value.length} bytes)", LogType.system);
-      
-      // Parse the 67 packet to build FEN
-      // Format: 67 [piece positions...]
-      if (value.length >= 66) {
-        try {
-          String newFen = _parse67Packet(value);
-          if (newFen.isNotEmpty && newFen != _currentFen) {
-            print("📌 Board state changed!");
-            print("📌 OLD: $_currentFen");
-            print("📌 NEW: $newFen");
-            setState(() {
-              _currentFen = newFen;
-            });
+    } 
+    // CASE 2: Continuation of a packet
+    else if (_isAccumulating) {
+      _packetBuffer.addAll(value);
+      if (_packetBuffer.length >= 73) {
+        _processFullState(_packetBuffer);
+        _isAccumulating = false;
+        meaning = "[FULL STATE COMPLETED]";
+      } else {
+        meaning = "[STATE CHUNK: ${_packetBuffer.length}/73 bytes]";
+        return; // Still accumulating
+      }
+    }
+    // CASE 3: Other headers
+    else {
+      switch (header) {
+        case 0xB2: 
+          meaning = "[Status Report]"; 
+          break;
+        case 0xB0:
+          meaning = "[Request ACK]";
+          if (value.length > 1 && value[1] == 1) meaning += " (OK)";
+          break;
+        case 0x26: 
+          meaning = "[Error/NACK]"; 
+          type = LogType.error; 
+          break;
+        case 0xE9:
+          final screenId = (value.length >= 2) ? value[1] : 0;
+          setState(() => _currentScreenId = screenId);
+          meaning = "[Screen ID: $screenId]";
+          break;
+        case 0xB8: // PIECE_TOUCH - Lift/Touch event with coordinate AND piece type
+          if (value.length >= 3) {
+            final sq = value[1];           // Square index (0-63)
+            final pieceTypeIdx = value[2]; // Piece type (0-5)
+            final piece = _decodePieceType(pieceTypeIdx);
+            final square = _chessUpToAlgebraic(sq);
+            setState(() => _liftedSquare = sq);
+            _addLog("💡 Touch: $square [$piece]", LogType.system);
+            meaning = "[PIECE_TOUCH: $square, $piece]";
+            
+            // Backup Strategy: The board sometimes swallows Release/Placement events in game mode.
+            // We start a "Sync Watchdog" to poll board state for the next 2 seconds.
+            _startAggressiveSync();
           }
-        } catch (e) {
-          _addLog("Error parsing 67 packet: $e", LogType.error);
-        }
+          break;
+        case 0xBB: // Release Touch
+          _addLog("💡 Release detected", LogType.system);
+          setState(() => _liftedSquare = null);
+          // Aggressive sync: request state immediately and again in 500ms
+          _sendCommand("B0");
+          Future.delayed(const Duration(milliseconds: 600), () => _sendCommand("B0"));
+          break;
+        case 0xA4: // ON_PLACEMENT - Piece placed at specific col/row
+          if (value.length >= 3) {
+            final col = value[1]; // Column (0-7)
+            final row = value[2]; // Row (0-7)
+            // Convert col,row to square index (0-63)
+            final sq = row * 8 + col;
+            final square = _chessUpToAlgebraic(sq);
+            setState(() => _liftedSquare = null);
+            _addLog("📍 Placement: $square", LogType.success);
+            meaning = "[ON_PLACEMENT: $square]";
+          } else {
+            _addLog("📍 Piece Set Down (no coords)", LogType.success);
+            setState(() => _liftedSquare = null);
+          }
+          _sendCommand("B0"); // Sync board state after placement
+          break;
+        case 0xA3: // MOVE - The board confirms a move!
+          if (value.length >= 3) {
+            final fromSq = value[1];
+            final toSq = value[2];
+            final from = _chessUpToAlgebraic(fromSq);
+            final to = _chessUpToAlgebraic(toSq);
+            
+            _addLog("🚀 MOVE DETECTED: $from -> $to", LogType.success);
+            meaning = "[MOVE: $from -> $to]";
+            
+            // Immediate sync to get full FEN
+             _sendCommand("B0"); 
+          }
+          break;
+          
+        case 0x19: // BOARD INFO RESPONSE (from C9)
+          meaning = "[BOARD INFO]";
+          _addLog("ℹ️ Info: $hex", LogType.system);
+          break;
+        case 0x6B: // History/Reconcile
+          meaning = "[History Update]";
+          if (value.length >= 3) {
+            final moveCount = value[1] << 8 | value[2];
+            meaning += " ($moveCount moves total)";
+          }
+          _sendCommand("B0"); // Sync board after history update
+          break;
+        default:
+          // Enhanced logging for unknown headers - helps discover new packet types
+          meaning = "UNKNOWN (0x${header.toRadixString(16).padLeft(2, '0').toUpperCase()})";
+          String details = "Header=0x${header.toRadixString(16).padLeft(2, '0')}";
+          if (value.length >= 2) {
+            details += " B1=${value[1]}";
+            // Try to interpret as square
+            if (value[1] < 64) {
+              details += " (sq=${_chessUpToAlgebraic(value[1])})";
+            }
+          }
+          if (value.length >= 3) {
+            details += " B2=${value[2]}";
+          }
+          _addLog("❓ UNKNOWN: $details | Raw: $hex", LogType.error);
       }
-    } else if (hex.startsWith("71")) {
-      meaning = "[Board State Dump]";
-      // Print the raw bytes to help the AI map the pieces
-      _addLog("RAW PIECES: ${value.skip(2).take(64).map((b) => b.toRadixString(16).padLeft(2, '0')).join(' ')}", LogType.system);
-      try {
-        String fen = ChessProtocol.parseBoardState(value);
-        if (fen.contains("/") && !fen.contains("?")) {
-          setState(() => _currentFen = fen);
-          _addLog("SYNC: $fen", LogType.success);
-        }
-      } catch (_) {}
-    } else {
-      meaning = "🔥 UNKNOWN";
-      type = LogType.success;
     }
 
     _addLog("RX: $hex $meaning", type);
   }
+
+  String _lastSyncedFen = "";
+
+  void _processFullState(List<int> fullPacket) {
+    try {
+      String fen = ChessProtocol.parseBoardState(fullPacket);
+      
+      // DEBUG: ALWAYS LOG FEN to see if it changes
+      // Only process if it's a valid FEN 
+      if (fen.contains("/")) {
+        
+        // Simple diff logging to detect moves
+        if (_lastSyncedFen.isNotEmpty && fen != _lastSyncedFen) {
+           _detectAndLogMove(_lastSyncedFen, fen);
+        }
+        
+        _lastSyncedFen = fen;
+        setState(() {
+            _currentFen = fen;
+            _liftedSquare = null; 
+        });
+        _addLog("🏁 SYNCED: $fen", LogType.success);
+      }
+    } catch (e) {
+      _addLog("Sync Error: $e", LogType.error);
+    }
+  }
+
+  // Basic diff to see what changed (State Diffing strategy)
+  void _detectAndLogMove(String oldFen, String newFen) {
+    // This is a naive diff just for logging, the UI updates from FEN directly
+    // Ideally we would use a chess library to validate the move
+    _addLog("🔄 Board State Changed!", LogType.success);
+  }
   
+  // Aggressive Sync Watchdog
+  // Polls board state 4 times over 2 seconds to catch moves if event packets are missing
+  void _startAggressiveSync() {
+    int checks = 0;
+    Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      checks++;
+      if (checks > 8 || _connectedDevice == null) { // Increased checks
+        timer.cancel();
+      } else {
+        // "Shotgun" approach: Try multiple potential state request commands
+        // B0 = App Request Board State
+        // C9 = Request Board Info
+        // 67 = Board State (As request?)
+        _sendCommand("B0"); 
+        _sendCommand("C9");
+        _sendCommand("67"); // Maybe 67 command triggers 67 response?
+      }
+    });
+  }
+
   // Translates ChessUp hardware IDs to Algebraic (a1-h8)
   String _chessUpToAlgebraic(int sq) {
     int internalIdx = _chessUpToIndex(sq);
@@ -319,18 +499,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
     return "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
   }
 
-  // THE TRANSLATION LAYER (Corrected for 12-wide stride)
+  // FIXED: OFFICIAL STRIDE IS 8
   int _chessUpToIndex(int hardwareSq) {
-    // ChessUp Pro hardware uses a 12-column grid.
-    // Index 40: (40 ~/ 12) = Rank 3, (40 % 12) = File 4 => e4. Correct!
-    int rank = hardwareSq ~/ 12;
-    int file = hardwareSq % 12;
+    int rank = hardwareSq ~/ 8;
+    int file = hardwareSq % 8;
     
-    // Map to our internal 0-63 (rank*8 + file)
     if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
       return rank * 8 + file;
     }
-    return -1; // Out of chess bounds
+    return -1;
   }
   
   // Parse 0x67 board state packet
@@ -428,7 +605,38 @@ class _ScanningScreenState extends State<ScanningScreen> {
   }
 
   Future<void> _sendCommand(String hex) async {
-    // Handle special commands
+    if (hex == "DUMP_ALL") {
+      _addLog("Requesting Full State Dump...", LogType.system);
+      await _sendCommand("3C"); // Identify
+      await Future.delayed(const Duration(milliseconds: 200));
+      await _sendCommand("2100"); // Settings
+      await Future.delayed(const Duration(milliseconds: 200));
+      await _sendCommand("B0");   // FEN
+      await Future.delayed(const Duration(milliseconds: 200));
+      await _sendCommand("7101"); // Full Board State
+      return;
+    }
+    
+    if (hex == "PLAY_SEQ") {
+      _addLog("Forcing Game Mode...", LogType.system);
+      await _sendCommand("2401"); // Start Game
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _sendCommand("4001"); // Mode Change (often board logic switch)
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _sendCommand("B0");   // FEN Sync
+      return;
+    }
+
+    if (hex == "INIT_SEQ") {
+      _addLog("Running Handshake Sequence...", LogType.system);
+      await _sendCommand("3C");
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _sendCommand("2401");
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _sendCommand("2100");
+      return;
+    }
+
     if (hex == "RESET") {
       setState(() {
         _currentFen = _startingFen;
@@ -535,103 +743,144 @@ class _ScanningScreenState extends State<ScanningScreen> {
           )
         ],
       ),
-      body: Column(
-        children: [
-          // FEN Display
-          Container(
-            padding: const EdgeInsets.all(12),
-            color: Colors.black26,
-            child: Column(
-              children: [
-                Text(_currentFen, style: const TextStyle(fontSize: 14, fontFamily: 'monospace', color: Colors.greenAccent)),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _QuickBtn("Reset Pos", "RESET"),
-                    _QuickBtn("Force Start", "4000"),
-                    _QuickBtn("Sync (71)", "7101"),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    icon: const Icon(Icons.tv),
-                    label: const Text("SHOW BOARD (Projection)", style: TextStyle(fontSize: 18)),
-                    onPressed: () => setState(() => _showProjection = true),
-                  ),
-                ),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Status Indicator & Sensor State
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.black12,
+              child: Row(
+                children: [
+                   CircleAvatar(
+                     backgroundColor: _liftedSquare != null ? Colors.greenAccent : Colors.grey,
+                     radius: 8,
+                   ),
+                   const SizedBox(width: 12),
+                   Expanded(
+                     child: Text(
+                       _liftedSquare != null ? "LIFTED: ${_chessUpToAlgebraic(_liftedSquare!)}" : "SENSORS ACTIVE",
+                       style: const TextStyle(fontWeight: FontWeight.bold),
+                     ),
+                   ),
+                   // Screen ID Badge
+                   Container(
+                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                     decoration: BoxDecoration(
+                       color: _isGameActive ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+                       borderRadius: BorderRadius.circular(4),
+                       border: Border.all(color: _isGameActive ? Colors.green : Colors.orange),
+                     ),
+                     child: Text(
+                       "MODE: $_currentScreenId",
+                       style: TextStyle(
+                         fontSize: 12,
+                         color: _isGameActive ? Colors.green : Colors.orange,
+                         fontWeight: FontWeight.bold
+                       ),
+                     ),
+                   ),
+                ],
+              ),
             ),
-          ),
-          
-          // Manual Input
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _hexController,
-                    decoration: const InputDecoration(
-                      labelText: "Raw Hex Command",
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onSubmitted: (val) => _sendCommand(val),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                // Added Sync button next to hex input
-                _ControlButton(
-                  label: "Sync (71)",
-                  icon: Icons.sync,
-                  onPressed: () => _sendCommand("7101"),
-                  color: Colors.blue,
-                ),
-                const SizedBox(width: 10),
-                FloatingActionButton.small(
-                  onPressed: () => _sendCommand(_hexController.text),
-                  child: const Icon(Icons.send),
-                ),
-              ],
-            ),
-          ),
 
-          const Divider(),
-
-          // Log View
-          Expanded(
-            child: ListView.builder(
-              controller: _logScroll,
-              itemCount: _logs.length,
-              itemBuilder: (context, index) {
-                final log = _logs[index];
-                Color color = Colors.white;
-                switch (log.type) {
-                  case LogType.rx: color = Colors.cyanAccent; break;
-                  case LogType.tx: color = Colors.greenAccent; break;
-                  case LogType.error: color = Colors.redAccent; break;
-                  case LogType.system: color = Colors.grey; break;
-                  case LogType.success: color = Colors.green; break;
-                }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  child: Text(
-                    "${log.timestamp.second}:${log.timestamp.millisecond.toString().padLeft(3, '0')} ${log.text}",
-                    style: TextStyle(color: color, fontFamily: 'monospace', fontSize: 12),
+            // FEN Area
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              color: Colors.black26,
+              child: Column(
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: SelectableText(
+                      _currentFen, 
+                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace', color: Colors.greenAccent),
+                    ),
                   ),
-                );
-              },
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _QuickBtn("Reset", "RESET"),
+                      _QuickBtn("FORCE PLAY", "PLAY_SEQ"),
+                      _QuickBtn("DUMP ALL", "DUMP_ALL"),
+                      _QuickBtn("LED TEST", "3E010C01"), // Green e2
+                      _QuickBtn("FEN (B0)", "B0"),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            
+            // Manual Command + Projection Button
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _hexController,
+                          decoration: const InputDecoration(
+                            labelText: "Send Hex",
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        onPressed: () => _sendCommand(_hexController.text),
+                        icon: const Icon(Icons.send),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6C22F5),
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.tv),
+                      label: const Text("OPEN PROJECTION"),
+                      onPressed: () => setState(() => _showProjection = true),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(),
+
+            // Logs
+            Container(
+              height: 300, // Fixed height for log area within the scroll view
+              color: Colors.black,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _logs.length,
+                itemBuilder: (c, i) {
+                  final log = _logs[i];
+                  Color color = Colors.white70;
+                  if (log.type == LogType.tx) color = Colors.greenAccent;
+                  if (log.type == LogType.rx) color = Colors.cyan;
+                  if (log.type == LogType.error) color = Colors.redAccent;
+                  if (log.type == LogType.success) color = Colors.amber;
+                  
+                  return Text(
+                    "${log.timestamp.second}:${log.timestamp.millisecond} ${log.text}",
+                    style: TextStyle(color: color, fontFamily: 'monospace', fontSize: 11),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -643,6 +892,34 @@ class _ScanningScreenState extends State<ScanningScreen> {
       ),
       onPressed: () => _sendCommand(cmd),
       child: Text(label),
+    );
+  }
+}
+
+class _ControlButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color color;
+
+  const _ControlButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.color = Colors.blue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
     );
   }
 }
