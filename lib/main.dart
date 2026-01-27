@@ -401,6 +401,14 @@ class _ScanningScreenState extends State<ScanningScreen> {
           }
           _sendCommand("B0"); // Sync board state after placement
           break;
+        case 0x42: // Navigation/Button Event (Back/Menu)
+          if (_recorder.isRecording) {
+             _recorder.stopRecording();
+             _recorder.saveGameToFirebase("Aborted (Menu)");
+             _addLog("💾 Auto-Saved (Menu Nav)", LogType.success);
+          }
+          meaning = "[Nav/Menu: ${value.map((e)=>e.toRadixString(16)).join(',')}]";
+          break;
         case 0xA3: // MOVE - The board confirms a move!
           if (value.length >= 3) {
             final fromSq = value[1];
@@ -688,7 +696,14 @@ class _ScanningScreenState extends State<ScanningScreen> {
         lastLogs: _logs.take(10).map((l) => l.text).toList(),
         liftedSquare: _liftedSquare != null ? _chessUpToAlgebraic(_liftedSquare!) : null,
         onBack: () => setState(() => _showProjection = false),
-        onDisconnect: () {
+        onDisconnect: () async {
+          // Auto-save on disconnect
+          if (_recorder.isRecording) {
+             print("🔌 Disconnected - Saving Game...");
+             _recorder.stopRecording();
+             await _recorder.saveGameToFirebase("Disconnect");
+          }
+          
           _connectedDevice?.disconnect();
           setState(() {
             _connectedDevice = null;
