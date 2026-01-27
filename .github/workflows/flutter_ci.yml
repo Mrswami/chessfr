@@ -1,0 +1,36 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          architecture: x64
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze Project
+        run: flutter analyze
+
+      - name: Run Tests
+        run: |
+          if [ -d "test" ]; then
+            flutter test
+          else
+            echo "No test directory found, skipping tests."
+          fi
+
+      - name: Build APK (Debug)
+        run: flutter build apk --debug
