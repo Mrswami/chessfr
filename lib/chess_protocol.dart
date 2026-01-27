@@ -9,17 +9,26 @@
 class ChessProtocol {
   
   static String parseBoardState(List<int> packet) {
-    // The packet usually contains (Header 2 bytes) + (Grid data)
-    // For a 12-wide grid, 8 ranks = 96 bytes of data. 
-    // If the packet is smaller, we'll fall back.
-    int stride = (packet.length >= 98) ? 12 : 8;
+    if (packet.length < 71) return ""; // Minimum size
+
+    // Full packet (73 bytes) structure:
+    // [0] Header (0x67)
+    // [1-64] Board Squares
+    // [65] Turn (0=w, 1=b)
+    // [66-69] Castling (K, Q, k, q)
+    // [70] En Passant Square Index
+    // [71] Halfmove clock
+    // [72] Fullmove counter
 
     StringBuffer fen = StringBuffer();
-    // Loop Ranks (7 down to 0) - FEN is top-down (Black to White)
+    // 1. Piece Placement (Ranks 8 to 1)
     for (int rank = 7; rank >= 0; rank--) {
       int emptyCount = 0;
       for (int file = 0; file < 8; file++) {
-        int index = 2 + (rank * stride) + file;
+        // Physical index: hardware uses index 1-64 for squares
+        // Mapping depends on how the board stores it. 
+        // Based on APK, it seems to be rank-major.
+        int index = 1 + (rank * 8) + file; 
         if (index >= packet.length) break;
         
         int pieceByte = packet[index];
@@ -38,32 +47,64 @@ class ChessProtocol {
       if (emptyCount > 0) fen.write(emptyCount);
       if (rank > 0) fen.write("/");
     }
+
+    // 2. Active Color
+    String turn = "w";
+    if (packet.length > 65) {
+        turn = (packet[65] == 0) ? "w" : "b";
+    }
+    fen.write(" $turn");
+
+    // 3. Castling Availability
+    String castling = "";
+    if (packet.length > 69) {
+        if (packet[66] == 1) castling += "K";
+        if (packet[67] == 1) castling += "Q";
+        if (packet[68] == 1) castling += "k";
+        if (packet[69] == 1) castling += "q";
+    }
+    fen.write(" ${castling.isEmpty ? "-" : castling}");
+
+    // 4. En Passant Square
+    String ep = "-";
+    if (packet.length > 70 && packet[70] != 64) {
+        int idx = packet[70];
+        int r = idx ~/ 8;
+        int f = idx % 8;
+        ep = "${String.fromCharCode('a'.codeUnitAt(0) + f)}${r + 1}";
+    }
+    fen.write(" $ep");
+
+    // 5. Halfmove Clock & Fullmove Number
+    int half = (packet.length > 71) ? packet[71] : 0;
+    int full = (packet.length > 72) ? packet[72] : 1;
+    fen.write(" $half $full");
     
     return fen.toString();
   }
 
   static String _byteToPiece(int b) {
-      // These are educated guesses based on common protocols.
-      // We will refine this by looking at your logs!
+      // Official Mapping Decoded from ChessUp APK boardStateArray:
       switch(b) {
-          case 0x00: return "";
-          // White
-          case 0x01: return "P";
-          case 0x02: return "N";
-          case 0x03: return "B";
-          case 0x04: return "R";
-          case 0x05: return "Q";
-          case 0x06: return "K";
+          case 0x40: return ""; // Empty Square
           
-          // Black (Commonly using bit 7 or secondary IDs)
-          case 0x81: case 0x11: case 0x09: return "p";
-          case 0x82: case 0x12: case 0x0A: return "n";
-          case 0x83: case 0x13: case 0x0B: return "b";
-          case 0x84: case 0x14: case 0x0C: return "r";
-          case 0x85: case 0x15: case 0x0D: return "q";
-          case 0x86: case 0x16: case 0x0E: return "k";
+          // White Pieces
+          case 0x00: return "P"; // White Pawn
+          case 0x01: return "R"; // White Rook
+          case 0x02: return "N"; // White Knight
+          case 0x03: return "B"; // White Bishop
+          case 0x04: return "Q"; // White Queen
+          case 0x05: return "K"; // White King
           
-          default: return b > 0 ? "?" : ""; // Show unknown pieces as ?, blank as empty
+          // Black Pieces 
+          case 0x08: return "p"; // Black Pawn
+          case 0x09: return "r"; // Black Rook
+          case 0x0a: return "n"; // Black Knight
+          case 0x0b: return "b"; // Black Bishop
+          case 0x0c: return "q"; // Black Queen
+          case 0x0d: return "k"; // Black King
+          
+          default: return b > 0 ? "?" : ""; // Unknown
       }
   }
 }

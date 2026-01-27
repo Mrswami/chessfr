@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "412770758504",
+    "project_id": "chessuppro",
+    "storage_bucket": "chessuppro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412770758504:android:24ec2e3b1f87630ca870dd",
+        "android_client_info": {
+          "package_name": "com.mrswami.chessup.chessup_pro_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJ9K0XOTCY4-Jea1mnuZ1IlYvK9KWrKDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

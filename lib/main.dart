@@ -3,11 +3,20 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'services/game_recorder.dart';
 import 'chess_protocol.dart';
 import 'game_screen.dart';
 import 'dart:async';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+    print("✅ Firebase Initialized");
+  } catch (e) {
+    print("⚠️ Firebase Warning: $e");
+  }
   runApp(const MyApp());
 }
 
@@ -64,6 +73,10 @@ class _ScanningScreenState extends State<ScanningScreen> {
   // 40 = Menu? 
   // Need to discover valid game screen IDs
   bool get _isGameActive => _currentScreenId != 40 && _currentScreenId != 0;
+  
+  // Recorder
+  final GameRecorder _recorder = GameRecorder();
+
   // Auto-sync
   bool _autoSync = false;
   Timer? _autoSyncTimer;
@@ -442,16 +455,18 @@ class _ScanningScreenState extends State<ScanningScreen> {
     try {
       String fen = ChessProtocol.parseBoardState(fullPacket);
       
-      // DEBUG: ALWAYS LOG FEN to see if it changes
-      // Only process if it's a valid FEN 
-      if (fen.contains("/")) {
+      // Only process if it's a valid FEN and changed
+      if (fen.contains("/") && fen != _lastSyncedFen) {
         
-        // Simple diff logging to detect moves
-        if (_lastSyncedFen.isNotEmpty && fen != _lastSyncedFen) {
+        // Simple diff: detecting moves
+        if (_lastSyncedFen.isNotEmpty) {
            _detectAndLogMove(_lastSyncedFen, fen);
         }
         
         _lastSyncedFen = fen;
+        // RECORDER HOOK
+        _recorder.handleNewFen(fen);
+
         setState(() {
             _currentFen = fen;
             _liftedSquare = null; 
@@ -476,16 +491,11 @@ class _ScanningScreenState extends State<ScanningScreen> {
     int checks = 0;
     Timer.periodic(const Duration(milliseconds: 500), (timer) {
       checks++;
-      if (checks > 8 || _connectedDevice == null) { // Increased checks
+      if (checks > 8 || _connectedDevice == null) { 
         timer.cancel();
       } else {
-        // "Shotgun" approach: Try multiple potential state request commands
-        // B0 = App Request Board State
-        // C9 = Request Board Info
-        // 67 = Board State (As request?)
-        _sendCommand("B0"); 
-        _sendCommand("C9");
-        _sendCommand("67"); // Maybe 67 command triggers 67 response?
+        // Identified Solution: Sending 0x67 (Response Header) as a command triggers the board to dump its state!
+        _sendCommand("67");
       }
     });
   }
@@ -839,17 +849,59 @@ class _ScanningScreenState extends State<ScanningScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  // Projection Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6C22F5),
+                        backgroundColor: _isGameActive ? const Color(0xFF6C22F5) : Colors.grey,
                         foregroundColor: Colors.white,
                       ),
                       icon: const Icon(Icons.tv),
-                      label: const Text("OPEN PROJECTION"),
-                      onPressed: () => setState(() => _showProjection = true),
+                      label: Text(_isGameActive ? "OPEN PROJECTION" : "Start Game on Board First"),
+                      onPressed: _isGameActive ? () => setState(() => _showProjection = true) : null,
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // Recording Controls
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _recorder.isRecording ? Colors.red : Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          icon: Icon(_recorder.isRecording ? Icons.stop : Icons.fiber_manual_record),
+                          label: Text(_recorder.isRecording ? "STOP REC" : "REC GAME"),
+                          onPressed: () {
+                            setState(() {
+                              if (_recorder.isRecording) {
+                                _recorder.stopRecording();
+                              } else {
+                                _recorder.startNewGame();
+                                _recorder.handleNewFen(_currentFen);
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Cloud Save
+                      IconButton.filledTonal(
+                         icon: const Icon(Icons.cloud_upload),
+                         tooltip: "Save to Firebase",
+                         onPressed: () async {
+                           _recorder.stopRecording();
+                           setState(() {}); // Update UI
+                           await _recorder.saveGameToFirebase("1-0"); // Default result
+                           if (context.mounted) {
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Game Saved to Cloud! ☁️")));
+                           }
+                         },
+                      )
+                    ],
                   ),
                 ],
               ),

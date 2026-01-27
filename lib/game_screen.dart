@@ -22,184 +22,216 @@ class GameProjectionScreen extends StatefulWidget {
 
 class _GameProjectionScreenState extends State<GameProjectionScreen> {
   bool _showDebug = false;
-  bool _isRotated = false;
+  bool _isFlipped = false; // Default: White at bottom (Rank 1)
 
   @override
   Widget build(BuildContext context) {
-    // DEBUG: Track re-renders
-    print("🎨 GameProjectionScreen.build() - FEN: ${widget.fen}");
+    // Standard starting FEN if empty
+    final displayFen = (widget.fen == "No Board Data" || widget.fen.isEmpty) 
+        ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" 
+        : widget.fen;
     
-    List<String?> board = _parseFen(widget.fen);
-    
-    // DEBUG: Show board state
-    int pieceCount = board.where((p) => p != null).length;
-    print("🎨 Parsed board has $pieceCount pieces");
-    
-    if (_isRotated) {
-      board = board.reversed.toList();
-    }
+    final board = _fenToBoard(displayFen);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F), // Ultra dark for TV
-      body: Stack(
-        children: [
-          // THE BIG BOARD
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
-              child: AspectRatio(
-                aspectRatio: 1.0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.white12, width: 2),
+      backgroundColor: const Color(0xFF0F0F0F),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // --- NEATER TOP BAR ---
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                border: const Border(bottom: BorderSide(color: Colors.white10)),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white54),
+                    onPressed: widget.onBack,
                   ),
-                  child: Column(
-                      children: List.generate(8, (rank) {
-                        return Expanded(
-                          child: Row(
-                            children: List.generate(8, (file) {
-                              bool isDark = (rank + file) % 2 == 1;
-                              Color squareColor = isDark 
-                                  ? const Color(0xFF556B2F) // Olive Dark
-                                  : const Color(0xFFF0E68C); // Khaki Light
-                              
-                              int index = (rank * 8) + file;
-                              String? piece = (index < board.length) ? board[index] : null;
-
-                              return Expanded(
-                                child: Container(
-                                  color: squareColor,
-                                  child: Center(
-                                    child: _buildPiece(piece),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        );
-                      }),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("CHESSPUP PRO", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.2)),
+                        Text(
+                          _getTurnLabel(displayFen),
+                          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-            ),
-          ),
-
-          // OVERLAY UI - TOP BAR
-          Positioned(
-            top: 40,
-            left: 20,
-            right: 20,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _HeaderBtn(
-                  icon: Icons.arrow_back, 
-                  label: "Dashboard", 
-                  onPressed: widget.onBack
-                ),
-                Text(
-                  "CHESSUP PRO PROJECTOR",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.3),
-                    letterSpacing: 6,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold
+                  // Controls
+                  _IconToggle(
+                    icon: Icons.flip,
+                    active: _isFlipped,
+                    activeColor: Colors.orange,
+                    onTap: () => setState(() => _isFlipped = !_isFlipped),
                   ),
-                ),
-                Row(
-                  children: [
-                    _HeaderBtn(
-                      icon: Icons.rotate_right, 
-                      label: "Flip", 
-                      onPressed: () => setState(() => _isRotated = !_isRotated),
-                    ),
-                    const SizedBox(width: 8),
-                    _HeaderBtn(
-                      icon: Icons.terminal, 
-                      label: "Logs", 
-                      onPressed: () => setState(() => _showDebug = !_showDebug),
-                      isActive: _showDebug,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          
-          // LIFTED SQUARE INDICATOR (Top center)
-          if (widget.liftedSquare != null)
-            Positioned(
-              top: 100,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(30),
+                  const SizedBox(width: 8),
+                  _IconToggle(
+                    icon: Icons.terminal_rounded,
+                    active: _showDebug,
+                    activeColor: Colors.greenAccent,
+                    onTap: () => setState(() => _showDebug = !_showDebug),
                   ),
-                  child: Text(
-                    "PICKUP: ${widget.liftedSquare}",
-                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                  const SizedBox(width: 12),
+                  // Status Indicators
+                  _statusDot(widget.fen != "No Board Data" && widget.fen.isNotEmpty, Colors.greenAccent),
+                  const SizedBox(width: 6),
+                  _statusDot(widget.liftedSquare != null, Colors.blueAccent),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    icon: const Icon(Icons.power_settings_new, color: Colors.redAccent, size: 22),
+                    onPressed: widget.onDisconnect,
                   ),
-                ),
+                ],
               ),
             ),
 
-          // DEBUG SIDEBAR (Optional)
-          if (_showDebug)
-            Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(
-                width: 300,
-                color: Colors.black.withOpacity(0.9),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 80),
-                    const Text("RAW TRAFFIC", style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
-                    const Divider(color: Colors.white24),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: widget.lastLogs.length,
-                        itemBuilder: (ctx, i) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
+            // --- MAIN BOARD AREA ---
+            Expanded(
+              child: Stack(
+                children: [
+                  // THE CHESSBOARD
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.all(20),
+                      constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white24, width: 2),
+                      ),
+                      child: AspectRatio(
+                        aspectRatio: 1.0,
+                        child: Column(
+                          children: List.generate(8, (rIdx) {
+                            int rank = _isFlipped ? rIdx : (7 - rIdx);
+                            return Expanded(
+                              child: Row(
+                                children: List.generate(8, (fIdx) {
+                                  int file = _isFlipped ? (7 - fIdx) : fIdx;
+                                  
+                                  String coord = "${String.fromCharCode('a'.codeUnitAt(0) + file)}${rank + 1}";
+                                  bool isHighlighted = widget.liftedSquare == coord;
+                                  
+                                  bool isDark = (rank + file) % 2 == 0;
+                                  Color baseColor = isDark ? const Color(0xFF4B533A) : const Color(0xFF818C6A);
+                                  
+                                  int boardIdx = (rank * 8) + file;
+                                  String? piece = (boardIdx < board.length) ? board[boardIdx] : null;
+
+                                  return Expanded(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: isHighlighted ? Colors.blueAccent.withOpacity(0.9) : baseColor,
+                                        border: isHighlighted ? Border.all(color: Colors.white, width: 2) : null,
+                                      ),
+                                      child: Center(child: _buildPiece(piece)),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // LIFTED SQUARE OVERLAY
+                  if (widget.liftedSquare != null)
+                    Positioned(
+                      top: 40,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 10)],
+                          ),
                           child: Text(
-                            widget.lastLogs[i],
-                            style: const TextStyle(color: Colors.greenAccent, fontSize: 11, fontFamily: 'monospace'),
+                            "TOUCH: ${widget.liftedSquare!.toUpperCase()}",
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                         ),
                       ),
                     ),
-                    const Divider(),
-                    const Text("CURRENT POSITION:", style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 10)),
-                    const SizedBox(height: 4),
-                    SelectableText(
-                      widget.fen, 
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'monospace')
+
+                  // LOG DRAWER OVERLAY
+                  if (_showDebug)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.75,
+                        color: Colors.black.withOpacity(0.95),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("HARDWARE LOGS", style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                            const Divider(color: Colors.white24, height: 20),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: widget.lastLogs.length,
+                                itemBuilder: (ctx, i) => Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 2),
+                                  child: Text(
+                                    widget.lastLogs[i],
+                                    style: const TextStyle(color: Colors.white70, fontSize: 10, fontFamily: 'monospace'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const Divider(color: Colors.white24),
+                            const Text("FEN POSITION:", style: TextStyle(color: Colors.blueAccent, fontSize: 9, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            SelectableText(
+                              displayFen,
+                              style: const TextStyle(color: Colors.white54, fontSize: 9, fontFamily: 'monospace'),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  Widget _statusDot(bool active, Color color) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: active ? color : Colors.white10,
+        boxShadow: active ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 4, spreadRadius: 1)] : null,
+      ),
+    );
+  }
+
+  String _getTurnLabel(String fen) {
+    if (fen == "No Board Data" || fen.isEmpty) return "Board Disconnected";
+    List<String> parts = fen.split(' ');
+    bool isBlack = parts.length > 1 && parts[1] == 'b';
+    return isBlack ? "Black to move" : "White to move";
+  }
+
   Widget _buildPiece(String? pieceCode) {
-    if (pieceCode == null || pieceCode.isEmpty) return const SizedBox.shrink();
-    
-    // Reject unknown pieces
-    if (pieceCode == '?' || !('pnbrqkPNBRQK'.contains(pieceCode))) {
-      debugPrint("⚠️ Trying to render unknown piece: '$pieceCode'");
-      return const SizedBox.shrink();
-    }
+    if (pieceCode == null || pieceCode.isEmpty || pieceCode == '?') return const SizedBox.shrink();
     
     String symbol = "";
     bool isWhite = pieceCode == pieceCode.toUpperCase();
@@ -211,88 +243,63 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
       case 'B': symbol = isWhite ? "♗" : "♝"; break;
       case 'N': symbol = isWhite ? "♘" : "♞"; break;
       case 'P': symbol = isWhite ? "♙" : "♟"; break;
-      default:
-        debugPrint("⚠️ Unhandled piece in switch: '$pieceCode'");
-        return const SizedBox.shrink();
+      default: return const SizedBox.shrink();
     }
 
     return Text(
       symbol,
       style: TextStyle(
-        fontSize: 28,
-        color: isWhite ? Colors.white : const Color(0xFF151515),
-        shadows: [
-          Shadow(
-            offset: const Offset(0, 0), 
-            blurRadius: 4, 
-            color: isWhite ? Colors.black45 : Colors.white60
-          ),
-          if (isWhite) const Shadow(offset: Offset(0, 2), blurRadius: 4, color: Colors.black45)
-        ],
+        fontSize: 34,
+        color: isWhite ? Colors.white : Colors.black,
+        shadows: isWhite ? [const Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))] : [const Shadow(color: Colors.white38, blurRadius: 2)],
       ),
     );
   }
 
-  List<String?> _parseFen(String fen) {
+  List<String?> _fenToBoard(String fen) {
     List<String?> board = List.filled(64, null);
-    String placement = fen.split(' ')[0];
-    
-    // FEN is top-down: rank 8 (index 56-63) down to rank 1 (index 0-7)
-    int rank = 7;  // Start at rank 7 (top)
-    int file = 0;
-    
-    for (int i = 0; i < placement.length; i++) {
-        String char = placement[i];
-        if (char == '/') {
-          rank--;  // Move down one rank
+    try {
+      String placement = fen.split(' ')[0];
+      int rank = 7;
+      int file = 0;
+      for (int i = 0; i < placement.length; i++) {
+        String c = placement[i];
+        if (c == '/') {
+          rank--;
           file = 0;
         } else {
-            int? skip = int.tryParse(char);
-            if (skip != null) {
-              file += skip;
-            } else {
-              if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
-                // VALIDATION: Only accept valid piece characters
-                if ('pnbrqkPNBRQK'.contains(char)) {
-                  board[rank * 8 + file] = char;
-                } else if (char != '?') {
-                  // Log unknown characters (but don't crash)
-                  debugPrint("⚠️ Unknown FEN char: '$char' at rank $rank, file $file");
-                }
-              }
-              file++;
+          int? skip = int.tryParse(c);
+          if (skip != null) {
+            file += skip;
+          } else if ('pnbrqkPNBRQK'.contains(c)) {
+            if (rank >= 0 && rank < 8 && file >= 0 && file < 8) {
+              board[rank * 8 + file] = c;
             }
+            file++;
+          }
         }
-    }
+      }
+    } catch (_) {}
     return board;
   }
 }
 
-class _HeaderBtn extends StatelessWidget {
+class _IconToggle extends StatelessWidget {
   final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-  final bool isActive;
+  final bool active;
+  final Color activeColor;
+  final VoidCallback onTap;
 
-  const _HeaderBtn({required this.icon, required this.label, this.onPressed, this.isActive = false});
+  const _IconToggle({required this.icon, required this.active, required this.activeColor, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.amber : Colors.white12,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: isActive ? Colors.black : Colors.white),
-            const SizedBox(width: 8),
-            Text(label, style: TextStyle(color: isActive ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-          ],
-        ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(icon, color: active ? activeColor : Colors.white38, size: 20),
       ),
     );
   }
