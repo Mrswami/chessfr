@@ -469,7 +469,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
 
         setState(() {
             _currentFen = fen;
-            _liftedSquare = null; 
+            // _liftedSquare = null; // Keep the highlight so we see what we moved
         });
         _addLog("🏁 SYNCED: $fen", LogType.success);
       }
