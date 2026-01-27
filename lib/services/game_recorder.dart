@@ -26,8 +26,7 @@ class GameRecorder {
     if (_game.fen == newFen) return;
 
     // 2. Try to find a legal move that leads to this FEN
-    // The 'chess' library doesn't rely strictly on FEN diffing, we have to brute force legal moves
-    final moves = _game.get_moves();
+    final moves = _game.generate_moves();
     bool found = false;
     
     for (var move in moves) {
@@ -37,8 +36,10 @@ class GameRecorder {
       // So we compare broadly (Piece Placement + Active Color)
       if (_simplifyFen(_game.fen) == _simplifyFen(newFen)) {
         found = true;
-        _moveHistory.add(move['san'] ?? move.toString());
-        print("✅ Recorded Move: ${move['san']}");
+        // move.san is not available on Move object in this version
+        // We rely on _game.pgn() for the final output anyway
+        _moveHistory.add(move.toString()); 
+        print("✅ Recorded Move: $move");
         break; 
       }
       _game.undo(); // Backtrack
