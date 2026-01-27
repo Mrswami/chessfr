@@ -405,7 +405,13 @@ class _ScanningScreenState extends State<ScanningScreen> {
           if (_recorder.isRecording) {
              _recorder.stopRecording();
              _recorder.saveGameToFirebase("Aborted (Menu)");
-             _addLog("💾 Auto-Saved (Menu Nav)", LogType.success);
+             
+             // Reset App UI to ready state
+             setState(() {
+               _currentFen = _startingFen;
+               _liftedSquare = null;
+             });
+             _addLog("💾 Auto-Saved & Reset", LogType.success);
           }
           meaning = "[Nav/Menu: ${value.map((e)=>e.toRadixString(16)).join(',')}]";
           break;
