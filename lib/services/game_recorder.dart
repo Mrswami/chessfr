@@ -40,6 +40,20 @@ class GameRecorder {
         // We rely on _game.pgn() for the final output anyway
         _moveHistory.add(move.toString()); 
         print("✅ Recorded Move: $move");
+        
+        // CHECK END CONDITIONS
+        if (_game.in_checkmate) {
+           bool whiteTurn = _game.fen.split(' ')[1] == 'w';
+           String result = whiteTurn ? "0-1" : "1-0";
+           print("🏁 CHECKMATE! Winner: ${whiteTurn ? 'Black' : 'White'}");
+           saveGameToFirebase(result);
+           stopRecording();
+        } else if (_game.in_draw) {
+           print("🏁 DRAW detected.");
+           saveGameToFirebase("1/2-1/2");
+           stopRecording();
+        }
+        
         break; 
       }
       _game.undo(); // Backtrack
@@ -77,6 +91,20 @@ class GameRecorder {
       print("☁️ Game Saved to Firebase!");
     } catch (e) {
       print("❌ Firebase Upload Error: $e");
+    }
+  }
+  Future<List<Map<String, dynamic>>> getRecentGames() async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('games')
+          .orderBy('date', descending: true)
+          .limit(10)
+          .get();
+      print("📜 Fetched ${snap.docs.length} games from Cloud.");
+      return snap.docs.map((d) => d.data()).toList();
+    } catch (e) {
+      print("❌ Error fetching games: $e");
+      return [];
     }
   }
 }

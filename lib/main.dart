@@ -920,9 +920,26 @@ class _ScanningScreenState extends State<ScanningScreen> {
                            if (context.mounted) {
                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Game Saved to Cloud! ☁️")));
                            }
-                         },
                       )
                     ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.history),
+                      label: const Text("CHECK CLOUD DB"),
+                      onPressed: () async {
+                         _addLog("⏳ Fetching...", LogType.system);
+                         final games = await _recorder.getRecentGames();
+                         _addLog("✅ Found ${games.length} games", LogType.success);
+                         for (var g in games) {
+                            String d = g['date'] ?? "?";
+                            if (d.length > 10) d = d.substring(0, 10);
+                            _addLog("📜 $d Result: ${g['result']}", LogType.system);
+                         }
+                      },
+                    ),
                   ),
                 ],
               ),
