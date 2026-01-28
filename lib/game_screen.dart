@@ -237,12 +237,12 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
     bool isWhite = pieceCode == pieceCode.toUpperCase();
     
     switch (pieceCode.toUpperCase()) {
-      case 'K': symbol = isWhite ? "♔" : "♚"; break;
-      case 'Q': symbol = isWhite ? "♕" : "♛"; break;
-      case 'R': symbol = isWhite ? "♖" : "♜"; break;
-      case 'B': symbol = isWhite ? "♗" : "♝"; break;
-      case 'N': symbol = isWhite ? "♘" : "♞"; break;
-      case 'P': symbol = isWhite ? "♙" : "♟"; break;
+      case 'K': symbol = "♚"; break;
+      case 'Q': symbol = "♛"; break;
+      case 'R': symbol = "♜"; break;
+      case 'B': symbol = "♝"; break;
+      case 'N': symbol = "♞"; break;
+      case 'P': symbol = "♟"; break;
       default: return const SizedBox.shrink();
     }
 
@@ -250,8 +250,10 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
       symbol,
       style: TextStyle(
         fontSize: 34,
-        color: isWhite ? Colors.white : Colors.black,
-        shadows: isWhite ? [const Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))] : [const Shadow(color: Colors.white38, blurRadius: 2)],
+        color: isWhite ? const Color(0xFFEEEEEE) : const Color(0xFF111111),
+        shadows: isWhite 
+            ? [const Shadow(color: Colors.black54, blurRadius: 5, offset: Offset(0, 2))] 
+            : [const Shadow(color: Colors.white24, blurRadius: 8), const Shadow(color: Colors.white12, blurRadius: 2)],
       ),
     );
   }

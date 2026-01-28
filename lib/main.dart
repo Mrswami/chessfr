@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'services/game_recorder.dart';
 import 'chess_protocol.dart';
 import 'game_screen.dart';
+import 'game_library_screen.dart';
 import 'dart:async';
 
 void main() async {
@@ -928,16 +929,9 @@ class _ScanningScreenState extends State<ScanningScreen> {
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.history),
-                      label: const Text("CHECK CLOUD DB"),
-                      onPressed: () async {
-                         _addLog("⏳ Fetching...", LogType.system);
-                         final games = await _recorder.getRecentGames();
-                         _addLog("✅ Found ${games.length} games", LogType.success);
-                         for (var g in games) {
-                            String d = g['date'] ?? "?";
-                            if (d.length > 10) d = d.substring(0, 10);
-                            _addLog("📜 $d Result: ${g['result']}", LogType.system);
-                         }
+                      label: const Text("OPEN CLOUD LIBRARY"),
+                      onPressed: () {
+                         Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLibraryScreen()));
                       },
                     ),
                   ),
