@@ -1,0 +1,15 @@
+{
+  "move_id": "example-001",
+  "fen_position": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "stockfish_top_3": [
+    { "move": "e4", "eval": 0.15 },
+    { "move": "d4", "eval": 0.10 },
+    { "move": "Nf3", "eval": 0.05 }
+  ],
+  "design_metrics": {
+    "is_bridge": true,
+    "island_count": 3,
+    "connectivity_gain": 0.62
+  },
+  "recommendation_logic": "if (is_bridge && delta_v < 0.5) rank_as_primary"
+}

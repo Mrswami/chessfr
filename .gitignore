@@ -1,0 +1,29 @@
+# Environment files with secrets
+.env
+*.env.local
+
+# Flutter
+flutter/.dart_tool/
+flutter/.packages
+flutter/build/
+flutter/.flutter-plugins
+flutter/.flutter-plugins-dependencies
+flutter/*.iml
+flutter/.idea/
+flutter/.metadata
+
+# Supabase local
+backend/.supabase/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
