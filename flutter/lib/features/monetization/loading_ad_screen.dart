@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoadingAdScreen extends StatefulWidget {
   final VoidCallback onAdComplete;
@@ -46,7 +47,7 @@ class _LoadingAdScreenState extends State<LoadingAdScreen> {
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: () {
-                   // Open URL
+                   launchUrl(Uri.parse('https://play.google.com/store/apps/details?id=com.fun.lastwar.gp'));
                 }, 
                 style: FilledButton.styleFrom(backgroundColor: Colors.blue),
                 child: const Text('INSTALL NOW'),
