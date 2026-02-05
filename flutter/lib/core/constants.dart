@@ -7,6 +7,7 @@ class AppConstants {
   static const String supabaseUrl = 'https://jcrkoclchttokwzeddlr.supabase.co';
 }
 
+// Feature exports
 export '../features/training/training_screen.dart';
 export '../features/monetization/loading_ad_screen.dart';
 export '../features/monetization/loading_ad_screen.dart';
