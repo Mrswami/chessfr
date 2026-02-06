@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import 'core/theme.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/monetization/loading_ad_screen.dart';
@@ -33,16 +32,7 @@ class _ChessTrainerAppState extends State<ChessTrainerApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Chess Trainer',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
-          brightness: Brightness.dark,
-        ),
-        textTheme: GoogleFonts.poppinsTextTheme(
-          Theme.of(context).textTheme,
-        ),
-      ),
+      theme: AppTheme.dark,
       home: _showAd 
         ? LoadingAdScreen(onAdComplete: () => setState(() => _showAd = false))
         : StreamBuilder<AuthState>(

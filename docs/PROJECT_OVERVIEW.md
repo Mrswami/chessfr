@@ -15,3 +15,15 @@ connectivity between piece groups and match the user's cognitive profile.
 Provide a coaching layer that feels like a "personal logic filter" rather than
 a generic engine evaluator. The app teaches patterns that align with the user's
 strengths and decision-making tendencies.
+
+---
+
+## Translation Key (for Cursor / technical handoff)
+
+When implementing or auditing, map "Pattern-Aligned" product language to these concrete behaviors:
+
+| Term | Technical meaning |
+|------|-------------------|
+| **Connectivity** | Reward moves that reduce the distance between isolated piece clusters (Quad-Split support). |
+| **Response** | Penalty for moves with latency < 2.0s (Impulse control for MG/Emotional Authority). |
+| **Influence** | Reward moves where pieces are "Networked" (4-line logic). |

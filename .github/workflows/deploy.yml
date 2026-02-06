@@ -1,0 +1,66 @@
+
+ CD: automatic deploy on push to main/master.
+# - Builds Flutter web and deploys to GitHub Pages (optional; enable in repo Settings > Pages).
+# - Optionally runs Supabase migrations if you add SUPABASE_ACCESS_TOKEN and link the project.
+name: Deploy
+
+on:
+  push:
+    branches: [master, main]
+
+jobs:
+  # Build Flutter web for deployment (e.g. GitHub Pages or download artifact).
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: "stable"
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: flutter
+
+      - name: Build web
+        run: flutter build web
+        working-directory: flutter
+
+      - name: Upload web build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: flutter/build/web
+
+  # Deploy to GitHub Pages (only runs if Pages is enabled and this job is used as deployment source).
+  deploy-pages:
+    needs: build-web
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment: github-pages
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Optional: run Supabase migrations when you add secrets.
+  # 1. In Supabase Dashboard: Account > Access Tokens — create a token.
+  # 2. In GitHub: repo Settings > Secrets > Actions — add SUPABASE_ACCESS_TOKEN.
+  # 3. In repo root: run `supabase link --project-ref YOUR_REF` and commit .supabase/config.toml (or set SUPABASE_PROJECT_REF in secrets).
+  # Then uncomment this job and add SUPABASE_ACCESS_TOKEN to the repo secrets.
+  #
+  # supabase-migrate:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: supabase/setup-cli@v1
+  #       with:
+  #         version: latest
+  #     - run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+  #       env:
+  #         SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  #     - run: supabase db push
+  #       working-directory: backend

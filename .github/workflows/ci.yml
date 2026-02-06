@@ -1,0 +1,32 @@
+# CI: run on every push and PR to main (or any branch).
+# Ensures the Flutter app analyzes and tests clean so the main branch stays shippable.
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: "stable"
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: flutter
+
+      - name: Analyze
+        run: flutter analyze
+        working-directory: flutter
+
+      - name: Test
+        run: flutter test
+        working-directory: flutter

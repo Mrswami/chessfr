@@ -1,57 +1,118 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../training/training_repository.dart';
 import '../training/training_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  Future<void> _signOut() async {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TrainingRepository _repo = TrainingRepository();
+  String? _profileId;
+  int _streak = 0;
+  int _xp = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final profileId = await _repo.getProfileId();
+    if (profileId == null) return;
+    final stats = await _repo.getUserStats(profileId);
+    if (mounted && stats != null) {
+      setState(() {
+        _profileId = profileId;
+        _streak = stats['current_streak'] as int? ?? 0;
+        _xp = stats['total_xp'] as int? ?? 0;
+      });
+    }
+  }
+
+  Future<void> _signOut(BuildContext context) async {
     await Supabase.instance.client.auth.signOut();
   }
 
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
+    final name = user?.userMetadata?['display_name'] ?? 'Player';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chess Trainer'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _signOut,
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hello, ${user?.userMetadata?['display_name'] ?? 'Player'}',
-              style: Theme.of(context).textTheme.headlineSmall,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hello, $name',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ).animate().fadeIn().slideX(begin: -0.1, end: 0),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            _buildStatChip(context, Icons.local_fire_department_rounded, '$_streak', 'Streak'),
+                            const SizedBox(width: 12),
+                            _buildStatChip(context, Icons.star_rounded, '$_xp', 'XP'),
+                          ],
+                        ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.logout_rounded),
+                      onPressed: () => _signOut(context),
+                    ).animate().fadeIn(delay: 50.ms),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 24),
-            _buildActionCard(
-              context,
-              'Start Training',
-              'Pattern-aligned puzzles ready.',
-              Icons.play_arrow,
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TrainingScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            _buildActionCard(
-              context,
-              'My Profile',
-              'Adjust your cognitive metrics.',
-              Icons.person,
-              () {},
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildActionTile(
+                    context,
+                    title: 'Start Training',
+                    subtitle: 'Pattern-aligned puzzles ready.',
+                    icon: Icons.play_circle_fill_rounded,
+                    color: const Color(0xFF0D9488),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const TrainingScreen()),
+                      );
+                      if (mounted) _loadStats();
+                    },
+                    delay: 150,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'My Profile',
+                    subtitle: 'Adjust your cognitive metrics.',
+                    icon: Icons.person_rounded,
+                    color: const Color(0xFFF59E0B),
+                    onTap: () {},
+                    delay: 200,
+                  ),
+                ]),
+              ),
             ),
           ],
         ),
@@ -59,19 +120,91 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context, String title, String subtitle,
-      IconData icon, VoidCallback onTap) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Icon(icon, color: Theme.of(context).colorScheme.primary),
-        ),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
+  Widget _buildStatChip(BuildContext context, IconData icon, String value, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 6),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.white70)),
+        ],
       ),
     );
+  }
+
+  Widget _buildActionTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    required int delay,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, size: 28, color: color),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: Colors.white54,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideX(begin: 0.05, end: 0, curve: Curves.easeOut);
   }
 }
