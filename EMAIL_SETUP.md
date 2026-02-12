@@ -11,7 +11,7 @@
 5. Click **App passwords** (under "How you sign in to Google")
 6. Click **Select app** → Choose "Mail"
 7. Click **Select device** → Choose "Other (Custom name)"
-8. Type: `ChessUp Pro CI/CD`
+8. Type: `ChessUp Pro CI/CD`  
 9. Click **Generate**
 10. **Copy the 16-character password** (you won't see it again!)
 
