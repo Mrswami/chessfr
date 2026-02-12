@@ -44,6 +44,7 @@ jobs:
           files: coverage/lcov.info
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: false
 
   build:
     name: Build APK
@@ -76,7 +77,7 @@ jobs:
         run: flutter doctor -v
       
       - name: Build APK
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release
         continue-on-error: false
       
       - name: Get version info
