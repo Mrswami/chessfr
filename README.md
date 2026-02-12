@@ -1,49 +1,60 @@
 # ChessUp Pro Mobile
 
-A Flutter mobile application for the ChessUp smart chessboard with advanced features including:
-- 🎮 Real-time game recording and playback
-- 🔄 Bluetooth connectivity with ChessUp boards
-- 📊 Game library and history
-- ♟️ Touch controls with visual feedback
-- 🏆 Checkmate detection and automatic result tracking
-- ☁️ Cloud database synchronization
+A Flutter mobile application for the ChessUp smart chessboard.
 
-## Related Projects
-- 🌐 **[ChessUp Firmware Extension](https://github.com/Mrswami/chessup-firmware-extension)** - Browser-based tools and protocol reverse engineering
+![Build Status](https://github.com/Mrswami/chessup-pro-mobile/workflows/Build%20and%20Release%20Android%20APK/badge.svg)
 
 ## Features
-- **Live Game Sync**: Real-time board state monitoring via BLE
-- **Auto-Save**: Graceful exit handling with automatic game saving
-- **Game Library**: Browse and replay previously recorded games
-- **Touch Highlighting**: Visual feedback for piece movements
-- **Cloud Integration**: Firebase backend for game persistence
 
-## Getting Started
+✅ **Auto-Connect** - Automatically connects to your ChessUp board on startup  
+✅ **Projection Mode** - Opens directly to the chess board view  
+✅ **Responsive Design** - Optimized for phones, tablets, and foldables  
+✅ **Game Recording** - Save games to Firebase Cloud  
+✅ **Bluetooth Integration** - Real-time board state synchronization  
+✅ **CI/CD Pipeline** - Automated builds and email delivery  
 
-### Prerequisites
-- Flutter SDK (latest stable version)
-- A ChessUp or ChessUp 2 smart chessboard
-- Android/iOS device with Bluetooth support
+## Quick Start
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Mrswami/chessup-pro-mobile.git
-   cd chessup-pro-mobile
-   ```
-
-2. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
-
-3. Run the app:
-   ```bash
-   flutter run
-   ```
+1. Download the latest APK from [Releases](https://github.com/Mrswami/chessup-pro-mobile/releases)
+2. Install on your Android device
+3. Grant Bluetooth permissions
+4. Open the app - it will auto-connect to your ChessUp board!
 
 ## Development
-This app communicates with ChessUp boards using Bluetooth Low Energy (BLE) protocol. See the [ChessUp Firmware Extension](https://github.com/Mrswami/chessup-firmware-extension) project for protocol documentation.
+
+### Prerequisites
+- Flutter 3.38.9+
+- Dart 3.10.8+
+- Android SDK
+
+### Setup
+```bash
+flutter pub get
+flutter run
+```
+
+### Build APK
+```bash
+flutter build apk --release
+```
+
+## CI/CD
+
+Every push to `master` automatically:
+- Builds a release APK
+- Runs tests and analysis
+- Emails the APK to the developer
+- Stores artifacts for 30 days
+
+See [CI_CD_GUIDE.md](CI_CD_GUIDE.md) for details.
+
+## Documentation
+
+- [Responsive Design Guide](RESPONSIVE_DESIGN.md)
+- [Auto-Connect Flow](AUTO_CONNECT_GUIDE.md)
+- [CI/CD Setup](CI_CD_GUIDE.md)
+- [Email Setup](EMAIL_SETUP.md)
 
 ## License
-MIT
+
+Private project - All rights reserved.
