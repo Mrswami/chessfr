@@ -26,7 +26,7 @@ class GameRecorder {
     if (_game.fen == newFen) return;
 
     // 2. Try to find a legal move that leads to this FEN
-    final moves = _game.generate_moves();
+    final moves = _game.moves();
     bool found = false;
     
     for (var move in moves) {

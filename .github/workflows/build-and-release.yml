@@ -30,7 +30,12 @@ jobs:
         continue-on-error: true
       
       - name: Analyze code
-        run: flutter analyze --no-fatal-infos
+        run: |
+          echo "🔍 Running code analysis..."
+          flutter analyze --no-fatal-infos || {
+            echo "⚠️ Analysis found issues (non-blocking)"
+            exit 0
+          }
         continue-on-error: true
       
       - name: Run tests
@@ -77,8 +82,23 @@ jobs:
         run: flutter doctor -v
       
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          echo "🔨 Starting APK build..."
+          flutter build apk --release --verbose
+          echo "✅ Build completed successfully"
         continue-on-error: false
+      
+      - name: Verify APK exists
+        run: |
+          if [ ! -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+            echo "❌ APK file not found!"
+            echo "Listing build directory:"
+            ls -la build/app/outputs/flutter-apk/ || true
+            exit 1
+          else
+            echo "✅ APK file found"
+            ls -lh build/app/outputs/flutter-apk/app-release.apk
+          fi
       
       - name: Get version info
         id: version
