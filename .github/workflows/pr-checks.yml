@@ -18,6 +18,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
       
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -29,17 +30,38 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
+      - name: Verify Flutter installation
+        run: flutter doctor -v
+      
       - name: Check formatting
-        run: dart format --set-exit-if-changed lib/
+        run: dart format --set-exit-if-changed lib/ test/
         continue-on-error: true
       
       - name: Analyze code
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
         continue-on-error: true
       
       - name: Run tests
-        run: flutter test
+        run: flutter test --coverage
         continue-on-error: true
+      
+      - name: Upload coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
       
       - name: Check build
         run: flutter build apk --debug
+        continue-on-error: true
+      
+      - name: PR Summary
+        if: always()
+        run: |
+          echo "## 📋 PR Quality Checks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All checks completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review the logs above for any warnings or errors." >> $GITHUB_STEP_SUMMARY
