@@ -1,0 +1,143 @@
+name: Manual Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      send_email:
+        description: 'Send APK via email'
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  release:
+    name: Create Release Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.9'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Get current version
+        id: current_version
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Build Release APK
+        run: flutter build apk --release
+      
+      - name: Build App Bundle (for Play Store)
+        run: flutter build appbundle --release
+      
+      - name: Get build info
+        id: build_info
+        run: |
+          echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_OUTPUT
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+      - name: Rename artifacts
+        run: |
+          mkdir -p release_builds
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             release_builds/ChessUpPro-v${{ steps.current_version.outputs.version }}-${{ steps.build_info.outputs.date }}.apk
+          mv build/app/outputs/bundle/release/app-release.aab \
+             release_builds/ChessUpPro-v${{ steps.current_version.outputs.version }}-${{ steps.build_info.outputs.date }}.aab
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.current_version.outputs.version }}-${{ steps.build_info.outputs.sha_short }}
+          name: ChessUp Pro v${{ steps.current_version.outputs.version }}
+          body: |
+            ## ChessUp Pro v${{ steps.current_version.outputs.version }}
+            
+            **Build Date:** ${{ steps.build_info.outputs.date }}
+            **Commit:** ${{ steps.build_info.outputs.sha_short }}
+            
+            ### Downloads
+            - **APK** (Android): Direct install
+            - **AAB** (App Bundle): For Google Play Store
+            
+            ### Installation
+            1. Download the APK file
+            2. Enable "Install from Unknown Sources" on your Android device
+            3. Open the APK and install
+            
+            ---
+            *Automated release build*
+          files: |
+            release_builds/*.apk
+            release_builds/*.aab
+          draft: false
+          prerelease: false
+      
+      - name: Send APK via Email
+        if: ${{ inputs.send_email }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚀 ChessUp Pro v${{ steps.current_version.outputs.version }} - Manual Release"
+          to: ${{ secrets.EMAIL_TO }}
+          from: ChessUp Pro Releases
+          body: |
+            🚀 Manual release build completed!
+            
+            Version: ${{ steps.current_version.outputs.version }}
+            Build Date: ${{ steps.build_info.outputs.date }}
+            Commit: ${{ steps.build_info.outputs.sha_short }}
+            
+            This is a RELEASE build ready for distribution.
+            
+            Files included:
+            - APK (for direct installation)
+            - AAB (for Google Play Store)
+            
+            The APK is attached. AAB is available on GitHub Releases.
+          attachments: release_builds/*.apk
+          html_body: |
+            <h2>🚀 ChessUp Pro Manual Release</h2>
+            <p><strong>Version:</strong> ${{ steps.current_version.outputs.version }}<br>
+            <strong>Build Date:</strong> ${{ steps.build_info.outputs.date }}<br>
+            <strong>Commit:</strong> <code>${{ steps.build_info.outputs.sha_short }}</code></p>
+            
+            <h3>This is a RELEASE build</h3>
+            <p>Ready for distribution and production use.</p>
+            
+            <h3>Files:</h3>
+            <ul>
+              <li><strong>APK</strong> - Attached to this email (for direct installation)</li>
+              <li><strong>AAB</strong> - Available on GitHub Releases (for Play Store)</li>
+            </ul>
+            
+            <hr>
+            <p><em>Manual release triggered from GitHub Actions</em></p>

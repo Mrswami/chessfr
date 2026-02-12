@@ -8,6 +8,7 @@ import 'services/game_recorder.dart';
 import 'chess_protocol.dart';
 import 'game_screen.dart';
 import 'game_library_screen.dart';
+import 'responsive_utils.dart';
 import 'dart:async';
 
 void main() async {
@@ -56,13 +57,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _writeChar;
   String? _autoConnectId;
+  bool _isAutoConnecting = false; // Track if we're in auto-connect flow
+  bool _hasAttemptedAutoConnect = false; // Prevent multiple auto-connect attempts
   
   // Board State - START WITH KNOWN POSITION
   // Standard starting FEN - we'll track moves from here
   static const String _startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
   String _currentFen = _startingFen;
   int? _liftedSquare; // Track which square has a lifted piece
-  bool _showProjection = false; // Toggle between debug and projection view
+  bool _showProjection = true; // Default to projection mode
   
   final List<LogEntry> _logs = [];
   final TextEditingController _hexController = TextEditingController();
@@ -125,9 +128,15 @@ class _ScanningScreenState extends State<ScanningScreen> {
 
   Future<void> _loadSavedDevice() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _autoConnectId = prefs.getString('last_device_id');
-    });
+    final savedId = prefs.getString('last_device_id');
+    
+    if (savedId != null) {
+      setState(() {
+        _autoConnectId = savedId;
+        _isAutoConnecting = true; // Start auto-connect flow
+      });
+      _addLog("Found saved board: ${savedId.substring(0, 8)}...", LogType.system);
+    }
   }
 
   Future<void> _requestPermissions() async {
@@ -180,17 +189,26 @@ class _ScanningScreenState extends State<ScanningScreen> {
       });
 
       // Auto-connect to previously paired device
-      if (_connectedDevice == null && _autoConnectId != null) {
+      if (_connectedDevice == null && _autoConnectId != null && !_hasAttemptedAutoConnect) {
         try {
           final found = _scanResults.firstWhere(
             (r) => r.device.remoteId.toString() == _autoConnectId
           );
-          _addLog("Auto-Connecting to known board...", LogType.system);
-          _connect(found.device);
+          _hasAttemptedAutoConnect = true;
+          _addLog("🔗 Auto-Connecting to saved board...", LogType.system);
+          await _connect(found.device, autoConnected: true);
           _autoConnectId = null; // Prevent duplicate connections
         } catch (_) {
           // Device not found yet, keep scanning
         }
+      }
+      
+      // If we have multiple boards and no saved preference, show selection
+      if (_scanResults.length > 1 && _autoConnectId == null && _isAutoConnecting) {
+        setState(() {
+          _isAutoConnecting = false; // Show board selection
+        });
+        _addLog("Multiple boards found - please select one", LogType.system);
       }
     });
 
@@ -203,7 +221,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
   // BLUETOOTH CONNECTION
   // ══════════════════════════════════════════════════════════════════════════
 
-  Future<void> _connect(BluetoothDevice device) async {
+  Future<void> _connect(BluetoothDevice device, {bool autoConnected = false}) async {
     if (_isScanning) await FlutterBluePlus.stopScan();
 
     _addLog("Connecting to ${device.platformName}...", LogType.system);
@@ -248,14 +266,24 @@ class _ScanningScreenState extends State<ScanningScreen> {
       }
 
       if (foundService) {
-        setState(() => _connectedDevice = device);
-        _addLog("✅ Connected! Board is in free play mode.", LogType.success);
+        setState(() {
+          _connectedDevice = device;
+          // Auto-enable projection mode if this was an auto-connect
+          if (autoConnected) {
+            _showProjection = true;
+            _isAutoConnecting = false;
+          }
+        });
+        _addLog("✅ Connected! ${autoConnected ? 'Opening projection...' : 'Board ready.'}", LogType.success);
       } else {
         _addLog("ChessUp service not found!", LogType.error);
         device.disconnect();
       }
     } catch (e) {
       _addLog("Connection failed: $e", LogType.error);
+      setState(() {
+        _isAutoConnecting = false; // Show scanner on failure
+      });
     }
   }
 
@@ -721,13 +749,52 @@ class _ScanningScreenState extends State<ScanningScreen> {
       );
     }
     
-    // Show Control Panel if connected
+    // Show Control Panel if connected (but not in projection mode)
     if (_connectedDevice != null) {
       return _buildControlPanel();
     }
     
-    // Show Scanner
+    // Show loading screen during auto-connect
+    if (_isAutoConnecting) {
+      return _buildAutoConnectLoading();
+    }
+    
+    // Show Scanner (only if not auto-connecting)
     return _buildScanner();
+  }
+
+  Widget _buildAutoConnectLoading() {
+    return Scaffold(
+      backgroundColor: const Color(0xFF121212),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              color: Color(0xFF6C22F5),
+              strokeWidth: 3,
+            ),
+            const SizedBox(height: 24),
+            ResponsiveText(
+              "Connecting to ChessUp...",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.white70,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ResponsiveText(
+              "Please wait",
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white38,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildScanner() {
@@ -738,26 +805,53 @@ class _ScanningScreenState extends State<ScanningScreen> {
         backgroundColor: _isScanning ? Colors.grey : const Color(0xFF6C22F5),
         child: Icon(_isScanning ? Icons.hourglass_top : Icons.search),
       ),
-      body: _scanResults.isEmpty
-          ? Center(child: Text(_isScanning ? "Scanning..." : "No ChessUp boards found."))
-          : ListView.builder(
-              itemCount: _scanResults.length,
-              itemBuilder: (c, i) {
-                final d = _scanResults[i].device;
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: ListTile(
-                    leading: const Icon(Icons.bluetooth, color: Colors.blue),
-                    title: Text(d.platformName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(d.remoteId.toString()),
-                    trailing: ElevatedButton(
-                      onPressed: () => _connect(d),
-                      child: const Text("CONNECT"),
-                    ),
-                  ),
-                );
-              },
+      body: ResponsiveLayout(
+        mobile: (context) => _buildScannerContent(context),
+        tablet: (context) => Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: ResponsiveUtils.getMaxContentWidth(context),
             ),
+            child: _buildScannerContent(context),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScannerContent(BuildContext context) {
+    final padding = ResponsiveUtils.getResponsivePadding(context);
+    
+    if (_scanResults.isEmpty) {
+      return Center(
+        child: ResponsiveText(
+          _isScanning ? "Scanning..." : "No ChessUp boards found.",
+          style: const TextStyle(fontSize: 16),
+        ),
+      );
+    }
+    
+    return ListView.builder(
+      padding: padding,
+      itemCount: _scanResults.length,
+      itemBuilder: (c, i) {
+        final d = _scanResults[i].device;
+        return Card(
+          margin: EdgeInsets.only(bottom: ResponsiveUtils.getResponsiveSpacing(context)),
+          child: ListTile(
+            leading: const Icon(Icons.bluetooth, color: Colors.blue, size: 32),
+            title: ResponsiveText(
+              d.platformName,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            subtitle: Text(d.remoteId.toString()),
+            trailing: ElevatedButton(
+              onPressed: () => _connect(d),
+              child: const Text("CONNECT"),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -775,196 +869,263 @@ class _ScanningScreenState extends State<ScanningScreen> {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: ResponsiveLayout(
+        mobile: (context) => _buildControlPanelContent(context, isMobile: true),
+        tablet: (context) => _buildControlPanelContent(context, isMobile: false),
+      ),
+    );
+  }
+
+  Widget _buildControlPanelContent(BuildContext context, {required bool isMobile}) {
+    final padding = ResponsiveUtils.getResponsivePadding(context);
+    final spacing = ResponsiveUtils.getResponsiveSpacing(context);
+    
+    return SingleChildScrollView(
+      child: Padding(
+        padding: padding,
+        child: isMobile ? _buildMobileLayout(spacing) : _buildTabletLayout(context, spacing),
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout(double spacing) {
+    return Column(
+      children: [
+        _buildStatusIndicator(spacing),
+        SizedBox(height: spacing),
+        _buildFenArea(spacing),
+        SizedBox(height: spacing),
+        _buildCommandControls(spacing),
+        SizedBox(height: spacing),
+        _buildRecordingControls(spacing),
+        SizedBox(height: spacing),
+        _buildLogsArea(),
+      ],
+    );
+  }
+
+  Widget _buildTabletLayout(BuildContext context, double spacing) {
+    return Column(
+      children: [
+        _buildStatusIndicator(spacing),
+        SizedBox(height: spacing),
+        _buildFenArea(spacing),
+        SizedBox(height: spacing),
+        // Two-column layout for controls on tablets
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Status Indicator & Sensor State
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.black12,
-              child: Row(
-                children: [
-                   CircleAvatar(
-                     backgroundColor: _liftedSquare != null ? Colors.greenAccent : Colors.grey,
-                     radius: 8,
-                   ),
-                   const SizedBox(width: 12),
-                   Expanded(
-                     child: Text(
-                       _liftedSquare != null ? "LIFTED: ${_chessUpToAlgebraic(_liftedSquare!)}" : "SENSORS ACTIVE",
-                       style: const TextStyle(fontWeight: FontWeight.bold),
-                     ),
-                   ),
-                   // Screen ID Badge
-                   Container(
-                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                     decoration: BoxDecoration(
-                       color: _isGameActive ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
-                       borderRadius: BorderRadius.circular(4),
-                       border: Border.all(color: _isGameActive ? Colors.green : Colors.orange),
-                     ),
-                     child: Text(
-                       "MODE: $_currentScreenId",
-                       style: TextStyle(
-                         fontSize: 12,
-                         color: _isGameActive ? Colors.green : Colors.orange,
-                         fontWeight: FontWeight.bold
-                       ),
-                     ),
-                   ),
-                ],
-              ),
-            ),
-
-            // FEN Area
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: Colors.black26,
+            Expanded(
               child: Column(
                 children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: SelectableText(
-                      _currentFen, 
-                      style: const TextStyle(fontSize: 12, fontFamily: 'monospace', color: Colors.greenAccent),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _QuickBtn("Reset", "RESET"),
-                      _QuickBtn("FORCE PLAY", "PLAY_SEQ"),
-                      _QuickBtn("DUMP ALL", "DUMP_ALL"),
-                      _QuickBtn("LED TEST", "3E010C01"), // Green e2
-                      _QuickBtn("FEN (B0)", "B0"),
-                    ],
-                  ),
+                  _buildCommandControls(spacing),
+                  SizedBox(height: spacing),
+                  _buildRecordingControls(spacing),
                 ],
               ),
             ),
-            
-            // Manual Command + Projection Button
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _hexController,
-                          decoration: const InputDecoration(
-                            labelText: "Send Hex",
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filled(
-                        onPressed: () => _sendCommand(_hexController.text),
-                        icon: const Icon(Icons.send),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Projection Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6C22F5),
-                        foregroundColor: Colors.white,
-                      ),
-                      icon: const Icon(Icons.tv),
-                      label: const Text("OPEN PROJECTION (Force)"),
-                      onPressed: () => setState(() => _showProjection = true),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Recording Controls
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _recorder.isRecording ? Colors.red : Colors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                          icon: Icon(_recorder.isRecording ? Icons.stop : Icons.fiber_manual_record),
-                          label: Text(_recorder.isRecording ? "STOP REC" : "REC GAME"),
-                          onPressed: () {
-                            setState(() {
-                              if (_recorder.isRecording) {
-                                _recorder.stopRecording();
-                              } else {
-                                _recorder.startNewGame();
-                                _recorder.handleNewFen(_currentFen);
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Cloud Save
-                      IconButton.filledTonal(
-                         icon: const Icon(Icons.cloud_upload),
-                         tooltip: "Save to Firebase",
-                         onPressed: () async {
-                           _recorder.stopRecording();
-                           setState(() {}); // Update UI
-                           await _recorder.saveGameToFirebase("1-0"); // Default result
-                           if (context.mounted) {
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Game Saved to Cloud! ☁️")));
-                           }
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.history),
-                      label: const Text("OPEN CLOUD LIBRARY"),
-                      onPressed: () {
-                         Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLibraryScreen()));
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(),
-
-            // Logs
-            Container(
-              height: 300, // Fixed height for log area within the scroll view
-              color: Colors.black,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8),
-                itemCount: _logs.length,
-                itemBuilder: (c, i) {
-                  final log = _logs[i];
-                  Color color = Colors.white70;
-                  if (log.type == LogType.tx) color = Colors.greenAccent;
-                  if (log.type == LogType.rx) color = Colors.cyan;
-                  if (log.type == LogType.error) color = Colors.redAccent;
-                  if (log.type == LogType.success) color = Colors.amber;
-                  
-                  return Text(
-                    "${log.timestamp.second}:${log.timestamp.millisecond} ${log.text}",
-                    style: TextStyle(color: color, fontFamily: 'monospace', fontSize: 11),
-                  );
-                },
-              ),
+            SizedBox(width: spacing),
+            Expanded(
+              child: _buildLogsArea(),
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildStatusIndicator(double spacing) {
+    return Container(
+      padding: EdgeInsets.all(spacing),
+      decoration: BoxDecoration(
+        color: Colors.black12,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: _liftedSquare != null ? Colors.greenAccent : Colors.grey,
+            radius: 8,
+          ),
+          SizedBox(width: spacing),
+          Expanded(
+            child: Text(
+              _liftedSquare != null ? "LIFTED: ${_chessUpToAlgebraic(_liftedSquare!)}" : "SENSORS ACTIVE",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _isGameActive ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: _isGameActive ? Colors.green : Colors.orange),
+            ),
+            child: Text(
+              "MODE: $_currentScreenId",
+              style: TextStyle(
+                fontSize: 12,
+                color: _isGameActive ? Colors.green : Colors.orange,
+                fontWeight: FontWeight.bold
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFenArea(double spacing) {
+    return Container(
+      padding: EdgeInsets.all(spacing),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: SelectableText(
+              _currentFen,
+              style: const TextStyle(fontSize: 12, fontFamily: 'monospace', color: Colors.greenAccent),
+            ),
+          ),
+          SizedBox(height: spacing),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              _QuickBtn("Reset", "RESET"),
+              _QuickBtn("FORCE PLAY", "PLAY_SEQ"),
+              _QuickBtn("DUMP ALL", "DUMP_ALL"),
+              _QuickBtn("LED TEST", "3E010C01"),
+              _QuickBtn("FEN (B0)", "B0"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommandControls(double spacing) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _hexController,
+                decoration: const InputDecoration(
+                  labelText: "Send Hex",
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ),
+            SizedBox(width: spacing),
+            IconButton.filled(
+              onPressed: () => _sendCommand(_hexController.text),
+              icon: const Icon(Icons.send),
+            ),
+          ],
+        ),
+        SizedBox(height: spacing),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6C22F5),
+              foregroundColor: Colors.white,
+            ),
+            icon: const Icon(Icons.tv),
+            label: const Text("OPEN PROJECTION (Force)"),
+            onPressed: () => setState(() => _showProjection = true),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecordingControls(double spacing) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _recorder.isRecording ? Colors.red : Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                icon: Icon(_recorder.isRecording ? Icons.stop : Icons.fiber_manual_record),
+                label: Text(_recorder.isRecording ? "STOP REC" : "REC GAME"),
+                onPressed: () {
+                  setState(() {
+                    if (_recorder.isRecording) {
+                      _recorder.stopRecording();
+                    } else {
+                      _recorder.startNewGame();
+                      _recorder.handleNewFen(_currentFen);
+                    }
+                  });
+                },
+              ),
+            ),
+            SizedBox(width: spacing),
+            IconButton.filledTonal(
+              icon: const Icon(Icons.cloud_upload),
+              tooltip: "Save to Firebase",
+              onPressed: () async {
+                _recorder.stopRecording();
+                setState(() {});
+                await _recorder.saveGameToFirebase("1-0");
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Game Saved to Cloud! ☁️")));
+                }
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: spacing),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.history),
+            label: const Text("OPEN CLOUD LIBRARY"),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const GameLibraryScreen()));
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLogsArea() {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: _logs.length,
+        itemBuilder: (c, i) {
+          final log = _logs[i];
+          Color color = Colors.white70;
+          if (log.type == LogType.tx) color = Colors.greenAccent;
+          if (log.type == LogType.rx) color = Colors.cyan;
+          if (log.type == LogType.error) color = Colors.redAccent;
+          if (log.type == LogType.success) color = Colors.amber;
+
+          return Text(
+            "${log.timestamp.second}:${log.timestamp.millisecond} ${log.text}",
+            style: TextStyle(color: color, fontFamily: 'monospace', fontSize: 11),
+          );
+        },
       ),
     );
   }

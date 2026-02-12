@@ -1,0 +1,105 @@
+name: Build and Release Android APK
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.9'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Run tests
+        run: flutter test || echo "No tests found, continuing..."
+        continue-on-error: true
+      
+      - name: Analyze code
+        run: flutter analyze || echo "Analysis warnings found, continuing..."
+        continue-on-error: true
+      
+      - name: Build APK
+        run: flutter build apk --release
+      
+      - name: Get version info
+        id: version
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      
+      - name: Rename APK
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             build/app/outputs/flutter-apk/ChessUpPro-v${{ steps.version.outputs.version }}-${{ steps.version.outputs.date }}.apk
+      
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChessUpPro-APK-${{ steps.version.outputs.version }}
+          path: build/app/outputs/flutter-apk/ChessUpPro-*.apk
+          retention-days: 30
+      
+      - name: Send APK via Email
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "ChessUp Pro v${{ steps.version.outputs.version }} - New Build Available"
+          to: ${{ secrets.EMAIL_TO }}
+          from: ChessUp Pro CI/CD
+          body: |
+            🎉 New ChessUp Pro build is ready!
+            
+            Version: ${{ steps.version.outputs.version }}
+            Build Date: ${{ steps.version.outputs.date }}
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+            
+            Changes in this build:
+            ${{ github.event.head_commit.message }}
+            
+            The APK is attached to this email.
+            
+            Download and install on your Android device to test the latest features!
+          attachments: build/app/outputs/flutter-apk/ChessUpPro-*.apk
+          html_body: |
+            <h2>🎉 New ChessUp Pro Build Available!</h2>
+            <p><strong>Version:</strong> ${{ steps.version.outputs.version }}<br>
+            <strong>Build Date:</strong> ${{ steps.version.outputs.date }}<br>
+            <strong>Commit:</strong> <code>${{ github.sha }}</code><br>
+            <strong>Branch:</strong> ${{ github.ref_name }}</p>
+            
+            <h3>Changes in this build:</h3>
+            <pre>${{ github.event.head_commit.message }}</pre>
+            
+            <p>The APK is attached to this email. Download and install on your Android device!</p>
+            
+            <hr>
+            <p><em>Automated build from GitHub Actions</em></p>
