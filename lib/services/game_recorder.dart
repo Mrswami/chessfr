@@ -30,7 +30,11 @@ class GameRecorder {
     bool found = false;
     
     for (var move in moves) {
-      _game.move(move);
+      // Try the move - move() returns bool indicating success
+      if (!_game.move(move)) {
+        continue; // Skip invalid moves
+      }
+      
       // Clean the FEN (remove move counts if needed for comparison)
       // Actually, ChessUp FEN might handle move counts differently to the library
       // So we compare broadly (Piece Placement + Active Color)
