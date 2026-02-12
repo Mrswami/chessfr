@@ -81,6 +81,18 @@ jobs:
       - name: Verify Flutter installation
         run: flutter doctor -v
       
+      - name: Check for compilation errors
+        run: |
+          echo "🔍 Checking for compilation errors..."
+          flutter analyze lib/ --no-fatal-infos 2>&1 | tee analyze_output.txt || true
+          if grep -q "Error:" analyze_output.txt; then
+            echo "❌ Compilation errors found:"
+            grep "Error:" analyze_output.txt
+            exit 1
+          else
+            echo "✅ No compilation errors found"
+          fi
+      
       - name: Build APK
         run: |
           echo "🔨 Starting APK build..."
