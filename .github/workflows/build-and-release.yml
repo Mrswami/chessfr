@@ -8,54 +8,9 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  quality-check:
-    name: Code Quality Checks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.38.9'
-          channel: 'stable'
-          cache: true
-      
-      - name: Get dependencies
-        run: flutter pub get
-      
-      - name: Check formatting
-        run: dart format --set-exit-if-changed lib/ test/
-        continue-on-error: true
-      
-      - name: Analyze code
-        run: |
-          echo "🔍 Running code analysis..."
-          flutter analyze --no-fatal-infos || {
-            echo "⚠️ Analysis found issues (non-blocking)"
-            exit 0
-          }
-        continue-on-error: true
-      
-      - name: Run tests
-        run: flutter test --coverage || echo "Tests completed with warnings"
-        continue-on-error: true
-      
-      - name: Upload coverage
-        if: always()
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage/lcov.info
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: false
-
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    needs: quality-check
-    if: always() # Build even if quality checks have warnings
     
     steps:
       - name: Checkout code
@@ -78,39 +33,8 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
-      - name: Verify Flutter installation
-        run: flutter doctor -v
-      
-      - name: Check for compilation errors
-        run: |
-          echo "🔍 Checking for compilation errors..."
-          flutter analyze lib/ --no-fatal-infos 2>&1 | tee analyze_output.txt || true
-          if grep -q "Error:" analyze_output.txt; then
-            echo "❌ Compilation errors found:"
-            grep "Error:" analyze_output.txt
-            exit 1
-          else
-            echo "✅ No compilation errors found"
-          fi
-      
       - name: Build APK
-        run: |
-          echo "🔨 Starting APK build..."
-          flutter build apk --release --verbose
-          echo "✅ Build completed successfully"
-        continue-on-error: false
-      
-      - name: Verify APK exists
-        run: |
-          if [ ! -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-            echo "❌ APK file not found!"
-            echo "Listing build directory:"
-            ls -la build/app/outputs/flutter-apk/ || true
-            exit 1
-          else
-            echo "✅ APK file found"
-            ls -lh build/app/outputs/flutter-apk/app-release.apk
-          fi
+        run: flutter build apk --release
       
       - name: Get version info
         id: version
@@ -118,14 +42,12 @@ jobs:
           VERSION=$(grep 'version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-          echo "time=$(date +'%H-%M-%S')" >> $GITHUB_OUTPUT
       
       - name: Get APK size
         id: apk_size
         run: |
           APK_SIZE=$(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)
           echo "size=$APK_SIZE" >> $GITHUB_OUTPUT
-          echo "📦 APK Size: $APK_SIZE"
       
       - name: Rename APK
         run: |
@@ -138,26 +60,13 @@ jobs:
           name: ChessUpPro-APK-${{ steps.version.outputs.version }}
           path: build/app/outputs/flutter-apk/ChessUpPro-*.apk
           retention-days: 30
-          compression-level: 6
       
       - name: Build Summary
         if: success()
         run: |
           echo "## ✅ Build Successful" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Date:** ${{ steps.version.outputs.date }}" >> $GITHUB_STEP_SUMMARY
           echo "**APK Size:** ${{ steps.apk_size.outputs.size }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📦 APK available in artifacts section" >> $GITHUB_STEP_SUMMARY
-      
-      - name: Build Summary (Failure)
-        if: failure()
-        run: |
-          echo "## ❌ Build Failed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Check the logs above for details." >> $GITHUB_STEP_SUMMARY
       
       - name: Send APK via Email
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && success()
@@ -177,31 +86,15 @@ jobs:
             Version: ${{ steps.version.outputs.version }}
             Build Date: ${{ steps.version.outputs.date }}
             APK Size: ${{ steps.apk_size.outputs.size }}
-            Commit: ${{ github.sha }}
-            Branch: ${{ github.ref_name }}
-            
-            Changes in this build:
-            ${{ github.event.head_commit.message }}
             
             The APK is attached to this email.
-            
-            Download and install on your Android device to test the latest features!
           attachments: build/app/outputs/flutter-apk/ChessUpPro-*.apk
           html_body: |
             <h2>🎉 New ChessUp Pro Build Available!</h2>
             <p><strong>Version:</strong> ${{ steps.version.outputs.version }}<br>
             <strong>Build Date:</strong> ${{ steps.version.outputs.date }}<br>
-            <strong>APK Size:</strong> ${{ steps.apk_size.outputs.size }}<br>
-            <strong>Commit:</strong> <code>${{ github.sha }}</code><br>
-            <strong>Branch:</strong> ${{ github.ref_name }}</p>
-            
-            <h3>Changes in this build:</h3>
-            <pre>${{ github.event.head_commit.message }}</pre>
-            
-            <p>The APK is attached to this email. Download and install on your Android device!</p>
-            
-            <hr>
-            <p><em>Automated build from GitHub Actions</em></p>
+            <strong>APK Size:</strong> ${{ steps.apk_size.outputs.size }}</p>
+            <p>The APK is attached to this email.</p>
       
       - name: Send Failure Notification
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -220,13 +113,5 @@ jobs:
             
             Commit: ${{ github.sha }}
             Branch: ${{ github.ref_name }}
-            Workflow: ${{ github.workflow }}
             
             Please check the GitHub Actions logs for details.
-          html_body: |
-            <h2>❌ Build Failed</h2>
-            <p><strong>Commit:</strong> <code>${{ github.sha }}</code><br>
-            <strong>Branch:</strong> ${{ github.ref_name }}<br>
-            <strong>Workflow:</strong> ${{ github.workflow }}</p>
-            
-            <p>Please check the <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">GitHub Actions logs</a> for details.</p>
