@@ -104,3 +104,27 @@ What you’re building: a **solo/small-team**, **user-facing app** with **auth**
   - or a job that builds the Flutter app artifact (e.g. APK) for download or store upload.
 
 Next step in this repo: add a single workflow under `.github/workflows/` that does the CI part above. No CD until you want automated deploys.
+
+---
+
+## 5. Merger Status: ChessXL + ChessUp Pro
+**Merged on:** Feb 16, 2026
+
+We have successfully merged the **ChessUp Pro** projection features into **ChessXL** (formerly ChessPersonalTrainer). 
+
+### Architecture Strategy: Modular Monolith
+- **Host**: ChessXL (`ChessPersonalTrainer`) is the master repository.
+- **Modules**: 
+  - `lib/features/training`: Original ChessXL logic (Stockfish, Ranking, Puzzles).
+  - `lib/features/projection`: **NEW** ChessUp Pro logic (Camera, Vision, AR).
+- **Shared Data**: All features now use **Supabase** as the single source of truth.
+  - *Note*: The projection feature's specific database tables (`live_sessions`) need to be created in Supabase.
+
+### New Features
+1.  **Chess Vision**: Real-time camera board recognition (YOLOv8).
+2.  **Move Recording**: Tracks moves from a physical board.
+
+### Next Steps for Merger
+1.  **Database Migration**: Create `live_sessions` (or `training_sessions`) table in Supabase.
+2.  **UI Polish**: Apply ChessXL theme (Santa/Dark) to the Camera Screen.
+3.  **Testing**: Verify camera permissions and model loading on a real device.

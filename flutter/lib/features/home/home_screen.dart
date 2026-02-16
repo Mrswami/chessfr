@@ -6,6 +6,7 @@ import '../training/training_screen.dart';
 import '../analysis/import_view.dart';
 import '../auth/user_role_service.dart';
 import '../admin/admin_dashboard.dart';
+import '../projection/ui/camera_recognition_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -136,6 +137,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     delay: 250,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'Chess Vision',
+                    subtitle: 'Scan and analyze real boards.',
+                    icon: Icons.camera_alt_rounded,
+                    color: Colors.cyan,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CameraRecognitionScreen()),
+                      );
+                    },
+                    delay: 275,
                   ),
                   if (_role == UserRole.admin) ...[
                     const SizedBox(height: 14),
