@@ -19,7 +19,12 @@ class GameAnalysisService {
     // For now, let's analyze ALL swings and filter by who made the bad move.
 
     // Replay the game move by move and analyze
-    final moves = game.history(options: {'verbose': true});
+    // history is List<State>, each state has a move
+    final states = game.history; 
+    
+    // We need to iterate states to get moves.
+    // Note: State contains the move that *caused* the state.
+    
     final spots = <SwingSpot>[];
     
     // Create a fresh board to replay
@@ -28,8 +33,8 @@ class GameAnalysisService {
 
     double? previousEval; // + is White, - is Black
     
-    for (int i = 0; i < moves.length; i++) {
-      final move = moves[i];
+    for (int i = 0; i < states.length; i++) {
+      final move = states[i].move; // Move object
       final fenBefore = replayBoard.fen;
       
       // We analyze the position BEFORE the move to see what was expected
@@ -62,13 +67,19 @@ class GameAnalysisService {
       
       final bestMovesBefore = await _stockfish.getTopMoves(fenBefore, depth: 10);
       if (bestMovesBefore.isEmpty) {
-        replayBoard.move(move);
+         replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
         continue;
       }
       
       final bestEvalBefore = bestMovesBefore.first.evaluation; // Relative to side to move
       
-      replayBoard.move(move);
+      // Make the move on the replay board
+      // Use Map with from/to indices which 'chess' package supports
+      final moveResult = replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
+      String san = '${move.from}-${move.to}'; // Fallback to indices for now
+      // Attempt to get SAN if possible, or leave as simple representation
+
+      
       final fenAfter = replayBoard.fen;
       
       // To see if the move was bad, we check the eval of the NEW position.
@@ -128,7 +139,7 @@ class GameAnalysisService {
          spots.add(SwingSpot(
            moveIndex: i,
            fenBefore: fenBefore,
-           movePlayedSan: move['san'],
+           movePlayedSan: san,
            evalBefore: evalBeforeWhite,
            evalAfter: evalAfterWhite,
            swing: swing,

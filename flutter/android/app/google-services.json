@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "221089588903",
+    "project_id": "chessprotrainer",
+    "storage_bucket": "chessprotrainer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:221089588903:android:b3e0d3131a5bc686361d82",
+        "android_client_info": {
+          "package_name": "com.mrswami.chess_trainer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiVMMoQX1em-Vc5vMOQ8no2TnUbzctrgc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

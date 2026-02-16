@@ -19,16 +19,17 @@
 | Area | Status | Notes |
 |------|--------|--------|
 | **Environment** | Done | Flutter SDK; Supabase project created (ref in env). |
-| **Database** | Done | Migration `001_initial_schema.sql` (profiles, positions, move_recommendations, training_sessions, user_stats, RLS, trigger). Run in Supabase SQL Editor. Also run `002_positions_insert_policy.sql` so app can insert new positions. |
+| **Database** | Done | Migration `001_initial_schema.sql` (profiles, positions, move_recommendations, training_sessions, user_stats, RLS, trigger). |
 | **Auth** | Done | Email/password via Supabase; Auth screen; auto profile + user_stats on signup. |
 | **Home** | Done | Dashboard with real Streak/XP from `user_stats`, tiles for Start Training and My Profile. |
-| **Training screen** | Done | Board (flutter_chess_board), mock Stockfish top-3, MoveRanker + DesignMetrics, ranked list, feedback, XP in message. |
+| **Training screen** | Done | Board (flutter_chess_board), Stockfish top-3, MoveRanker + DesignMetrics, ranked list, feedback, XP. |
 | **Chess logic** | Done | Stockfish integrated; MoveRanker; Game Analysis (Swing Spots); PGN import. |
-| **Training loop (persist)** | Done | On move: resolve profile_id + position_id, compute outcome + latency + XP, insert `training_sessions`, update `user_stats`. Home refreshes stats when returning from Training. |
+| **Opening Explorer** | Done | Lichess Masters integration to show opening name, ECO, and play count in Training. |
+| **Training loop** | Done | On move: resolve profile + position, compute outcome/XP, insert `training_sessions`, update `user_stats`. |
 | **Analysis** | Done | Import/Paste PGN, detect Swing Spots, navigate to training. |
-| **UI/theme** | Done | AppTheme (teal/amber), polished Auth/Home/Training/Admin, loading ad placeholder. |
-| **Admin** | Done | Admin Dashboard (user management placeholder). |
-| **Notifications** | Started | Firebase setup in `main.dart` + `NotificationService`. **Requires config files.** |
+| **UI/theme** | Done | AppTheme (teal/amber), polished Auth/Home/Training/Admin. |
+| **Admin** | Done | Admin Dashboard (user management). |
+| **Firebase** | Setup | `FIREBASE_SETUP.md` created. App Distribution configured for "email myself" tester workflow. |
 | **CI/CD** | Done | `.github/workflows/ci.yml` (analyze/test) & `deploy.yml` (Web -> Pages) configured. |
 
 ---
@@ -36,9 +37,9 @@
 ## 3. What’s Not Done (Next Steps)
 
 - **Firebase Config:** Download `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) and place in respective folders.
-- **Admin Backend:** Admin dashboard currently uses mock data or simple queries; add RLS policies for admin-only tables if needed.
+- **Admin Backend:** Admin dashboard currently uses mock data; add RLS policies for admin-only tables.
 - **Profile screen:** “My Profile” tile doesn’t navigate yet; cognitive weights are hardcoded.
-- **Next position / sessions:** After one move, user goes back manually; no “Next puzzle” flow.
+- **Next position / sessions:** Manual back navigation only; no "Next puzzle" flow.
 - **Real ads / IAP:** Loading ad is a placeholder.
 
 ---
@@ -53,75 +54,84 @@ ChessPersonalTrainer/
 ├── backend/
 │   ├── .env.example    # SUPABASE_URL, SUPABASE_ANON_KEY
 │   └── supabase/migrations/
-│       ├── 001_initial_schema.sql
-│       └── 002_positions_insert_policy.sql
 ├── docs/
 │   ├── AGENT_HANDOFF.md     # This file
-│   ├── PROJECT_OVERVIEW.md  # Product concepts
+│   ├── FIREBASE_SETUP.md    # Guide for notifications and App Distribution
+│   ├── PROJECT_OVERVIEW.md
 │   ├── PROTOCOL_AND_STATUS.md
-│   ├── TRAINING_LOOP.md      # Training loop context + implementation
+│   ├── TRAINING_LOOP.md
 │   ├── DATA_MODEL.md
 │   └── REVENUE_STRATEGIES.md
 ├── flutter/
 │   ├── lib/
 │   │   ├── main.dart
-│   │   ├── core/theme.dart, constants.dart
+│   │   ├── core/theme.dart
 │   │   └── features/
 │   │       ├── auth/auth_screen.dart
 │   │       ├── home/home_screen.dart
 │   │       ├── training/training_screen.dart, training_repository.dart
-│   │       ├── logic/design_metrics.dart, move_ranker.dart, stockfish_service.dart
+│   │       ├── logic/design_metrics.dart, move_ranker.dart, stockfish_service.dart, opening_service.dart
 │   │       └── monetization/loading_ad_screen.dart
 │   └── pubspec.yaml
-├── data/sample_move_payload.json
 └── README.md
 ```
-
-- **Supabase config:** URL and anon key are in `flutter/lib/main.dart` (move to env or --dart-define for production).
-- **Training persistence:** `TrainingRepository` talks to `training_sessions` and `user_stats`; used by `TrainingScreen` and `HomeScreen`.
 
 ---
 
 ## 5. How to Run Locally
 
-1. **Supabase:** Ensure migrations `001` and `002` are run in the project’s SQL Editor.
-2. **Flutter:** From repo root, `cd flutter` then `flutter pub get` and `flutter run` (pick device: Windows, Chrome, Android, etc.).
-3. **Auth:** Sign up with email/password in the app; profile and user_stats are created by DB trigger.
+1. **Supabase:** Ensure migrations are run in the project’s SQL Editor.
+2. **Flutter:** `cd flutter`, `flutter pub get`, `flutter run`.
+3. **Auth:** Sign up in app.
 
 ---
 
-## 6. GitHub Pages: Exact Clicks (No “Deploy from a branch”)
+## 6. GitHub Pages: Exact Clicks
 
-We deploy via **GitHub Actions**, not “Deploy from a branch.” Use these steps:
-
-1. Open the repo: **https://github.com/Mrswami/ChessPersonalTrainer**
-2. Click the **Settings** tab (top bar of the repo).
-3. In the **left sidebar**, under **“Code and automation”**, click **Pages**.
-4. Under **“Build and deployment”**:
-   - **Source:** select **“GitHub Actions”** (not “Deploy from a branch”).
-5. Save if there’s a button. You do **not** need to choose a branch; the workflow in `.github/workflows/deploy.yml` runs on push to `master`/`main`.
-6. Push to `master` (or run the workflow manually: Actions → Deploy → Run workflow). After it succeeds, the **Pages** page will show **“Your site is live at https://mrswami.github.io/ChessPersonalTrainer”** (or the org/user equivalent). That URL is the **domain** for the app.
-
-If **Settings** or **Pages** is missing, the account may not have admin access to the repo.
+1. **Settings** -> **Pages**.
+2. **Source:** **“GitHub Actions”**.
+3. Push to `master` triggers deploy to `https://mrswami.github.io/ChessPersonalTrainer`.
 
 ---
 
 ## 7. Environment / Secrets
 
-- **Supabase:** Project URL and anon key are in `main.dart`. For CI/CD or production, use env or `--dart-define` and avoid committing keys.
-- **Optional Supabase CD:** To run `supabase db push` in GitHub Actions, add repo secrets `SUPABASE_ACCESS_TOKEN` and `SUPABASE_PROJECT_REF`, then uncomment the `supabase-migrate` job in `deploy.yml`.
+- **Supabase:** Keys in `main.dart`. Use env for production.
 
 ---
 
 ## 8. Docs to Read for Deeper Context
 
+- **Setup & Testers:** `docs/FIREBASE_SETUP.md` (Crucial for "email myself" workflow)
 - **Product / concepts:** `docs/PROJECT_OVERVIEW.md`
-- **Protocol, plan status, why Supabase/CI:** `docs/PROTOCOL_AND_STATUS.md`
-- **Training loop (conversation + implementation):** `docs/TRAINING_LOOP.md`
-- **Schema:** `docs/DATA_MODEL.md`
+- **Protocol:** `docs/PROTOCOL_AND_STATUS.md`
 
 ---
 
 ## 9. One-Line Summary for a New Agent
 
-**Flutter + Supabase app for pattern-aligned chess coaching: auth, home with Streak/XP, training screen with board + ranked moves and full persist to `training_sessions` and `user_stats`. Stockfish is mocked; profile screen and “next position” not built. Deploy is GitHub Actions → GitHub Pages (source = GitHub Actions).**
+**Flutter + Supabase app for pattern-aligned chess coaching: auth, home with Streak/XP, training screen with board + ranked moves + OP explorer, stockfish logic, swing spot analysis, and persisted stats. Deploy is GitHub Actions. Firebase App Distribution is used for testing.**
+
+---
+
+## 10. PINNED THOUGHTS (DISTANT FUTURE)
+
+**Strategic Ideas & Deferred Features:**
+
+1.  **Visual Overhaul (Eerie/Modern):**
+    *   *Concept:* Update the app image/icon from "Santa with whitened eyes" to a "Sleek/Modern Magnus Carlsen with a tinge of eeriness."
+    *   *Action:* Use `generate_image` or external tools when tokens/budget allow.
+
+2.  **Session Connectivity (Flow):**
+    *   *Concept:* Reduce friction by implementing a "Next Puzzle" button or automatic transition after a solved position, instead of forcing manual back navigation.
+    *   *Goal:* Keep the user in the "flow state" longer.
+
+3.  **Admin & Security Hardening:**
+    *   *Concept:* The Admin Dashboard is currently frontend-only. We need strict RLS policies (e.g., `is_admin` column in profiles) to secure user management endpoints.
+
+4.  **Monetization Construction:**
+    *   *Concept:* Replace the placeholder "Loading Ad" screen with real AdMob integration and In-App Purchases (IAP) for "Premium" removal of ads.
+
+5.  **Dynamic Cognitive Profile:**
+    *   *Concept:* The "My Profile" weights (Connectivity vs. Material) are currently hardcoded. These should dynamically adjust based on user performance in specific puzzle types.
+
