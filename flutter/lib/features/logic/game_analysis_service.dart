@@ -1,5 +1,4 @@
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:flutter/foundation.dart';
 import 'stockfish_service.dart';
 
 class GameAnalysisService {
@@ -31,7 +30,7 @@ class GameAnalysisService {
     final replayBoard = chess_lib.Chess();
     // Assuming standard start (can support fen setups later)
 
-    double? previousEval; // + is White, - is Black
+
     
     for (int i = 0; i < states.length; i++) {
       final move = states[i].move; // Move object
@@ -75,7 +74,7 @@ class GameAnalysisService {
       
       // Make the move on the replay board
       // Use Map with from/to indices which 'chess' package supports
-      final moveResult = replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
+      replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
       String san = '${move.from}-${move.to}'; // Fallback to indices for now
       // Attempt to get SAN if possible, or leave as simple representation
 
@@ -94,7 +93,7 @@ class GameAnalysisService {
       // If side was White: WhiteEval = ReportEval.
       // If side was Black: WhiteEval = -ReportEval.
       
-      final sideMoving = replayBoard.turn == chess_lib.Color.WHITE ? 'b' : 'w'; // Wait, after move, turn flipps.
+      // final sideMoving = replayBoard.turn == chess_lib.Color.WHITE ? 'b' : 'w'; // Unused
       // Before move i:
       // If i=0 (Move 1), turn is White.
       // After replayBoard.move(move), turn is Black.

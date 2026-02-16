@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chess_board/flutter_chess_board.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../logic/game_analysis_service.dart';
 import '../logic/stockfish_service.dart';

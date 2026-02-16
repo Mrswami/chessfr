@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
 import '../logic/chess_com_service.dart';
-import '../logic/game_analysis_service.dart';
-import '../logic/stockfish_service.dart';
 import 'analysis_view.dart';
 
 class ImportView extends StatefulWidget {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_chess_board/flutter_chess_board.dart' hide Color;
-import '../logic/design_metrics.dart';
 import '../logic/move_ranker.dart';
 import '../logic/stockfish_service.dart';
 import '../logic/opening_service.dart';

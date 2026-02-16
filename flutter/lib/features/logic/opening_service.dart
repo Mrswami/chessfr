@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class OpeningStats {
@@ -61,7 +62,7 @@ class OpeningService {
       }
     } catch (e) {
       // Fail silently for UI purposes
-      print('Error fetching opening stats: $e');
+      debugPrint('Error fetching opening stats: $e');
     }
     return null;
   }
