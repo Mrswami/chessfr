@@ -4,9 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../training/training_repository.dart';
 import '../training/training_screen.dart';
 import '../analysis/import_view.dart';
+import '../analysis/game_library_screen.dart';
 import '../auth/user_role_service.dart';
 import '../admin/admin_dashboard.dart';
 import '../projection/ui/camera_recognition_screen.dart';
+import '../projection/ui/board_connection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -141,6 +143,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 14),
                   _buildActionTile(
                     context,
+                    title: 'Game Archive',
+                    subtitle: 'View your recorded history.',
+                    icon: Icons.inventory_2_rounded,
+                    color: Colors.pinkAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const GameLibraryScreen()),
+                      );
+                    },
+                    delay: 260,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
                     title: 'Chess Vision',
                     subtitle: 'Scan and analyze real boards.',
                     icon: Icons.camera_alt_rounded,
@@ -152,6 +169,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     delay: 275,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'Connect Board',
+                    subtitle: 'Link your ChessUp hardware.',
+                    icon: Icons.bluetooth_rounded,
+                    color: Colors.indigoAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const BoardConnectionScreen()),
+                      );
+                    },
+                    delay: 290,
                   ),
                   if (_role == UserRole.admin) ...[
                     const SizedBox(height: 14),
