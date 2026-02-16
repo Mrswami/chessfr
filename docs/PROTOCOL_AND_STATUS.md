@@ -39,14 +39,14 @@ Using the original roadmap as the “plan”:
 
 | Phase | Status | What’s done |
 |-------|--------|-------------|
-| **0 – Environment** | Done | Flutter installed; Supabase account + project created. |
+| **0 – Environment** | Done | Flutter installed; Supabase account + project created; CI/CD configured. |
 | **1 – Backend** | Done | Migration SQL written (`backend/supabase/migrations/001_initial_schema.sql`). You run it in Supabase Dashboard SQL Editor; Auth + RLS included. |
 | **2 – Flutter shell** | Done | App created; Supabase init in `main.dart`; Auth screen, Home, Training screen; theme and UI polish. |
-| **3 – Chess logic** | In progress | MoveRanker + DesignMetrics in Dart; Stockfish currently **mocked** (returns fixed top-3). Real engine still to plug in (e.g. Stockfish API or Edge Function). |
-| **4 – Training loop** | In progress | Board + ranked moves + feedback work; **logging to `training_sessions` and updating `user_stats` not yet wired** from the app. |
-| **5 – Polish + revenue** | Started | Duolingo-style UI; loading ad placeholder. No real ad SDK or in-app purchase yet. |
+| **3 – Chess logic** | Done | **Stockfish integrated** (locally via `stockfish` package); MoveRanker + DesignMetrics in Dart; Game Analysis (Swing Spot detection); PGN import. |
+| **4 – Training loop** | Done | Board + ranked moves + feedback work; **Analysis View** finds critical moments and launches training from there. |
+| **5 – Admin & Ops** | Started | **Admin Dashboard** created (role-based access); **Firebase Notifications** set up (requires config files); CI/CD workflows fixed. |
 
-So: **we’re past the foundation (Phases 0–2), in the middle of logic and training loop (3–4), with initial polish (5).** Next concrete steps: wire training sessions to Supabase, then add real Stockfish (or API) and optional CI/CD.
+So: **we have a functional foundation with real engine analysis, user roles, and a CI/CD pipeline.** Next steps: Polish the "Swing Spot" detection accuracy, fully implement the Admin features with real backend data, and verify notifications on actual devices.
 
 ---
 

@@ -7,7 +7,12 @@ import '../logic/stockfish_service.dart';
 import 'training_repository.dart';
 
 class TrainingScreen extends StatefulWidget {
-  const TrainingScreen({super.key});
+  final String? initialFen;
+  
+  const TrainingScreen({
+    super.key,
+    this.initialFen,
+  });
 
   @override
   State<TrainingScreen> createState() => _TrainingScreenState();
@@ -27,20 +32,23 @@ class _TrainingScreenState extends State<TrainingScreen> {
   String? _profileId;
   String? _positionId;
 
-  final String _startFen =
-      'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+  late String _currentFen;
 
   @override
   void initState() {
     super.initState();
-    _controller.loadFen(_startFen);
+    // Default to a known position if none provided (e.g. Ruy Lopez)
+    _currentFen = widget.initialFen ?? 
+        'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+        
+    _controller.loadFen(_currentFen);
     _resolveIdsAndAnalyze();
   }
 
   Future<void> _resolveIdsAndAnalyze() async {
     setState(() => _isLoading = true);
     _profileId = await _repo.getProfileId();
-    _positionId = await _repo.getOrCreatePositionId(_startFen);
+    _positionId = await _repo.getOrCreatePositionId(_currentFen);
 
     final engineMoves = await _stockfish.getTopMoves(_controller.getFen());
     final profile = {
@@ -243,7 +251,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                                   '${index + 1}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF14B8A6),
+                                    color: Colors.teal,
                                   ),
                                 ),
                               ),
@@ -265,7 +273,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                                 ),
                               ),
                               trailing: Text(
-                                '${move.finalScore.toStringAsFixed(1)}',
+                                move.finalScore.toStringAsFixed(1),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.white54,

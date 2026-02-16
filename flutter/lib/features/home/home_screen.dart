@@ -3,6 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../training/training_repository.dart';
 import '../training/training_screen.dart';
+import '../analysis/import_view.dart';
+import '../auth/user_role_service.dart';
+import '../admin/admin_dashboard.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,14 +16,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TrainingRepository _repo = TrainingRepository();
+  final UserRoleService _roleService = UserRoleService();
+  
   String? _profileId;
   int _streak = 0;
   int _xp = 0;
+  UserRole _role = UserRole.free;
 
   @override
   void initState() {
     super.initState();
     _loadStats();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final role = await _roleService.getUserRole();
+    if (mounted) setState(() => _role = role);
   }
 
   Future<void> _loadStats() async {
@@ -111,6 +123,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () {},
                     delay: 200,
                   ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'Analyze Game',
+                    subtitle: 'Find swing spots in your games.',
+                    icon: Icons.auto_graph_rounded,
+                    color: const Color(0xFF8B5CF6),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ImportView()),
+                      );
+                    },
+                    delay: 250,
+                  ),
+                  if (_role == UserRole.admin) ...[
+                    const SizedBox(height: 14),
+                    _buildActionTile(
+                      context,
+                      title: 'Admin Dashboard',
+                      subtitle: 'Manage users and content.',
+                      icon: Icons.admin_panel_settings_rounded,
+                      color: Colors.redAccent,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                        );
+                      },
+                      delay: 300,
+                    ),
+                  ],
                 ]),
               ),
             ),

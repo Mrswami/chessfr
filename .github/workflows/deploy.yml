@@ -1,5 +1,5 @@
 
- CD: automatic deploy on push to main/master.
+# CD: automatic deploy on push to main/master.
 # - Builds Flutter web and deploys to GitHub Pages (optional; enable in repo Settings > Pages).
 # - Optionally runs Supabase migrations if you add SUPABASE_ACCESS_TOKEN and link the project.
 name: Deploy
@@ -40,7 +40,9 @@ jobs:
     permissions:
       pages: write
       id-token: write
-    environment: github-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

@@ -23,22 +23,23 @@
 | **Auth** | Done | Email/password via Supabase; Auth screen; auto profile + user_stats on signup. |
 | **Home** | Done | Dashboard with real Streak/XP from `user_stats`, tiles for Start Training and My Profile. |
 | **Training screen** | Done | Board (flutter_chess_board), mock Stockfish top-3, MoveRanker + DesignMetrics, ranked list, feedback, XP in message. |
+| **Chess logic** | Done | Stockfish integrated; MoveRanker; Game Analysis (Swing Spots); PGN import. |
 | **Training loop (persist)** | Done | On move: resolve profile_id + position_id, compute outcome + latency + XP, insert `training_sessions`, update `user_stats`. Home refreshes stats when returning from Training. |
-| **Chess logic** | Partial | MoveRanker and DesignMetrics in Dart; **Stockfish is mocked** (returns fixed moves). Real engine (API or Edge Function) not wired. |
-| **UI/theme** | Done | AppTheme (teal/amber), polished Auth/Home/Training, loading ad placeholder. |
-| **CI** | Done | `.github/workflows/ci.yml`: `flutter analyze` + `flutter test` on push/PR. |
-| **CD** | Done | `.github/workflows/deploy.yml`: build Flutter web, upload artifact, deploy to GitHub Pages. **Pages must use “GitHub Actions” as source** (see below). |
+| **Analysis** | Done | Import/Paste PGN, detect Swing Spots, navigate to training. |
+| **UI/theme** | Done | AppTheme (teal/amber), polished Auth/Home/Training/Admin, loading ad placeholder. |
+| **Admin** | Done | Admin Dashboard (user management placeholder). |
+| **Notifications** | Started | Firebase setup in `main.dart` + `NotificationService`. **Requires config files.** |
+| **CI/CD** | Done | `.github/workflows/ci.yml` (analyze/test) & `deploy.yml` (Web -> Pages) configured. |
 
 ---
 
 ## 3. What’s Not Done (Next Steps)
 
-- **Stockfish:** Replace mock in `lib/features/logic/stockfish_service.dart` with real engine (e.g. Stockfish API, WASM, or Supabase Edge Function).
-- **Profile screen:** “My Profile” tile doesn’t navigate yet; cognitive weights (connectivity_weight, engine_trust) are hardcoded in Training.
-- **Load profile from DB:** Training uses mock profile map; could fetch `profiles.cognitive_profile` and pass to MoveRanker.
-- **Next position / sessions:** After one move, user goes back manually; no “Next puzzle” or “session of N positions” yet.
-- **Real ads / IAP:** Loading ad is a placeholder; no ad SDK or in-app purchase.
-- **Supabase CD:** Optional job in `deploy.yml` to run `supabase db push` is commented out; add secrets and uncomment if you want migrations on deploy.
+- **Firebase Config:** Download `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) and place in respective folders.
+- **Admin Backend:** Admin dashboard currently uses mock data or simple queries; add RLS policies for admin-only tables if needed.
+- **Profile screen:** “My Profile” tile doesn’t navigate yet; cognitive weights are hardcoded.
+- **Next position / sessions:** After one move, user goes back manually; no “Next puzzle” flow.
+- **Real ads / IAP:** Loading ad is a placeholder.
 
 ---
 

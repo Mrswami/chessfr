@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'core/services/notification_service.dart';
 import 'core/theme.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/home/home_screen.dart';
@@ -14,6 +15,13 @@ void main() async {
     url: 'https://jcrkoclchttokwzeddlr.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjcmtvY2xjaHR0b2t3emVkZGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMDIyNzEsImV4cCI6MjA4NTg3ODI3MX0.9atZ2PCTdXjC862CqRYo5WAsOtyBFanITy-iwVfEiPA',
   );
+
+  try {
+    await Firebase.initializeApp();
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint('Firebase init failed (Missing config?): $e');
+  }
 
   runApp(const ChessTrainerApp());
 }
