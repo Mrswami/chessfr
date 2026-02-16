@@ -44,7 +44,7 @@ Using the original roadmap as the “plan”:
 | **2 – Flutter shell** | Done | App created; Supabase init in `main.dart`; Auth screen, Home, Training screen; theme and UI polish. |
 | **3 – Chess logic** | Done | **Stockfish integrated** (locally via `stockfish` package); MoveRanker + DesignMetrics in Dart; Game Analysis (Swing Spot detection); PGN import. |
 | **4 – Training loop** | Done | Board + ranked moves + feedback work; **Analysis View** finds critical moments and launches training from there. |
-| **5 – Admin & Ops** | Started | **Admin Dashboard** created (role-based access); **Firebase Notifications** set up (requires config files); **CI/CD workflows active** (APK building + Analysis + Tests). |
+| **5 – Admin & Ops** | Started | **Admin Dashboard** created (role-based access); **Firebase Notifications** set up (requires config files); **CI/CD workflows active** (APK building + Analysis + Tests). Web deploy postponed (engine compatibility). |
 
 So: **we have a functional foundation with real engine analysis, user roles, and a CI/CD pipeline.** Next steps: Polish the "Swing Spot" detection accuracy, fully implement the Admin features with real backend data, and verify notifications on actual devices.
 
