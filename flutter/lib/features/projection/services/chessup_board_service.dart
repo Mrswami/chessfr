@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+// ignore: depend_on_referenced_packages
 import 'package:shared_preferences/shared_preferences.dart';
 import 'chess_protocol.dart';
 import 'game_recorder.dart';
@@ -83,7 +84,7 @@ class ChessUpBoardService extends ChangeNotifier {
         }
       });
 
-      // Note: FlutterBluePlus 2.x requires a License parameter
+
       await device.connect(autoConnect: false, license: License.free);
       
       final prefs = await SharedPreferences.getInstance();

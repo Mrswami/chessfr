@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/services.dart';
+import 'game_review_screen.dart';
 
 class GameLibraryScreen extends StatelessWidget {
   const GameLibraryScreen({super.key});
@@ -73,8 +74,8 @@ class GameLibraryScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      status == 'active' ? Icons.sensors : Icons.history, // Changed icon
-                      color: status == 'active' ? Colors.cyanAccent : Colors.white38, // Fixed color
+                      status == 'active' ? Icons.sensors : Icons.history,
+                      color: status == 'active' ? Colors.cyanAccent : Colors.white38,
                     ),
                   ),
                   title: Text(
@@ -135,6 +136,30 @@ class GameLibraryScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
+                    icon: const Icon(Icons.play_arrow),
+                    onPressed: () {
+                      Navigator.pop(ctx); // Close modal
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GameReviewScreen(
+                            pgn: game['pgn'] ?? "",
+                            initialFen: game['fen'], // Optional, might use start pos if null
+                          ),
+                        ),
+                      );
+                    },
+                    label: const Text("REVIEW GAME"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.cyanAccent,
+                      foregroundColor: Colors.black,
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
                     icon: const Icon(Icons.copy),
                     onPressed: () {
                        Clipboard.setData(ClipboardData(text: game['pgn'] ?? ""));
@@ -142,17 +167,9 @@ class GameLibraryScreen extends StatelessWidget {
                     },
                     label: const Text("COPY PGN"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.cyan.withOpacity(0.2),
-                      foregroundColor: Colors.cyanAccent,
+                      backgroundColor: Colors.white10,
+                      foregroundColor: Colors.white,
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.white10),
-                    child: const Text("CLOSE", style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
