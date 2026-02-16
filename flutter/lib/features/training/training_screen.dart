@@ -4,6 +4,7 @@ import 'package:flutter_chess_board/flutter_chess_board.dart';
 import '../logic/design_metrics.dart';
 import '../logic/move_ranker.dart';
 import '../logic/stockfish_service.dart';
+import '../logic/opening_service.dart';
 import 'training_repository.dart';
 
 class TrainingScreen extends StatefulWidget {
@@ -21,10 +22,12 @@ class TrainingScreen extends StatefulWidget {
 class _TrainingScreenState extends State<TrainingScreen> {
   final ChessBoardController _controller = ChessBoardController();
   final StockfishService _stockfish = StockfishService();
+  final OpeningService _openingService = OpeningService();
   final MoveRanker _ranker = MoveRanker();
   final TrainingRepository _repo = TrainingRepository();
 
   List<RankedMove> _rankedMoves = [];
+  OpeningStats? _openingStats;
   bool _isLoading = true;
   String? _feedback;
   bool _feedbackIsPositive = true;
@@ -50,7 +53,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _profileId = await _repo.getProfileId();
     _positionId = await _repo.getOrCreatePositionId(_currentFen);
 
-    final engineMoves = await _stockfish.getTopMoves(_controller.getFen());
+    // Fetch engine moves and opening stats in parallel for speed
+    final engineMovesFuture = _stockfish.getTopMoves(_controller.getFen());
+    final openingStatsFuture = _openingService.getOpeningStats(_controller.getFen());
+
+    final results = await Future.wait([engineMovesFuture, openingStatsFuture]);
+    final engineMoves = results[0] as List<EngineMove>;
+    final openingStats = results[1] as OpeningStats?;
+
     final profile = {
       'connectivity_weight': 0.8,
       'engine_trust': 0.2,
@@ -61,6 +71,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     if (mounted) {
       setState(() {
         _rankedMoves = ranked;
+        _openingStats = openingStats;
         _isLoading = false;
         _positionShownAt = DateTime.now();
       });
@@ -204,6 +215,66 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         .animate()
                         .fadeIn(duration: 200.ms)
                         .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                  
+                  if (_openingStats != null && _openingStats!.name != 'Unknown Position')
+                     Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _openingStats!.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (_openingStats!.eco.isNotEmpty)
+                                  Text(
+                                    'ECO: ${_openingStats!.eco}',
+                                    style: const TextStyle(fontSize: 12, color: Colors.white54),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.public, size: 14, color: Colors.white54),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${_openingStats!.totalGames}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                     ).animate().fadeIn(),
+
                   Text(
                     'Recommended moves',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -244,7 +315,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                                 height: 36,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF0D9488).withOpacity(0.3),
+                                  color: Colors.teal.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
