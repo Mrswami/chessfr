@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chess_board/flutter_chess_board.dart' hide Color;
+import '../projection/ui/board_connection_screen.dart';
+import '../projection/services/chessup_board_service.dart';
 
 class GameReviewScreen extends StatefulWidget {
   final String pgn;
@@ -59,8 +61,23 @@ class _GameReviewScreenState extends State<GameReviewScreen> {
           IconButton(
             icon: const Icon(Icons.psychology_outlined),
             onPressed: () {
+              // Enable Ghost Mode
+              ChessUpBoardService().setGhostMode(true);
+              
+              // Navigate to Connection Screen (which goes to Projection if connected)
+              // We might want to pass the FEN to preset the board for analysis
+              // converting PGN to FEN at current move index is complex without a parser.
+              // For now, we'll just open the mode.
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BoardConnectionScreen()),
+              );
+              
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Ghost Analysis Mode coming soon!")),
+                const SnackBar(
+                  content: Text("Ghost Mode Activated! Connect board to analyze."),
+                  backgroundColor: Colors.purple,
+                ),
               );
             },
             tooltip: "Analyze Position (Ghost Mode)",

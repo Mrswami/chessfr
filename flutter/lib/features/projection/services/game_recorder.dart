@@ -8,7 +8,15 @@ class GameRecorder {
   bool _isRecording = false;
   String? _liveSessionId;
 
+  bool _isGhostMode = false;
+
   bool get isRecording => _isRecording;
+  bool get isGhostMode => _isGhostMode;
+
+  set isGhostMode(bool value) {
+    _isGhostMode = value;
+    debugPrint("👻 Ghost Mode set to: $value");
+  }
 
   // Supabase client
   final _client = Supabase.instance.client;
@@ -17,12 +25,21 @@ class GameRecorder {
     _game = chess_lib.Chess();
     _moveHistory.clear();
     _isRecording = true;
-    _createLiveSession(); // Start a new session in DB
+    
+    if (!_isGhostMode) {
+      _createLiveSession(); // Start a new session in DB
+    } else {
+      debugPrint("👻 Ghost Game Started (No DB)");
+    }
   }
 
   void stopRecording() {
     _isRecording = false;
-    _finalizeLiveSession();
+    if (!_isGhostMode) {
+      _finalizeLiveSession();
+    } else {
+      debugPrint("👻 Ghost Game Ended (No DB)");
+    }
   }
 
   // Tries to infer the move that happened between the internal state and the new FEN
@@ -59,7 +76,9 @@ class GameRecorder {
         debugPrint("✅ Recorded Move: ${_moveHistory.last}");
         
         // Broadcast update
-        _updateLiveSession();
+        if (!_isGhostMode) {
+          _updateLiveSession();
+        }
 
         // Check End Conditions
         if (_game.in_checkmate) {

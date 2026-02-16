@@ -44,6 +44,12 @@ class ChessUpBoardService extends ChangeNotifier {
   List<ScanResult> get scanResults => _scanResults;
   List<LogEntry> get logs => _logs;
   bool get isConnected => _connectedDevice != null;
+  bool get isGhostMode => _recorder.isGhostMode;
+  
+  void setGhostMode(bool enabled) {
+    _recorder.isGhostMode = enabled;
+    notifyListeners();
+  }
 
   final GameRecorder _recorder = GameRecorder();
 

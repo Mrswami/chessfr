@@ -38,6 +38,20 @@ class _GameProjectionScreenState extends State<GameProjectionScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Ghost Mode Banner
+            if (ChessUpBoardService().isGhostMode)
+              Container(
+                width: double.infinity,
+                color: Colors.purple.withOpacity(0.8),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: const Center(
+                  child: Text(
+                    "👻 GHOST MODE - UNSAVED SANDBOX",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                  ),
+                ),
+              ),
+              
             // Header
             _buildHeader(displayFen),
 
