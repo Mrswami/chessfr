@@ -39,11 +39,7 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
-      cardTheme: CardThemeData(
-        color: _surfaceCard,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: _surfaceCard,

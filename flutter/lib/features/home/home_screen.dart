@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TrainingRepository _repo = TrainingRepository();
   final UserRoleService _roleService = UserRoleService();
   
-  String? _profileId;
+
   int _streak = 0;
   int _xp = 0;
   UserRole _role = UserRole.free;
@@ -41,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final stats = await _repo.getUserStats(profileId);
     if (mounted && stats != null) {
       setState(() {
-        _profileId = profileId;
         _streak = stats['current_streak'] as int? ?? 0;
         _xp = stats['total_xp'] as int? ?? 0;
       });
