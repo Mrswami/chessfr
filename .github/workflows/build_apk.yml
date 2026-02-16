@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Setup Java 17 for Android Gradle build
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      # Setup Flutter
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.0"
+          channel: 'stable'
+          
+      # Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: flutter
+        
+      # Build APK
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+        working-directory: flutter
+        
+      # Upload Artifacts (Split by ABI, we usually want universal or arm64-v8a)
+      # Or just build fat apk: flutter build apk --release (without split-per-abi for simpler testing)
+      # Let's use fat APK for simplicity of distribution unless size is critical
+      
+      - name: Build Fat APK
+        run: flutter build apk --release
+        working-directory: flutter
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: flutter/build/app/outputs/flutter-apk/app-release.apk
