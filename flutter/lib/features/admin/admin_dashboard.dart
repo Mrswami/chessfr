@@ -57,7 +57,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.ghost_mode_outlined), // Placeholder for Ghost Analysis
+            tooltip: 'Ghost Analysis Log (Future)',
+            onPressed: () {
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text('Ghost Analysis implementation pinned for later.')),
+               );
+            },
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(

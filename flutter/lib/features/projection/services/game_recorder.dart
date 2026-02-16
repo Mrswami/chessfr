@@ -96,15 +96,14 @@ class GameRecorder {
 
       // TODO: Create a 'training_sessions' or 'live_games' table in Supabase
       // For now, we simulate success
-      /*
-      final response = await _client.from('training_sessions').insert({
+      final response = await _client.from('live_sessions').insert({
         'user_id': user.id,
-        'status': 'live',
+        'status': 'active',
         'started_at': DateTime.now().toIso8601String(),
         'fen': _game.fen,
       }).select().single();
       _liveSessionId = response['id'];
-      */
+      debugPrint("✅ Live session started: $_liveSessionId");
     } catch (e) {
       debugPrint("Error creating live session: $e");
     }
@@ -113,15 +112,11 @@ class GameRecorder {
   Future<void> _updateLiveSession() async {
     if (_liveSessionId == null) return;
     try {
-      // TODO: Update the session
-      /*
-      await _client.from('training_sessions').update({
+      await _client.from('live_sessions').update({
         'fen': _game.fen,
         'pgn': _game.pgn(),
-        'last_move': _moveHistory.isNotEmpty ? _moveHistory.last : '',
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', _liveSessionId!);
-      */
     } catch (e) {
       debugPrint("Error updating live session: $e");
     }
@@ -130,14 +125,11 @@ class GameRecorder {
   Future<void> _finalizeLiveSession() async {
     if (_liveSessionId == null) return;
     try {
-      // TODO: Mark as completed
-      /*
-      await _client.from('training_sessions').update({
+      await _client.from('live_sessions').update({
         'status': 'completed',
-        'result': _game.in_checkmate ? 'checkmate' : 'active', // Simplify
-        'completed_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', _liveSessionId!);
-      */
+      debugPrint("🏁 Live session finalized: $_liveSessionId");
     } catch (e) {
       debugPrint("Error finalizing session: $e");
     }

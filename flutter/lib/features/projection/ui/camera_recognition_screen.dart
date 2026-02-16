@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../services/chess_vision_service.dart';
+import '../services/game_recorder.dart';
 
 class CameraRecognitionScreen extends StatefulWidget {
   const CameraRecognitionScreen({super.key});
@@ -14,6 +15,7 @@ class CameraRecognitionScreen extends StatefulWidget {
 class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
   CameraController? _cameraController;
   final ChessVisionService _visionService = ChessVisionService();
+  final GameRecorder _gameRecorder = GameRecorder();
   
   List<ChessPieceDetection> _detectedPieces = [];
   bool _isInitializing = true;
@@ -122,6 +124,10 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
       final rawDetections = await _visionService.detectPiecesFromFrame(image);
       final detections = _visionService.parseDetections(rawDetections);
 
+      // Pass detection data to recorder (Future: Construct FEN from detections)
+      // For now, we are just visualizing. In a full implementation, we'd map
+      // bounding boxes to board squares here.
+      
       if (mounted) {
         setState(() {
           _detectedPieces = detections;
@@ -141,22 +147,33 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Camera Chess Recognition'),
-        backgroundColor: Colors.black87,
+        title: const Text('Chess Vision'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         foregroundColor: Colors.white,
         actions: [
           // FPS counter
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                '${_fps.toStringAsFixed(1)} FPS',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black45,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    '${_fps.toStringAsFixed(1)} FPS',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.cyanAccent,
+                    ),
+                  ),
                 ),
-              ),
             ),
           ),
         ],
@@ -165,11 +182,28 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
       floatingActionButton: _cameraController != null &&
               _cameraController!.value.isInitialized
           ? FloatingActionButton(
-              onPressed: _toggleDetection,
-              child: Icon(_isDetecting ? Icons.pause : Icons.play_arrow),
+              onPressed: _toggleRecording,
+              backgroundColor: _gameRecorder.isRecording ? Colors.red : Colors.cyan,
+              child: Icon(_gameRecorder.isRecording ? Icons.stop : Icons.videocam),
             )
           : null,
     );
+  }
+
+  void _toggleRecording() {
+    setState(() {
+      if (_gameRecorder.isRecording) {
+        _gameRecorder.stopRecording();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Session Ended. saved to History.')),
+        );
+      } else {
+        _gameRecorder.startNewGame();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Live Session Started! Broadcasting...')),
+        );
+      }
+    });
   }
 
   Widget _buildBody() {
@@ -196,14 +230,9 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(),
+          CircularProgressIndicator(color: Colors.cyan),
           SizedBox(height: 16),
-          Text('Initializing camera and AI model...'),
-          SizedBox(height: 8),
-          Text(
-            'This may take a few seconds',
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
+          Text('Initializing Optical Neural Network...', style: TextStyle(color: Colors.white70)),
         ],
       ),
     );
@@ -219,13 +248,17 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
           Text(
             _errorMessage ?? 'Unknown error',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16, color: Colors.white),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _initializeCamera,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: const Text('Retry Connection'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.cyan.withOpacity(0.2),
+              foregroundColor: Colors.cyanAccent,
+            ),
           ),
         ],
       ),
@@ -234,12 +267,6 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
 
   Widget _buildCameraPreview() {
     final camera = _cameraController!;
-    final size = MediaQuery.of(context).size;
-    
-    // Calculate scale to fit camera preview
-    // Note: This scaling logic is tricky in Flutter camera. 
-    // Usually need to handle aspect ratios carefully.
-    // For now, using a simplified Fit.
     
     return Stack(
       fit: StackFit.expand,
@@ -247,17 +274,13 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
         // Camera preview
         CameraPreview(camera),
 
-        // Detection overlay
-        // We need to ensure the overlay size matches the PREVIEW size, not just screen size.
-        // But for UI overlay, we paint on screen coords.
+        // HUD Overlay
         LayoutBuilder(
           builder: (context, constraints) {
             return CustomPaint(
               size: Size(constraints.maxWidth, constraints.maxHeight),
               painter: DetectionOverlayPainter(
                 detections: _detectedPieces,
-                // The preview size is rotated 90deg on portrait phones usually.
-                // We pass the raw image size from the camera.
                 imageSize: Size(
                   camera.value.previewSize!.height, // Height becomes width in portrait
                   camera.value.previewSize!.width,
@@ -267,117 +290,71 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
           }
         ),
 
-        // Stats overlay
+        // Bottom Info Panel
         Positioned(
-          top: 16,
-          left: 16,
-          child: _buildStatsCard(),
-        ),
-
-        // Detected pieces list
-        Positioned(
-          bottom: 16,
-          left: 16,
-          right: 16,
-          child: _buildDetectionsList(),
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+              ),
+            ),
+            child: _buildDetectionsList(),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatsCard() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Detected: ${_detectedPieces.length} pieces',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            'Frames: $_frameCount',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDetectionsList() {
     if (_detectedPieces.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Text(
-          '🎯 Point camera at chess board',
-          style: TextStyle(color: Colors.white),
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 60),
+        child: Text(
+          'Scanning for pieces...',
+          style: TextStyle(color: Colors.white54, fontStyle: FontStyle.italic),
           textAlign: TextAlign.center,
         ),
       );
     }
 
     // Group pieces by color
-    final whitePieces = _detectedPieces.where((p) => p.isWhite).toList();
-    final blackPieces = _detectedPieces.where((p) => p.isBlack).toList();
+    final whitePieces = _detectedPieces.where((p) => p.isWhite).length;
+    final blackPieces = _detectedPieces.where((p) => p.isBlack).length;
 
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 150),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (whitePieces.isNotEmpty) ...[
-              Text(
-                '⚪ White (${whitePieces.length}):',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                whitePieces.map((p) => p.pieceType).join(', '),
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-            ],
-            if (blackPieces.isNotEmpty) ...[
-              Text(
-                '⚫ Black (${blackPieces.length}):',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                blackPieces.map((p) => p.pieceType).join(', '),
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-            ],
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 60),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildPieceCount('White', whitePieces, Colors.white),
+          Container(width: 1, height: 20, color: Colors.white24),
+          _buildPieceCount('Black', blackPieces, Colors.grey[400]!),
+        ],
       ),
     );
   }
-
-  void _toggleDetection() {
-    // This could pause/resume detection in a future enhancement
-    debugPrint('Toggle detection (future feature)');
+  
+  Widget _buildPieceCount(String label, int count, Color color) {
+      return Row(
+          children: [
+              Icon(Icons.circle, size: 8, color: color),
+              const SizedBox(width: 8),
+              Text(
+                  '$label: $count',
+                  style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                  ),
+              ),
+          ],
+      );
   }
 
   @override
@@ -403,12 +380,6 @@ class DetectionOverlayPainter extends CustomPainter {
 
     for (final detection in detections) {
       final box = detection.boundingBox;
-
-      // Scale coordinates from image space to screen space
-      // Note: This scaling assumes the image fills the screen (fitHeight / fitWidth).
-      // Since we use CameraPreview, it typically covers.
-      // However, we need to match the aspect ratio logic of the preview.
-      // Usually, CameraPreview scales to cover.
       
       final scaleX = size.width / imageSize.width;
       final scaleY = size.height / imageSize.height;
@@ -418,41 +389,32 @@ class DetectionOverlayPainter extends CustomPainter {
       final width = box.width * scaleX;
       final height = box.height * scaleY;
 
-      // Choose color based on piece color
-      final color = detection.isWhite ? Colors.white : Colors.black;
+      // Choose color based on piece color - Cyan/Gold theme
+      final isWhite = detection.isWhite;
+      final color = isWhite ? const Color(0xFF0D9488) : const Color(0xFFF59E0B);
 
-      // Draw bounding box
+      // Draw bounding box (High tech feel)
       final paint = Paint()
-        ..color = color.withOpacity(0.8)
+        ..color = color.withOpacity(0.6)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3;
-
+        ..strokeWidth = 2;
+        
+      // Draw corners only for a cleaner look could be better, but full box for now
       canvas.drawRect(
         Rect.fromLTWH(left, top, width, height),
         paint,
       );
 
-      // Draw filled background for label
-      final labelPaint = Paint()
-        ..color = color.withOpacity(0.8)
-        ..style = PaintingStyle.fill;
-
-      const labelHeight = 24.0;
-      canvas.drawRect(
-        Rect.fromLTWH(left, top - labelHeight, width, labelHeight),
-        labelPaint,
-      );
-
-      // Draw label text
-      final textStyle = TextStyle(
-        color: detection.isWhite ? Colors.black : Colors.white,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-      );
-
+      // Label with confidence
       final textSpan = TextSpan(
-        text: '${detection.pieceType} ${(detection.confidence * 100).toStringAsFixed(0)}%',
-        style: textStyle,
+        text: '${detection.pieceType.toUpperCase()} ${(detection.confidence * 100).toInt()}%',
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.5,
+          backgroundColor: Colors.black54,
+        ),
       );
 
       final textPainter = TextPainter(
@@ -463,7 +425,7 @@ class DetectionOverlayPainter extends CustomPainter {
       textPainter.layout();
       textPainter.paint(
         canvas,
-        Offset(left + 4, top - labelHeight + 4),
+        Offset(left, top - 14),
       );
     }
   }
