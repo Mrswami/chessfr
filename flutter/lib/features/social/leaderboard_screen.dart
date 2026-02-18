@@ -13,7 +13,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   final _repository = TrainingRepository();
   bool _isLoading = true;
   List<Map<String, dynamic>> _topPlayers = [];
-  String _sortBy = 'xp'; // 'xp' or 'streak'
 
   @override
   void initState() {
@@ -138,7 +137,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
-                  fontWeight: FontWeight.black,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
