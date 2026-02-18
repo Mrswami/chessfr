@@ -9,6 +9,7 @@ import '../auth/user_role_service.dart';
 import '../admin/admin_dashboard.dart';
 import '../projection/ui/camera_recognition_screen.dart';
 import '../projection/ui/board_connection_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -119,10 +120,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildActionTile(
                     context,
                     title: 'My Profile',
-                    subtitle: 'Adjust your cognitive metrics.',
+                    subtitle: 'Customize your DankFish avatar.',
                     icon: Icons.person_rounded,
                     color: const Color(0xFFF59E0B),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                      );
+                    },
                     delay: 200,
                   ),
                   const SizedBox(height: 14),

@@ -16,6 +16,18 @@ class TrainingRepository {
     return res?['id'] as String?;
   }
 
+  /// Returns the full user profile including engine preferences
+  Future<Map<String, dynamic>?> getFullProfile() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return null;
+    final res = await _client
+        .from('profiles')
+        .select('id, connectivity_weight, response_weight, influence_weight, engine_mode')
+        .eq('user_id', userId)
+        .maybeSingle();
+    return res != null ? Map<String, dynamic>.from(res) : null;
+  }
+
   /// Returns position id for this FEN. Inserts the position if it doesn't exist.
   Future<String> getOrCreatePositionId(String fen) async {
     final existing = await _client

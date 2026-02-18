@@ -4,16 +4,20 @@ class DesignMetrics {
   final bool isBridge;
   final int islandCount;
   final double connectivityGain;
+  final double responseGain;
+  final double influenceGain;
 
   DesignMetrics({
     required this.isBridge,
     required this.islandCount,
     required this.connectivityGain,
+    required this.responseGain,
+    required this.influenceGain,
   });
 
   @override
   String toString() =>
-      'Bridge: $isBridge, Islands: $islandCount, Gain: ${connectivityGain.toStringAsFixed(2)}';
+      'Bridge: $isBridge, Islands: $islandCount, Conn: ${connectivityGain.toStringAsFixed(2)}, Resp: ${responseGain.toStringAsFixed(2)}, Infl: ${influenceGain.toStringAsFixed(2)}';
 }
 
 class ConnectivityCalculator {
@@ -28,7 +32,13 @@ class ConnectivityCalculator {
     // Note: chess.dart move returns true/false or move object depending on version
     // We'll trust the input is valid for now or return default
     if (!game.move(moveSan)) {
-      return DesignMetrics(isBridge: false, islandCount: initialIslands, connectivityGain: 0);
+      return DesignMetrics(
+        isBridge: false, 
+        islandCount: initialIslands, 
+        connectivityGain: 0,
+        responseGain: 0,
+        influenceGain: 0,
+      );
     }
 
     // 3. Calculate new state
@@ -42,6 +52,8 @@ class ConnectivityCalculator {
       isBridge: isBridge,
       islandCount: newIslands,
       connectivityGain: connectivityGain,
+      responseGain: 0.5, // Placeholder for future Response calculation
+      influenceGain: 0.3, // Placeholder for future Influence calculation
     );
   }
 

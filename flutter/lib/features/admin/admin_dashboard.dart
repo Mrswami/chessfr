@@ -61,7 +61,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         title: const Text('Admin Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.ghost_mode_outlined), // Placeholder for Ghost Analysis
+            icon: const Icon(Icons.visibility_off_outlined), // Placeholder for Ghost Analysis
             tooltip: 'Ghost Analysis Log (Future)',
             onPressed: () {
                ScaffoldMessenger.of(context).showSnackBar(

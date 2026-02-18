@@ -83,7 +83,8 @@ class ChessUpBoardService extends ChangeNotifier {
         }
       });
 
-      await device.connect(autoConnect: false);
+      // Note: FlutterBluePlus 2.x requires a License parameter
+      await device.connect(autoConnect: false, license: License.free);
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('last_device_id', device.remoteId.toString());

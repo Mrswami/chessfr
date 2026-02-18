@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../admin/dev_panel.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -14,6 +16,10 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isSignUp = false;
+  
+  // Secret dev panel access
+  int _tapCount = 0;
+  DateTime? _lastTap;
 
   Future<void> _submit() async {
     setState(() => _isLoading = true);
@@ -53,6 +59,27 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  void _handleSecretTap() {
+    if (!kDebugMode) return; // Only works in debug builds
+    
+    final now = DateTime.now();
+    
+    // Reset counter if more than 2 seconds since last tap
+    if (_lastTap != null && now.difference(_lastTap!).inSeconds > 2) {
+      _tapCount = 0;
+    }
+    
+    _lastTap = now;
+    _tapCount++;
+    
+    if (_tapCount >= 5) {
+      _tapCount = 0;
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const DevPanel()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,15 +104,18 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.psychology_alt_rounded,
-                    size: 72,
-                    color: Theme.of(context).colorScheme.primary,
-                  )
-                      .animate()
-                      .fadeIn()
-                      .scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1))
-                      .shake(hz: 0.5, curve: Curves.easeOut),
+                  GestureDetector(
+                    onTap: _handleSecretTap,
+                    child: Icon(
+                      Icons.psychology_alt_rounded,
+                      size: 72,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                        .animate()
+                        .fadeIn()
+                        .scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1))
+                        .shake(hz: 0.5, curve: Curves.easeOut),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     _isSignUp ? 'Create Profile' : 'Welcome Back',

@@ -38,7 +38,7 @@ class GameLibraryScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Icon(Icons.inventory_2_outlined, size: 48, color: Colors.white24),
+                   Icon(Icons.visibility_off_outlined, size: 48, color: Colors.white24), // Changed icon
                    SizedBox(height: 16),
                    Text("No games recorded yet.", style: TextStyle(color: Colors.white24)),
                 ],
@@ -73,8 +73,8 @@ class GameLibraryScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      status == 'active' ? Icons.sensors_active : Icons.history,
-                      color: status == 'active' ? Colors.cyanAccent : Colors.white38,
+                      status == 'active' ? Icons.sensors : Icons.history, // Changed icon
+                      color: status == 'active' ? Colors.cyanAccent : Colors.white38, // Fixed color
                     ),
                   ),
                   title: Text(

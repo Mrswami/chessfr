@@ -12,8 +12,8 @@ void main() async {
   
   await Supabase.initialize(
     // TODO: Move to .env or --dart-define in production
-    url: 'https://jcrkoclchttokwzeddlr.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjcmtvY2xjaHR0b2t3emVkZGxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMDIyNzEsImV4cCI6MjA4NTg3ODI3MX0.9atZ2PCTdXjC862CqRYo5WAsOtyBFanITy-iwVfEiPA',
+    url: 'https://kticrtqrtnskgiqxewzd.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aWNydHFydG5za2dpcXhld3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNDQ4MTEsImV4cCI6MjA4NjkyMDgxMX0.cfwhQz5jzAW9gjWcGQQfLnoghcQrgqpicBdZ1u_ZBw0',
   );
 
   try {

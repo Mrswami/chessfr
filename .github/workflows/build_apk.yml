@@ -78,8 +78,15 @@ jobs:
         run: flutter build apk --release
         working-directory: flutter
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
           path: flutter/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Distribute to Firebase App Distribution
+        uses: w9jds/firebase-action@master
+        with:
+          args: "appdistribution:distribute flutter/build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups 'testers' --release-notes '🚀 Auto-build from GitHub Actions: ${{ github.event.head_commit.message }}'"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

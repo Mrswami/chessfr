@@ -31,15 +31,15 @@ class _TrainingScreenState extends State<TrainingScreen> {
   String? _feedback;
   bool _feedbackIsPositive = true;
   DateTime? _positionShownAt;
+  
+  Map<String, dynamic>? _userProfile;
   String? _profileId;
   String? _positionId;
-
   late String _currentFen;
 
   @override
   void initState() {
     super.initState();
-    // Default to a known position if none provided (e.g. Ruy Lopez)
     _currentFen = widget.initialFen ?? 
         'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
         
@@ -48,11 +48,19 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   Future<void> _resolveIdsAndAnalyze() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
-    _profileId = await _repo.getProfileId();
-    _positionId = await _repo.getOrCreatePositionId(_currentFen);
+    
+    // Fetch profile and position in parallel
+    final profileFuture = _repo.getFullProfile();
+    final positionIdFuture = _repo.getOrCreatePositionId(_currentFen);
+    
+    final metaResults = await Future.wait([profileFuture, positionIdFuture]);
+    _userProfile = metaResults[0] as Map<String, dynamic>?;
+    _profileId = _userProfile?['id'];
+    _positionId = metaResults[1] as String?;
 
-    // Fetch engine moves and opening stats in parallel for speed
+    // Fetch engine moves and opening stats
     final engineMovesFuture = _stockfish.getTopMoves(_controller.getFen());
     final openingStatsFuture = _openingService.getOpeningStats(_controller.getFen());
 
@@ -60,12 +68,16 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final engineMoves = results[0] as List<EngineMove>;
     final openingStats = results[1] as OpeningStats?;
 
-    final profile = {
-      'connectivity_weight': 0.8,
-      'engine_trust': 0.2,
-    };
-    final ranked =
-        _ranker.rankMoves(_controller.getFen(), engineMoves, profile);
+    // Use actual user profile or fallback defaults
+    final ranked = _ranker.rankMoves(
+      _controller.getFen(), 
+      engineMoves, 
+      _userProfile ?? {
+        'connectivity_weight': 0.5,
+        'engine_trust': 0.5,
+        'engine_mode': 'stockfish',
+      }
+    );
 
     if (mounted) {
       setState(() {
@@ -78,6 +90,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   void _onMove(String moveSan) {
+    if (_rankedMoves.isEmpty) return;
+    
     final bestMove = _rankedMoves.first;
     int rank = -1;
     for (var i = 0; i < _rankedMoves.length; i++) {
@@ -91,6 +105,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final isRecommended = rank >= 1 && rank <= 3;
     String outcome = 'incorrect';
     int xpEarned = 0;
+    
     if (isCorrect) {
       outcome = 'correct';
       xpEarned = 10;
@@ -101,13 +116,13 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
     setState(() {
       if (isCorrect) {
-        _feedback = "Excellent! That's the most connected move. +$xpEarned XP";
+        _feedback = "Excellent! That's the DankFish choice. +$xpEarned XP";
         _feedbackIsPositive = true;
       } else if (isRecommended) {
         _feedback = "Good choice. ${_rankedMoves[rank - 1].explanation} +$xpEarned XP";
         _feedbackIsPositive = true;
       } else {
-        _feedback = "Interesting, but check your piece connectivity.";
+        _feedback = "Not quite. Check your piece connectivity!";
         _feedbackIsPositive = false;
       }
     });
@@ -129,9 +144,31 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDankFish = _userProfile?['engine_mode'] == 'dankfish';
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pattern Training'),
+        title: Text(isDankFish ? '🎅 DankFish Training' : 'Pattern Training'),
+        actions: [
+          if (isDankFish)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade900,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.redAccent),
+                  ),
+                  child: const Text(
+                    'PERSONALIZED',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
@@ -167,19 +204,16 @@ class _TrainingScreenState extends State<TrainingScreen> {
                 children: [
                   if (_feedback != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       margin: const EdgeInsets.only(bottom: 14),
                       decoration: BoxDecoration(
                         color: _feedbackIsPositive
-                            ? const Color(0xFF0D9488).withOpacity(0.25)
+                            ? (isDankFish ? Colors.red.shade900.withOpacity(0.3) : const Color(0xFF0D9488).withOpacity(0.25))
                             : const Color(0xFFF59E0B).withOpacity(0.25),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _feedbackIsPositive
-                              ? const Color(0xFF0D9488).withOpacity(0.5)
+                              ? (isDankFish ? Colors.red : const Color(0xFF0D9488).withOpacity(0.5))
                               : const Color(0xFFF59E0B).withOpacity(0.5),
                           width: 1,
                         ),
@@ -188,10 +222,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         children: [
                           Icon(
                             _feedbackIsPositive
-                                ? Icons.thumb_up_rounded
+                                ? (isDankFish ? Icons.celebration : Icons.thumb_up_rounded)
                                 : Icons.lightbulb_outline_rounded,
                             color: _feedbackIsPositive
-                                ? const Color(0xFF14B8A6)
+                                ? (isDankFish ? Colors.redAccent : const Color(0xFF14B8A6))
                                 : const Color(0xFFF59E0B),
                             size: 22,
                           ),
@@ -199,10 +233,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                           Expanded(
                             child: Text(
                               _feedback!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
                                   ),
@@ -210,151 +241,35 @@ class _TrainingScreenState extends State<TrainingScreen> {
                           ),
                         ],
                       ),
-                    )
-                        .animate()
-                        .fadeIn(duration: 200.ms)
-                        .slideY(begin: 0.3, end: 0, curve: Curves.easeOut),
+                    ).animate().fadeIn(duration: 200.ms).slideY(begin: 0.3, end: 0),
                   
                   if (_openingStats != null && _openingStats!.name != 'Unknown Position')
-                     Container(
-                      margin: const EdgeInsets.only(bottom: 14),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _openingStats!.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (_openingStats!.eco.isNotEmpty)
-                                  Text(
-                                    'ECO: ${_openingStats!.eco}',
-                                    style: const TextStyle(fontSize: 12, color: Colors.white54),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black26,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.public, size: 14, color: Colors.white54),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${_openingStats!.totalGames}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                     ).animate().fadeIn(),
+                    _buildOpeningCard(context),
 
-                  Text(
-                    'Recommended moves',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        isDankFish ? '🎅 Dank Recommendations' : 'Recommended moves',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                      ),
+                      if (isDankFish)
+                        const Icon(Icons.auto_awesome, color: Colors.amber, size: 16),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   if (_isLoading)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
+                    const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
                   else
                     Expanded(
                       child: ListView.builder(
                         itemCount: _rankedMoves.length,
                         itemBuilder: (context, index) {
                           final move = _rankedMoves[index];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surface
-                                  .withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 4,
-                              ),
-                              leading: Container(
-                                width: 36,
-                                height: 36,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Colors.teal.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  '${index + 1}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                              ),
-                              title: Text(
-                                move.moveSan,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Text(
-                                  move.explanation,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ),
-                              trailing: Text(
-                                move.finalScore.toStringAsFixed(1),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white54,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          )
-                              .animate()
-                              .fadeIn(delay: (80 * index).ms)
-                              .slideX(begin: 0.08, end: 0, curve: Curves.easeOut);
+                          return _buildMoveTile(context, index, move, isDankFish);
                         },
                       ),
                     ),
@@ -365,5 +280,74 @@ class _TrainingScreenState extends State<TrainingScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildOpeningCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_openingStats!.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                if (_openingStats!.eco.isNotEmpty) Text('ECO: ${_openingStats!.eco}', style: const TextStyle(fontSize: 12, color: Colors.white54)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              children: [
+                const Icon(Icons.public, size: 14, color: Colors.white54),
+                const SizedBox(width: 4),
+                Text('${_openingStats!.totalGames}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.white70)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn();
+  }
+
+  Widget _buildMoveTile(BuildContext context, int index, RankedMove move, bool isDankFish) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: isDankFish && index == 0 ? Border.all(color: Colors.amber.withOpacity(0.5)) : null,
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: (isDankFish && index == 0 ? Colors.amber : Colors.teal).withOpacity(0.3),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.w700, color: isDankFish && index == 0 ? Colors.amber : Colors.teal)),
+        ),
+        title: Text(move.moveSan, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(move.explanation, style: const TextStyle(fontSize: 13, color: Colors.white70)),
+        ),
+        trailing: isDankFish && index == 0 
+          ? const Icon(Icons.star, color: Colors.amber, size: 18)
+          : Text(move.finalScore.toStringAsFixed(1), style: const TextStyle(fontSize: 13, color: Colors.white54, fontWeight: FontWeight.w500)),
+      ),
+    ).animate().fadeIn(delay: (80 * index).ms).slideX(begin: 0.08, end: 0);
   }
 }
