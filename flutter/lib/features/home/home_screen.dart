@@ -10,6 +10,7 @@ import '../admin/admin_dashboard.dart';
 import '../projection/ui/camera_recognition_screen.dart';
 import '../projection/ui/board_connection_screen.dart';
 import '../profile/profile_screen.dart';
+import '../social/leaderboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -145,6 +146,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     delay: 250,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'Global Leaderboard',
+                    subtitle: 'See where you rank.',
+                    icon: Icons.emoji_events_rounded,
+                    color: Colors.amber,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+                      );
+                    },
+                    delay: 255,
                   ),
                   const SizedBox(height: 14),
                   _buildActionTile(

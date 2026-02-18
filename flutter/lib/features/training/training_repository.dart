@@ -115,4 +115,22 @@ class TrainingRepository {
         .maybeSingle();
     return res != null ? Map<String, dynamic>.from(res) : null;
   }
+  /// Fetches the top players ordered by total XP.
+  Future<List<Map<String, dynamic>>> getLeaderboard({int limit = 10}) async {
+    final res = await _client
+        .from('user_stats')
+        .select('''
+          total_xp,
+          current_streak,
+          profiles:profile_id (
+            display_name,
+            avatar_variant,
+            avatar_background
+          )
+        ''')
+        .order('total_xp', ascending: false)
+        .limit(limit);
+    
+    return List<Map<String, dynamic>>.from(res);
+  }
 }
