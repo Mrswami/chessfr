@@ -1,6 +1,11 @@
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,7 +16,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _supabase = Supabase.instance.client;
+  final GlobalKey _boundaryKey = GlobalKey();
+  
   bool _isLoading = true;
+  bool _isSharing = false;
   bool _isDankFishMode = false;
   
   // User stats
@@ -134,6 +142,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _shareProfile() async {
+    setState(() => _isSharing = true);
+    
+    try {
+      // Small delay to ensure any animations finish
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return;
+      
+      final pngBytes = byteData.buffer.asUint8List();
+      
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/chess_xl_profile.png').create();
+      await file.writeAsBytes(pngBytes);
+      
+      final username = _supabase.auth.currentUser?.email?.split('@').first ?? 'a player';
+      final mode = _isDankFishMode ? 'DankFish 🎅' : 'Stockfish 🐟';
+      
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Check out my $mode profile in Chess XL! I have $_totalXp XP and a $_currentStreak day streak. 🔥',
+      );
+    } catch (e) {
+      debugPrint('Error sharing profile: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,16 +190,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: 'Share Profile',
-            onPressed: () {
-              // TODO: Generate shareable profile card
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Share feature coming soon!')),
-              );
-            },
-          ),
+          _isSharing 
+            ? const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
+              )
+            : IconButton(
+                icon: const Icon(Icons.share_rounded),
+                tooltip: 'Share Profile',
+                onPressed: _shareProfile,
+              ),
         ],
       ),
       body: _isLoading
@@ -162,16 +209,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Avatar Display Card
-                  _buildAvatarCard(),
-                  const SizedBox(height: 16),
+                  // Everything inside this RepaintBoundary will be in the screenshot
+                  RepaintBoundary(
+                    key: _boundaryKey,
+                    child: Container(
+                      color: const Color(0xFF0F0F0F), // Background for the snapshot
+                      child: Column(
+                        children: [
+                          // Avatar Display Card
+                          _buildAvatarCard(),
+                          const SizedBox(height: 16),
+                          
+                          // Stats Cards (Inline for shareability)
+                          _buildStatsSection(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   
                   // Engine Mode Toggle
                   _buildEngineModeToggle(),
-                  const SizedBox(height: 16),
-                  
-                  // Stats Cards
-                  _buildStatsSection(),
                   const SizedBox(height: 16),
                   
                   // Cognitive Profile
@@ -481,11 +539,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
               _buildAvatarOption('classic', '🎅'),
               _buildAvatarOption('jolly', '😄🎅'),
               _buildAvatarOption('cool', '😎🎅'),
               _buildAvatarOption('sleepy', '😴🎅'),
+              _buildAvatarOption('king', '🤴🎅'),
+              _buildAvatarOption('robot', '🤖🎅'),
+              _buildAvatarOption('space', '🚀🎅'),
+              _buildAvatarOption('ninja', '🥷🎅'),
             ],
           ),
           const SizedBox(height: 16),
@@ -495,11 +558,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
               _buildColorOption('dark', Colors.grey.shade900),
               _buildColorOption('blue', Colors.blue.shade700),
               _buildColorOption('green', Colors.green.shade700),
               _buildColorOption('purple', Colors.purple.shade700),
+              _buildColorOption('gold', Colors.amber.shade800),
+              _buildColorOption('fire', Colors.red.shade700),
+              _buildColorOption('forest', Colors.teal.shade800),
+              _buildColorOption('arctic', Colors.cyan.shade300),
             ],
           ),
           const SizedBox(height: 16),
@@ -525,6 +593,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onTap: () => setState(() => _selectedSantaVariant = variant),
       child: Container(
         padding: const EdgeInsets.all(12),
+        width: 70,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? Colors.red.shade900 : Colors.white.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
@@ -565,6 +635,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return '😎🎅';
       case 'sleepy':
         return '😴🎅';
+      case 'king':
+        return '🤴🎅';
+      case 'robot':
+        return '🤖🎅';
+      case 'space':
+        return '🚀🎅';
+      case 'ninja':
+        return '🥷🎅';
       default:
         return '🎅';
     }
@@ -578,6 +656,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return [Colors.green.shade900, Colors.green.shade700];
       case 'purple':
         return [Colors.purple.shade900, Colors.purple.shade700];
+      case 'gold':
+        return [const Color(0xFFB8860B), const Color(0xFFFFD700)];
+      case 'fire':
+        return [Colors.red.shade900, Colors.orange.shade800];
+      case 'forest':
+        return [const Color(0xFF003300), const Color(0xFF006600)];
+      case 'arctic':
+        return [Colors.cyan.shade900, Colors.cyan.shade100];
       default:
         return [Colors.grey.shade900, Colors.grey.shade800];
     }
