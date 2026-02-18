@@ -47,36 +47,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
-      // Load user stats
-      final stats = await _supabase
-          .from('user_stats')
+      // 1. Load profile preferences first using user_id
+      final profile = await _supabase
+          .from('profiles')
           .select()
           .eq('user_id', userId)
           .single();
 
-      // Load profile preferences
-      final profile = await _supabase
-          .from('profiles')
+      // 2. Load user stats using the profile's ID
+      final profileId = profile['id'];
+      final stats = await _supabase
+          .from('user_stats')
           .select()
-          .eq('id', userId)
+          .eq('profile_id', profileId)
           .single();
 
       if (mounted) {
         setState(() {
           _totalXp = stats['total_xp'] ?? 0;
           _currentStreak = stats['current_streak'] ?? 0;
-          _tier = stats['tier'] ?? 'Free';
+          _tier = stats['tier'] ?? 'Free'; // Defaults to Free if column doesn't exist
           
           // Load cognitive profile (normalize to percentages)
-          final conn = (profile['connectivity_weight'] ?? 0.33) * 100;
-          final resp = (profile['response_weight'] ?? 0.33) * 100;
-          final infl = (profile['influence_weight'] ?? 0.34) * 100;
+          final cognitiveProfile = profile['cognitive_profile'] as Map<String, dynamic>? ?? {};
+          final conn = (cognitiveProfile['connectivity_weight'] ?? 0.33) * 100;
+          final resp = (cognitiveProfile['response_weight'] ?? 0.33) * 100;
+          final infl = (cognitiveProfile['influence_weight'] ?? 0.34) * 100;
           
           _connectivityPct = conn;
           _responsePct = resp;
           _influencePct = infl;
           
-          // Load avatar preferences (we'll add these columns to profiles table)
+          // Load avatar preferences
           _isDankFishMode = profile['engine_mode'] == 'dankfish';
           _selectedSantaVariant = profile['avatar_variant'] ?? 'classic';
           _selectedBackground = profile['avatar_background'] ?? 'dark';
@@ -100,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _supabase
           .from('profiles')
           .update({'engine_mode': isDankFish ? 'dankfish' : 'stockfish'})
-          .eq('id', userId);
+          .eq('user_id', userId);
 
       setState(() => _isDankFishMode = isDankFish);
       
@@ -130,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'avatar_variant': _selectedSantaVariant,
             'avatar_background': _selectedBackground,
           })
-          .eq('id', userId);
+          .eq('user_id', userId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
