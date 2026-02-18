@@ -698,6 +698,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       default:
         return Colors.cyan.shade700;
     }
+  }
+
   Widget _buildPulsingSanta() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
