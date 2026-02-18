@@ -130,6 +130,31 @@ class TrainingRepository {
         ''')
         .order('total_xp', ascending: false)
         .limit(limit);
+  
+    return List<Map<String, dynamic>>.from(res);
+  }
+
+  /// Fetches the most recent training activities across the community.
+  Future<List<Map<String, dynamic>>> getRecentActivity({int limit = 15}) async {
+    final res = await _client
+        .from('training_sessions')
+        .select('''
+          id,
+          created_at,
+          outcome,
+          xp_earned,
+          positions:position_id (
+            fen,
+            tags
+          ),
+          profiles:profile_id (
+            display_name,
+            avatar_variant,
+            avatar_background
+          )
+        ''')
+        .order('created_at', ascending: false)
+        .limit(limit);
     
     return List<Map<String, dynamic>>.from(res);
   }

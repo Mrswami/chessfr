@@ -10,7 +10,7 @@ import '../admin/admin_dashboard.dart';
 import '../projection/ui/camera_recognition_screen.dart';
 import '../projection/ui/board_connection_screen.dart';
 import '../profile/profile_screen.dart';
-import '../social/leaderboard_screen.dart';
+import '../social/social_hub_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -150,14 +150,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 14),
                   _buildActionTile(
                     context,
-                    title: 'Global Leaderboard',
-                    subtitle: 'See where you rank.',
-                    icon: Icons.emoji_events_rounded,
-                    color: Colors.amber,
+                    title: 'Community Hub',
+                    subtitle: 'Pulse of the community.',
+                    icon: Icons.diversity_3_rounded,
+                    color: Colors.cyanAccent,
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+                        MaterialPageRoute(builder: (context) => const SocialHubScreen()),
                       );
                     },
                     delay: 255,
