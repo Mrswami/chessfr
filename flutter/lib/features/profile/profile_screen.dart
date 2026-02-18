@@ -164,7 +164,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final file = await File('${tempDir.path}/chess_xl_profile.png').create();
       await file.writeAsBytes(pngBytes);
       
-      final username = _supabase.auth.currentUser?.email?.split('@').first ?? 'a player';
       final mode = _isDankFishMode ? 'DankFish 🎅' : 'Stockfish 🐟';
       
       await Share.shareXFiles(

@@ -21,7 +21,6 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
   bool _isInitializing = true;
   bool _isDetecting = false;
   String? _errorMessage;
-  int _frameCount = 0;
   double _fps = 0;
   DateTime? _lastFrameTime;
 
@@ -106,7 +105,6 @@ class _CameraRecognitionScreenState extends State<CameraRecognitionScreen> {
 
     setState(() {
       _isDetecting = true;
-      _frameCount++;
     });
 
     // Calculate FPS
