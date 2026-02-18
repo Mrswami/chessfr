@@ -77,7 +77,7 @@ class _AuthScreenState extends State<AuthScreen> {
     
     if (_tapCount >= 5) {
       _tapCount = 0;
-      HapticFeedback.successOverridable();
+      HapticFeedback.vibrate();
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const DevPanel()),
       );
