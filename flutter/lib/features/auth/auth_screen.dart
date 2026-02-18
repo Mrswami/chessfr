@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../admin/dev_panel.dart';
@@ -60,20 +60,24 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _handleSecretTap() {
-    if (!kDebugMode) return; // Only works in debug builds
+    // TEMPORARY: Disabled kDebugMode check so user can access on Firebase Release builds
+    // if (!kDebugMode) return; 
     
     final now = DateTime.now();
+    debugPrint('Secret Tap: $_tapCount');
     
     // Reset counter if more than 2 seconds since last tap
     if (_lastTap != null && now.difference(_lastTap!).inSeconds > 2) {
       _tapCount = 0;
     }
     
+    HapticFeedback.lightImpact();
     _lastTap = now;
     _tapCount++;
     
     if (_tapCount >= 5) {
       _tapCount = 0;
+      HapticFeedback.successOverridable();
       Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const DevPanel()),
       );
@@ -106,6 +110,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 children: [
                   GestureDetector(
                     onTap: _handleSecretTap,
+                    behavior: HitTestBehavior.opaque,
                     child: Icon(
                       Icons.psychology_alt_rounded,
                       size: 72,

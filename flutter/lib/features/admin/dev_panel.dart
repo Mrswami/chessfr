@@ -107,12 +107,14 @@ class _DevPanelState extends State<DevPanel> {
 
   @override
   Widget build(BuildContext context) {
+    // TEMPORARY: Disabled Release mode block for beta testing
+    /*
     if (kReleaseMode) {
-      // This should never happen in production, but just in case
       return const Scaffold(
         body: Center(child: Text('🚫 Not available in production')),
       );
     }
+    */
 
     return Scaffold(
       appBar: AppBar(
