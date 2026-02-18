@@ -33,33 +33,63 @@ class _DevPanelState extends State<DevPanel> {
   Future<void> _quickLogin(String email, String password, String displayName) async {
     setState(() => _isLoading = true);
     try {
-      // Try to sign in first
+      // 1. Force logout first to ensure clean state
+      await _client.auth.signOut();
+      
+      // 2. Attempt sign in
       try {
         await _client.auth.signInWithPassword(email: email, password: password);
       } catch (e) {
-        // If sign in fails, create the account
+        final errorStr = e.toString().toLowerCase();
+        
+        // If it's a rate limit error, don't try to sign up as it will just error again
+        if (errorStr.contains('rate_limit') || errorStr.contains('429')) {
+          throw '⚠️ Supabase Rate Limit: Please wait a minute before trying again.';
+        }
+
+        // If it looks like a "user not found" or "invalid credentials" error, attempt sign up
+        // Note: Supabase sometimes returns 'Invalid login credentials' for non-existent users
+        debugPrint('Sign in failed, attempting auto-signup for developer account...');
+        
         await _client.auth.signUp(
           email: email,
           password: password,
-          data: {'display_name': displayName, 'role': email.contains('admin') ? 'admin' : 'free'},
+          data: {
+            'display_name': displayName, 
+            'role': email.contains('admin') ? 'admin' : 'free'
+          },
         );
-        // Then sign in
+        
+        // After signup, attempt final sign in
         await _client.auth.signInWithPassword(email: email, password: password);
       }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Logged in as $displayName')),
+          SnackBar(
+            content: Text('✅ Logged in as $displayName'),
+            backgroundColor: Colors.green.shade800,
+          ),
         );
         // Navigate to home
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
         );
       }
     } catch (e) {
+      String message = e.toString();
+      if (message.contains('over_email_send_rate_limit')) {
+        message = '⏳ Too many login attempts. Please wait about 60 seconds.';
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(message), 
+            backgroundColor: Colors.red.shade900,
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     } finally {
