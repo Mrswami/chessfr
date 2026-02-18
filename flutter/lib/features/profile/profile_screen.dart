@@ -43,16 +43,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    // Safety timeout to prevent infinite loading
+    Future.delayed(const Duration(seconds: 8), () {
+      if (mounted && _isLoading) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('⚠️ Profile taking a while... Try refreshing.')),
+        );
+      }
+    });
+
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return;
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        debugPrint('No current user found during profile load');
+        setState(() => _isLoading = false);
+        return;
+      }
+      final userId = user.id;
 
       // 1. Load profile preferences first using user_id
       final profile = await _supabase
           .from('profiles')
           .select()
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
+
+      if (profile == null) {
+        debugPrint('Profile not found for user $userId');
+        setState(() => _isLoading = false);
+        return;
+      }
 
       // 2. Load user stats using the profile's ID
       final profileId = profile['id'];
@@ -60,23 +81,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .from('user_stats')
           .select()
           .eq('profile_id', profileId)
-          .single();
+          .maybeSingle();
 
       if (mounted) {
         setState(() {
-          _totalXp = stats['total_xp'] ?? 0;
-          _currentStreak = stats['current_streak'] ?? 0;
-          _tier = stats['tier'] ?? 'Free'; // Defaults to Free if column doesn't exist
+          if (stats != null) {
+            _totalXp = stats['total_xp'] ?? 0;
+            _currentStreak = stats['current_streak'] ?? 0;
+            _tier = stats['tier'] ?? 'Free';
+          }
           
-          // Load cognitive profile (normalize to percentages)
+          // Load cognitive profile
           final cognitiveProfile = profile['cognitive_profile'] as Map<String, dynamic>? ?? {};
-          final conn = (cognitiveProfile['connectivity_weight'] ?? 0.33) * 100;
-          final resp = (cognitiveProfile['response_weight'] ?? 0.33) * 100;
-          final infl = (cognitiveProfile['influence_weight'] ?? 0.34) * 100;
-          
-          _connectivityPct = conn;
-          _responsePct = resp;
-          _influencePct = infl;
+          _connectivityPct = (cognitiveProfile['connectivity_weight'] ?? 0.33) * 100;
+          _responsePct = (cognitiveProfile['response_weight'] ?? 0.33) * 100;
+          _influencePct = (cognitiveProfile['influence_weight'] ?? 0.34) * 100;
           
           // Load avatar preferences
           _isDankFishMode = profile['engine_mode'] == 'dankfish';
@@ -204,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.cyanAccent))
+          ? Center(child: _buildPulsingSanta())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -679,5 +698,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       default:
         return Colors.cyan.shade700;
     }
+  Widget _buildPulsingSanta() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          '🎅',
+          style: TextStyle(fontSize: 80),
+        )
+            .animate(onPlay: (controller) => controller.repeat(reverse: true))
+            .scale(
+              begin: const Offset(1.0, 1.0),
+              end: const Offset(1.2, 1.2),
+              duration: 800.ms,
+              curve: Curves.easeInOut,
+            )
+            .shimmer(delay: 400.ms, duration: 1200.ms, color: Colors.white30),
+        const SizedBox(height: 24),
+        const Text(
+          'Summoning your profile...',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.1,
+          ),
+        ).animate().fadeIn(delay: 200.ms),
+      ],
+    );
   }
 }
