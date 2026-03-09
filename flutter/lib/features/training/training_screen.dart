@@ -52,7 +52,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     setState(() => _isLoading = true);
     
     // Fetch profile and position in parallel
-    final profileFuture = _repo.getFullProfile();
+    final profileFuture = _repo.getProfile();
     final positionIdFuture = _repo.getOrCreatePositionId(_currentFen);
     
     final metaResults = await Future.wait([profileFuture, positionIdFuture]);

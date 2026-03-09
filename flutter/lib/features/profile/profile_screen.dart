@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:image_picker/image_picker.dart';
+import '../training/training_repository.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -16,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _supabase = Supabase.instance.client;
+  final _repo = TrainingRepository();
   final GlobalKey _boundaryKey = GlobalKey();
   
   bool _isLoading = true;
@@ -31,6 +34,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   double _connectivityPct = 33.0;
   double _responsePct = 33.0;
   double _influencePct = 34.0;
+  
+  // Face Avatar
+  String? _avatarUrl;
   
   // Avatar customization
   String _selectedSantaVariant = 'classic'; // classic, jolly, cool, sleepy
@@ -101,6 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _isDankFishMode = profile['engine_mode'] == 'dankfish';
           _selectedSantaVariant = profile['avatar_variant'] ?? 'classic';
           _selectedBackground = profile['avatar_background'] ?? 'dark';
+          _avatarUrl = profile['avatar_url'];
           
           _isLoading = false;
         });
@@ -160,6 +167,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       debugPrint('Error saving avatar: $e');
+    }
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 75,
+      );
+      
+      if (image == null) return;
+      
+      setState(() => _isLoading = true);
+      final url = await _repo.uploadAvatar(File(image.path));
+      
+      if (mounted) {
+        setState(() {
+          _avatarUrl = url;
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('🤳 Face Uploaded Comically!')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error uploading face: $e');
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -284,10 +321,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          // Santa Avatar
-          Text(
-            _getSantaEmoji(),
-            style: const TextStyle(fontSize: 120),
+          // Face or Santa Avatar
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              if (_avatarUrl != null)
+                ClipOval(
+                  child: Image.network(
+                    _avatarUrl!,
+                    width: 150,
+                    height: 150,
+                    fit: BoxFit.cover,
+                  ).animate().scale(duration: 400.ms, curve: Curves.elasticOut),
+                )
+              else
+                Text(
+                  _getSantaEmoji(),
+                  style: const TextStyle(fontSize: 120),
+                ),
+              
+              // Comical Upload Button
+              GestureDetector(
+                onTap: _pickAndUploadAvatar,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.cyanAccent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: const Icon(Icons.add_a_photo_rounded, color: Colors.black, size: 20),
+                ),
+              ).animate().scale(delay: 500.ms, curve: Curves.elasticOut),
+            ],
           ),
           const SizedBox(height: 16),
           

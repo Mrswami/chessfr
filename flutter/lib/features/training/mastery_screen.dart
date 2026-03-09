@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../training/widgets/mastery_path.dart';
+import '../training/widgets/brain_balloon.dart';
+import '../training/widgets/master_map.dart';
 import '../training/training_repository.dart';
 
 class MasteryScreen extends StatefulWidget {
@@ -12,7 +14,9 @@ class MasteryScreen extends StatefulWidget {
 class _MasteryScreenState extends State<MasteryScreen> {
   final TrainingRepository _repo = TrainingRepository();
   int _totalXp = 0;
+  double _consistencyScore = 0;
   int _currentLevel = 0;
+  String? _avatarUrl;
   bool _isLoading = true;
 
   @override
@@ -24,11 +28,20 @@ class _MasteryScreenState extends State<MasteryScreen> {
   Future<void> _loadStats() async {
     final profileId = await _repo.getProfileId();
     if (profileId == null) return;
+    
+    // Load stats
     final stats = await _repo.getUserStats(profileId);
+    
+    // Load profile for avatar_url
+    final profile = await _repo.getProfile();
+    
     if (mounted && stats != null) {
       final xp = stats['total_xp'] as int? ?? 0;
+      final consistency = (stats['consistency_score'] as num? ?? 0).toDouble();
       setState(() {
         _totalXp = xp;
+        _consistencyScore = consistency;
+        _avatarUrl = profile?['avatar_url'];
         // Simple level calculation: Level = totalXp / 500
         _currentLevel = (xp / 500).floor();
         _isLoading = false;
@@ -36,10 +49,19 @@ class _MasteryScreenState extends State<MasteryScreen> {
     }
   }
 
+  Color _getAtmosphereColor() {
+    if (_consistencyScore < 3) return const Color(0xFF0F0F0F); // Ground / Fog
+    if (_consistencyScore < 7) return const Color(0xFF001220); // Deep Sky
+    if (_consistencyScore < 14) return const Color(0xFF000B14); // Stratosphere
+    return const Color(0xFF010101); // Space
+  }
+
   @override
   Widget build(BuildContext context) {
+    final atmosphereColor = _getAtmosphereColor();
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: atmosphereColor,
       appBar: AppBar(
         title: const Text('COGNITIVE JOURNEY'),
         backgroundColor: Colors.transparent,
@@ -59,6 +81,27 @@ class _MasteryScreenState extends State<MasteryScreen> {
                 MasteryPath(
                   totalXp: _totalXp,
                   currentLevel: _currentLevel,
+                ),
+                // The Brain Balloon (User) - Floating in the atmosphere
+                Positioned(
+                  left: MediaQuery.of(context).size.width / 2 - 30,
+                  bottom: 300 + (_consistencyScore * 8), // Vertical buoyancy
+                  child: BrainBalloon(
+                    brainScore: _totalXp,
+                    avatarUrl: _avatarUrl,
+                    label: 'YOU',
+                    isUser: true,
+                  ),
+                ),
+                // Realm 1: The Master Map at the bottom
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: MasterMap(
+                    totalXp: _totalXp,
+                    currentLevel: _currentLevel,
+                  ),
                 ),
                 Positioned(
                   top: 20,
@@ -87,14 +130,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.cyanAccent.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.psychology_rounded, color: Colors.cyanAccent),
-          ),
+          _buildBuoyancyIndicator(),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -123,14 +159,37 @@ class _MasteryScreenState extends State<MasteryScreen> {
             ),
           ),
           const SizedBox(width: 16),
-          Column(
-            children: [
-              const Text('LEVEL', style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
-              Text('$_currentLevel', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
-            ],
-          ),
+          _buildLevelIndicator(),
         ],
       ),
+    );
+  }
+
+  Widget _buildBuoyancyIndicator() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          _consistencyScore > 0 ? Icons.keyboard_double_arrow_up_rounded : Icons.air_rounded,
+          color: Colors.cyanAccent, 
+          size: 20
+        ),
+        Text(
+          _consistencyScore.toStringAsFixed(1),
+          style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        const Text('CONSISTENCY', style: TextStyle(color: Colors.white38, fontSize: 8)),
+      ],
+    );
+  }
+
+  Widget _buildLevelIndicator() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('LEVEL', style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
+        Text('$_currentLevel', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
+      ],
     );
   }
 }

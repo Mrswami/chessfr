@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Persists training steps and updates user stats.
@@ -17,15 +18,39 @@ class TrainingRepository {
   }
 
   /// Returns the full user profile including engine preferences
-  Future<Map<String, dynamic>?> getFullProfile() async {
+  Future<Map<String, dynamic>?> getProfile() async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return null;
     final res = await _client
         .from('profiles')
-        .select('id, connectivity_weight, response_weight, influence_weight, engine_mode')
+        .select('id, connectivity_weight, response_weight, influence_weight, engine_mode, avatar_url')
         .eq('user_id', userId)
         .maybeSingle();
     return res != null ? Map<String, dynamic>.from(res) : null;
+  }
+
+  /// Uploads a face image to Supabase and updates profile metadata.
+  Future<String?> uploadAvatar(File file) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return null;
+
+    final fileExt = file.path.split('.').last;
+    final fileName = '$userId-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+    final filePath = 'avatars/$fileName';
+
+    await _client.storage.from('avatars').upload(filePath, file);
+
+    final avatarUrl = _client.storage.from('avatars').getPublicUrl(filePath);
+    await _updateProfileAvatar(userId, avatarUrl);
+
+    return avatarUrl;
+  }
+
+  Future<void> _updateProfileAvatar(String userId, String avatarUrl) async {
+    await _client
+        .from('profiles')
+        .update({'avatar_url': avatarUrl})
+        .eq('user_id', userId);
   }
 
   /// Returns position id for this FEN. Inserts the position if it doesn't exist.
@@ -103,14 +128,30 @@ class TrainingRepository {
       'positions_trained': (res['positions_trained'] as int? ?? 0) + 1,
       'last_training_date': today.toIso8601String().split('T').first,
       'updated_at': now.toIso8601String(),
+      'consistency_score': _calculateNewConsistency(res['consistency_score'] as double? ?? 0, lastDate),
     }).eq('profile_id', profileId);
+  }
+
+  double _calculateNewConsistency(double currentScore, DateTime? lastDate) {
+    if (lastDate == null) return 1.0;
+    
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+    final diff = today.difference(lastDay).inDays;
+
+    if (diff <= 0) return currentScore; // Already updated today
+    if (diff == 1) return (currentScore + 1.0).clamp(0.0, 100.0); // Consecutive day bonus
+    
+    // "Slow Leak" - sink by 0.5 per missed day
+    return (currentScore - (diff * 0.5)).clamp(0.0, 100.0);
   }
 
   /// Fetches current user stats for the given profile.
   Future<Map<String, dynamic>?> getUserStats(String profileId) async {
     final res = await _client
         .from('user_stats')
-        .select('total_xp, current_streak, longest_streak, positions_trained')
+        .select('total_xp, current_streak, longest_streak, positions_trained, consistency_score')
         .eq('profile_id', profileId)
         .maybeSingle();
     return res != null ? Map<String, dynamic>.from(res) : null;
