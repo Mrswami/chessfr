@@ -1,0 +1,541 @@
+﻿Build Android APK	Set up job	∩╗┐2026-03-09T20:33:21.6292537Z Current runner version: '2.332.0'
+Build Android APK	Set up job	2026-03-09T20:33:21.6327478Z ##[group]Runner Image Provisioner
+Build Android APK	Set up job	2026-03-09T20:33:21.6328775Z Hosted Compute Agent
+Build Android APK	Set up job	2026-03-09T20:33:21.6329854Z Version: 20260213.493
+Build Android APK	Set up job	2026-03-09T20:33:21.6330857Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Build Android APK	Set up job	2026-03-09T20:33:21.6332046Z Build Date: 2026-02-13T00:28:41Z
+Build Android APK	Set up job	2026-03-09T20:33:21.6333323Z Worker ID: {bec8e0d3-6cfe-4de1-a20e-e0c9aeacd03d}
+Build Android APK	Set up job	2026-03-09T20:33:21.6334614Z Azure Region: eastus2
+Build Android APK	Set up job	2026-03-09T20:33:21.6335590Z ##[endgroup]
+Build Android APK	Set up job	2026-03-09T20:33:21.6338490Z ##[group]Operating System
+Build Android APK	Set up job	2026-03-09T20:33:21.6339525Z Ubuntu
+Build Android APK	Set up job	2026-03-09T20:33:21.6340358Z 24.04.3
+Build Android APK	Set up job	2026-03-09T20:33:21.6341424Z LTS
+Build Android APK	Set up job	2026-03-09T20:33:21.6342189Z ##[endgroup]
+Build Android APK	Set up job	2026-03-09T20:33:21.6343165Z ##[group]Runner Image
+Build Android APK	Set up job	2026-03-09T20:33:21.6344199Z Image: ubuntu-24.04
+Build Android APK	Set up job	2026-03-09T20:33:21.6345173Z Version: 20260302.42.1
+Build Android APK	Set up job	2026-03-09T20:33:21.6347187Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260302.42/images/ubuntu/Ubuntu2404-Readme.md
+Build Android APK	Set up job	2026-03-09T20:33:21.6350162Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260302.42
+Build Android APK	Set up job	2026-03-09T20:33:21.6352032Z ##[endgroup]
+Build Android APK	Set up job	2026-03-09T20:33:21.6354126Z ##[group]GITHUB_TOKEN Permissions
+Build Android APK	Set up job	2026-03-09T20:33:21.6357926Z Contents: read
+Build Android APK	Set up job	2026-03-09T20:33:21.6358745Z Metadata: read
+Build Android APK	Set up job	2026-03-09T20:33:21.6359847Z Packages: read
+Build Android APK	Set up job	2026-03-09T20:33:21.6360743Z ##[endgroup]
+Build Android APK	Set up job	2026-03-09T20:33:21.6363287Z Secret source: Actions
+Build Android APK	Set up job	2026-03-09T20:33:21.6364894Z Prepare workflow directory
+Build Android APK	Set up job	2026-03-09T20:33:21.6822923Z Prepare all required actions
+Build Android APK	Set up job	2026-03-09T20:33:21.6879404Z Getting action download info
+Build Android APK	Set up job	2026-03-09T20:33:22.0572418Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build Android APK	Set up job	2026-03-09T20:33:22.1898878Z Download action repository 'actions/setup-java@v4' (SHA:c1e323688fd81a25caa38c78aa6df2d33d3e20d9)
+Build Android APK	Set up job	2026-03-09T20:33:22.5889801Z Download action repository 'subosito/flutter-action@v2' (SHA:fd55f4c5af5b953cc57a2be44cb082c8f6635e8e)
+Build Android APK	Set up job	2026-03-09T20:33:22.7619450Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Build Android APK	Set up job	2026-03-09T20:33:22.8734223Z Download action repository 'w9jds/firebase-action@master' (SHA:3e10b1b465a6ae543d23eccc13f9f9cd47c184f3)
+Build Android APK	Set up job	2026-03-09T20:33:23.2544090Z Getting action download info
+Build Android APK	Set up job	2026-03-09T20:33:23.3765641Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+Build Android APK	Set up job	2026-03-09T20:33:23.5528010Z Complete job name: Build Android APK
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	∩╗┐2026-03-09T20:33:23.6090681Z ##[group]Pull down action image 'w9jds/firebase-action:v15.8.0'
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:23.6148538Z ##[command]/usr/bin/docker pull w9jds/firebase-action:v15.8.0
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0820956Z v15.8.0: Pulling from w9jds/firebase-action
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0824115Z 01d7766a2e4a: Already exists
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0849545Z 868b909f8ce7: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0851588Z f12c2f6b47b7: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0852800Z e6b56ff66d06: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0854110Z c45a8f54c8db: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0855197Z 485754b7b2af: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0856328Z 64aef538b817: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0857826Z e0d2af52907f: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0859063Z 20e911a429a4: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0860160Z 824296387e55: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0861148Z 26b90aaa98ec: Pulling fs layer
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0862100Z 485754b7b2af: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0862948Z 64aef538b817: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0863829Z e0d2af52907f: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0864777Z 20e911a429a4: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0865623Z 824296387e55: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0866447Z 26b90aaa98ec: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.0867518Z c45a8f54c8db: Waiting
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.1678464Z e6b56ff66d06: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.1680250Z e6b56ff66d06: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.2550509Z c45a8f54c8db: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.2552367Z c45a8f54c8db: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.7283365Z 868b909f8ce7: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.7286988Z 868b909f8ce7: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.8419927Z 64aef538b817: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:24.8422956Z 64aef538b817: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.0172206Z e0d2af52907f: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.7125960Z 20e911a429a4: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.7129504Z 20e911a429a4: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.8057270Z 824296387e55: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.8057933Z 824296387e55: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.9032776Z 26b90aaa98ec: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:25.9033438Z 26b90aaa98ec: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:26.1823817Z 485754b7b2af: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:26.1824491Z 485754b7b2af: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:26.1987724Z 868b909f8ce7: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:29.0568429Z f12c2f6b47b7: Verifying Checksum
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:29.0569058Z f12c2f6b47b7: Download complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:30.9014198Z f12c2f6b47b7: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:30.9132026Z e6b56ff66d06: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:30.9284677Z c45a8f54c8db: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:34.9161960Z 485754b7b2af: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:34.9540574Z 64aef538b817: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:36.2322414Z e0d2af52907f: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8133781Z 20e911a429a4: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8238451Z 824296387e55: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8354523Z 26b90aaa98ec: Pull complete
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8391928Z Digest: sha256:7106b29287583ff659cad047c4f667cf43e893c4cb6fee43d7ae7bc121334c20
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8406384Z Status: Downloaded newer image for w9jds/firebase-action:v15.8.0
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8417689Z docker.io/w9jds/firebase-action:v15.8.0
+Build Android APK	Pull w9jds/firebase-action:v15.8.0	2026-03-09T20:33:42.8445774Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	∩╗┐2026-03-09T20:33:42.8720291Z ##[group]Run actions/checkout@v4
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8720891Z with:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8721095Z   repository: Mrswami/chessfr
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8721516Z   token: ***
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8721707Z   ssh-strict: true
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8721935Z   ssh-user: git
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8722188Z   persist-credentials: true
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8722408Z   clean: true
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8722607Z   sparse-checkout-cone-mode: true
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8722842Z   fetch-depth: 1
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8723030Z   fetch-tags: false
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8723218Z   show-progress: true
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8723417Z   lfs: false
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8723588Z   submodules: false
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8723785Z   set-safe-directory: true
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.8724226Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9839296Z Syncing repository: Mrswami/chessfr
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9840593Z ##[group]Getting Git version info
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9840974Z Working directory is '/home/runner/work/chessfr/chessfr'
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9841509Z [command]/usr/bin/git version
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9927872Z git version 2.53.0
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9954927Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9970978Z Temporarily overriding HOME='/home/runner/work/_temp/bfbefde6-0f84-4042-bd7b-7004377bc09c' before making global git config changes
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9972393Z Adding repository directory to the temporary git global config as a safe directory
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:42.9985038Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/chessfr/chessfr
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0025511Z Deleting the contents of '/home/runner/work/chessfr/chessfr'
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0029493Z ##[group]Initializing the repository
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0034092Z [command]/usr/bin/git init /home/runner/work/chessfr/chessfr
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0154204Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0155169Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0155775Z hint: to use in all of your new repositories, which will suppress this warning,
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0156180Z hint: call:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0156358Z hint:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0156813Z hint: 	git config --global init.defaultBranch <name>
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0157129Z hint:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0157881Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0158797Z hint: 'development'. The just-created branch can be renamed via this command:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0159207Z hint:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0159430Z hint: 	git branch -m <name>
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0159703Z hint:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0160274Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0161275Z Initialized empty Git repository in /home/runner/work/chessfr/chessfr/.git/
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0171435Z [command]/usr/bin/git remote add origin https://github.com/Mrswami/chessfr
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0206824Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0207491Z ##[group]Disabling automatic garbage collection
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0212203Z [command]/usr/bin/git config --local gc.auto 0
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0241704Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0242342Z ##[group]Setting up auth
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0249562Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0280916Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0650791Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0681594Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0917017Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.0958668Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.1200028Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.1236165Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.1237040Z ##[group]Fetching the repository
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.1245045Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +55d6d30c4d844256ab35bcd02545d6eb47b0f697:refs/remotes/origin/master
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3774220Z From https://github.com/Mrswami/chessfr
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3775394Z  * [new ref]         55d6d30c4d844256ab35bcd02545d6eb47b0f697 -> origin/master
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3810296Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3811127Z ##[group]Determining the checkout info
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3813694Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3819532Z [command]/usr/bin/git sparse-checkout disable
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3865634Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3894537Z ##[group]Checking out the ref
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.3900034Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.4181305Z Reset branch 'master'
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.4184136Z branch 'master' set up to track 'origin/master'.
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.4192920Z ##[endgroup]
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.4233764Z [command]/usr/bin/git log -1 --format=%H
+Build Android APK	Run actions/checkout@v4	2026-03-09T20:33:43.4259047Z 55d6d30c4d844256ab35bcd02545d6eb47b0f697
+Build Android APK	Run actions/setup-java@v4	∩╗┐2026-03-09T20:33:43.4498084Z ##[group]Run actions/setup-java@v4
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4498365Z with:
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4498542Z   distribution: zulu
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4498747Z   java-version: 17
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4498933Z   java-package: jdk
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4499134Z   check-latest: false
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4499327Z   server-id: github
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4499531Z   server-username: GITHUB_ACTOR
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4499776Z   server-password: GITHUB_TOKEN
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4500006Z   overwrite-settings: true
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4500223Z   job-status: success
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4500537Z   token: ***
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.4500724Z ##[endgroup]
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.6540962Z ##[group]Installed distributions
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.6565522Z Trying to resolve the latest version from remote
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.7521436Z Resolved latest version as 17.0.18+8
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.7524480Z Trying to download...
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:43.7525471Z Downloading Java 17.0.18+8 (Zulu) from https://cdn.azul.com/zulu/bin/zulu17.64.17-ca-crac-jdk17.0.18-linux_x64.tar.gz ...
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:50.4526287Z Extracting Java archive...
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:50.4632391Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/9801ffc5-d72b-4990-94bd-87d667bbf4a0 -f /home/runner/work/_temp/840090ce-c3bd-4947-a07d-a9ca180ca5e2
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1580761Z Java 17.0.18+8 was downloaded
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1581367Z Setting Java 17.0.18+8 as the default
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1592634Z Creating toolchains.xml for JDK version 17 from zulu
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1667797Z Writing to /home/runner/.m2/toolchains.xml
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1668294Z 
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1668443Z Java configuration:
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1668798Z   Distribution: zulu
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1669417Z   Version: 17.0.18+8
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1670269Z   Path: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1670709Z 
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1675311Z ##[endgroup]
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1690939Z Creating settings.xml with server-id: github
+Build Android APK	Run actions/setup-java@v4	2026-03-09T20:33:53.1692418Z Writing to /home/runner/.m2/settings.xml
+Build Android APK	Run subosito/flutter-action@v2	∩╗┐2026-03-09T20:33:53.1932609Z ##[group]Run subosito/flutter-action@v2
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1932897Z with:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1933069Z   channel: stable
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1933242Z   cache: true
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1933418Z   architecture: X64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1933611Z   pub-cache-path: default
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1933821Z   dry-run: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1934065Z   git-source: https://github.com/flutter/flutter.git
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1934356Z env:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1934591Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1934972Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.1935288Z ##[endgroup]
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2024879Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2025275Z [36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2081125Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2081462Z env:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2081715Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2082157Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2082487Z ##[endgroup]
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2259534Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2259919Z [36;1m$GITHUB_ACTION_PATH/setup.sh -p \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2260198Z [36;1m  -n '' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2260386Z [36;1m  -f '' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2260574Z [36;1m  -a 'X64' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2260759Z [36;1m  -k '' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2260939Z [36;1m  -c '' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2261106Z [36;1m  -l '' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2261288Z [36;1m  -d 'default' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2261585Z [36;1m  -g 'https://github.com/flutter/flutter.git' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2261888Z [36;1m  stable[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2310612Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2310942Z env:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2311190Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2311594Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.2311907Z ##[endgroup]
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4275611Z ##[group]Run actions/cache@v4
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4275850Z with:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4276076Z   path: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4276520Z   key: flutter-linux-stable-3.41.4-x64-ff37bef603469fb030f2b72995ab929ccfc227f0
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4277145Z   enableCrossOsArchive: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4277386Z   fail-on-cache-miss: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4277599Z   lookup-only: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4277793Z   save-always: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4277968Z env:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4278360Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4278746Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.4279056Z ##[endgroup]
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.6339670Z Cache not found for input keys: flutter-linux-stable-3.41.4-x64-ff37bef603469fb030f2b72995ab929ccfc227f0
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7287106Z ##[group]Run actions/cache@v4
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7287379Z with:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7287598Z   path: /home/runner/.pub-cache
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7288308Z   key: flutter-pub-linux-stable-3.41.4-x64-ff37bef603469fb030f2b72995ab929ccfc227f0-2cf2a45fdfc2b391d77c8c111a13f2845d57743a28070b4d4c94aa2915101f45
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7289035Z   enableCrossOsArchive: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7289288Z   fail-on-cache-miss: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7289517Z   lookup-only: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7289732Z   save-always: false
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7289931Z env:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7290174Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7290609Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.7290937Z ##[endgroup]
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9482558Z Cache not found for input keys: flutter-pub-linux-stable-3.41.4-x64-ff37bef603469fb030f2b72995ab929ccfc227f0-2cf2a45fdfc2b391d77c8c111a13f2845d57743a28070b4d4c94aa2915101f45
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9571716Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9572042Z [36;1m$GITHUB_ACTION_PATH/setup.sh \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9572291Z [36;1m  -n '3.41.4' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9572507Z [36;1m  -a 'x64' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9572788Z [36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.41.4-x64' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9573137Z [36;1m  -d '/home/runner/.pub-cache' \[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9573390Z [36;1m  stable[0m
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9621734Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9622048Z env:
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9622297Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9622706Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:53.9623029Z ##[endgroup]
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:54.1497841Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:54.1498837Z                                  Dload  Upload   Total   Spent    Left  Speed
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:54.1499331Z 
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:54.8014871Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:55.8134501Z  11 1438M   11  162M    0     0   249M      0  0:00:05 --:--:--  0:00:05  249M
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:56.8011078Z  32 1438M   32  468M    0     0   281M      0  0:00:05  0:00:01  0:00:04  281M
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:57.8022664Z  52 1438M   52  757M    0     0   285M      0  0:00:05  0:00:02  0:00:03  285M
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:58.7999251Z  71 1438M   71 1036M    0     0   283M      0  0:00:05  0:00:03  0:00:02  283M
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:59.3596819Z  90 1438M   90 1306M    0     0   281M      0  0:00:05  0:00:04  0:00:01  281M
+Build Android APK	Run subosito/flutter-action@v2	2026-03-09T20:33:59.3597633Z 100 1438M  100 1438M    0     0   276M      0  0:00:05  0:00:05 --:--:--  280M
+Build Android APK	Install dependencies	∩╗┐2026-03-09T20:34:50.7513325Z ##[group]Run flutter pub get
+Build Android APK	Install dependencies	2026-03-09T20:34:50.7513755Z [36;1mflutter pub get[0m
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8459612Z shell: /usr/bin/bash -e {0}
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8459933Z env:
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8460224Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8461901Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8462361Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8462731Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Install dependencies	2026-03-09T20:34:50.8464225Z ##[endgroup]
+Build Android APK	Install dependencies	2026-03-09T20:34:55.1109394Z Resolving dependencies...
+Build Android APK	Install dependencies	2026-03-09T20:34:55.7350868Z Downloading packages...
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8630761Z   _flutterfire_internals 1.3.66 (1.3.67 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8631581Z ! app_links 6.3.0 (overridden) (7.0.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8632200Z   archive 4.0.7 (4.0.9 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8632969Z   camera 0.11.3+1 (0.12.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8633602Z   camera_android_camerax 0.6.30 (0.7.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8634324Z   camera_avfoundation 0.9.23+2 (0.10.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8634913Z > characters 1.4.1 (was 1.4.0)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8635383Z   chess 0.7.0 (0.8.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8635881Z   dart_jsonwebtoken 3.3.1 (3.3.2 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8636453Z   firebase_core 4.4.0 (4.5.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8637172Z   firebase_core_web 3.4.0 (3.5.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8637730Z   firebase_messaging 16.1.1 (16.1.2 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8638425Z   firebase_messaging_platform_interface 4.7.6 (4.7.7 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8639167Z   firebase_messaging_web 4.1.2 (4.1.3 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8639778Z   flutter_blue_plus 2.1.1 (2.2.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8640295Z   flutter_blue_plus_android 8.1.0 (8.2.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8640798Z   flutter_blue_plus_darwin 8.1.1 (8.2.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8641298Z   flutter_blue_plus_linux 8.1.0 (8.2.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8641843Z   flutter_blue_plus_platform_interface 8.1.0 (8.2.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8642391Z   flutter_blue_plus_web 8.1.0 (8.2.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8642834Z   flutter_dotenv 5.2.1 (6.0.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8643237Z   flutter_lints 5.0.0 (6.0.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8643671Z   google_fonts 6.3.3 (8.0.2 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8644090Z   hooks 1.0.1 (1.0.2 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8644471Z   image 4.7.2 (4.8.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8644847Z   json_annotation 4.10.0 (4.11.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8645263Z   lints 5.1.1 (6.1.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8645624Z > matcher 0.12.19 (was 0.12.17)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8646023Z > material_color_utilities 0.13.0 (was 0.11.1)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8646475Z   meta 1.17.0 (1.18.1 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8647063Z   native_toolchain_c 0.17.4 (0.17.5 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8647519Z   posix 6.0.3 (6.5.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8647953Z   shared_preferences_android 2.4.20 (2.4.21 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8648446Z > test_api 0.7.10 (was 0.7.7)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8648827Z   uuid 4.5.2 (4.5.3 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8649185Z   win32 5.15.0 (6.0.0 available)
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8649601Z Changed 4 dependencies!
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8650151Z 32 packages have newer versions incompatible with dependency constraints.
+Build Android APK	Install dependencies	2026-03-09T20:35:01.8650843Z Try `flutter pub outdated` for more information.
+Build Android APK	Create dummy .env	∩╗┐2026-03-09T20:35:02.4427830Z ##[group]Run touch .env
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4428096Z [36;1mtouch .env[0m
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4477631Z shell: /usr/bin/bash -e {0}
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4477869Z env:
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4478125Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4478524Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4478925Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4479276Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Create dummy .env	2026-03-09T20:35:02.4479515Z ##[endgroup]
+Build Android APK	Analyze	∩╗┐2026-03-09T20:35:02.4594860Z ##[group]Run flutter analyze --fatal-infos
+Build Android APK	Analyze	2026-03-09T20:35:02.4595474Z [36;1mflutter analyze --fatal-infos[0m
+Build Android APK	Analyze	2026-03-09T20:35:02.4653243Z shell: /usr/bin/bash -e {0}
+Build Android APK	Analyze	2026-03-09T20:35:02.4653490Z env:
+Build Android APK	Analyze	2026-03-09T20:35:02.4653746Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Analyze	2026-03-09T20:35:02.4654146Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Analyze	2026-03-09T20:35:02.4654543Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Analyze	2026-03-09T20:35:02.4654870Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Analyze	2026-03-09T20:35:02.4655108Z ##[endgroup]
+Build Android APK	Analyze	2026-03-09T20:35:22.6683435Z Analyzing flutter...                                            
+Build Android APK	Analyze	2026-03-09T20:35:22.6699827Z No issues found! (ran in 19.2s)
+Build Android APK	Generate Launcher Icons	∩╗┐2026-03-09T20:35:22.6905672Z ##[group]Run dart run flutter_launcher_icons
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6906506Z [36;1mdart run flutter_launcher_icons[0m
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6971977Z shell: /usr/bin/bash -e {0}
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6972465Z env:
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6973000Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6973706Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6974598Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6975323Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:22.6975783Z ##[endgroup]
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.2928278Z   ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.2928841Z      FLUTTER LAUNCHER ICONS (v0.14.4)                               
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.2929259Z   ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.2929513Z   
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.3778879Z ΓÇó Creating default icons Android
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.4503196Z ΓÇó Adding a new Android launcher icon
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:24.5785733Z ΓÇó Overwriting default iOS launcher icon with new icon
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:25.2182176Z No platform provided
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:25.2182867Z 
+Build Android APK	Generate Launcher Icons	2026-03-09T20:35:25.2183375Z Γ£ô Successfully generated launcher icons
+Build Android APK	Generate Debug Keystore	∩╗┐2026-03-09T20:35:25.2428089Z ##[group]Run mkdir -p ~/.android
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2428639Z [36;1mmkdir -p ~/.android[0m
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2429480Z [36;1mkeytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US,L=US,S=US"[0m
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2479065Z shell: /usr/bin/bash -e {0}
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2479316Z env:
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2479600Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2479994Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2480390Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2480721Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.2480958Z ##[endgroup]
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.6233925Z Generating 2,048 bit RSA key pair and self-signed certificate (SHA256withRSA) with a validity of 10,000 days
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.6237237Z 	for: CN=Android Debug, O=Android, C=US, L=US, ST=US
+Build Android APK	Generate Debug Keystore	2026-03-09T20:35:25.7135127Z [Storing /home/runner/.android/debug.keystore]
+Build Android APK	Create dummy google-services.json	∩╗┐2026-03-09T20:35:25.8544027Z ##[group]Run target="flutter/android/app/google-services.json"
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8544505Z [36;1mtarget="flutter/android/app/google-services.json"[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8544859Z [36;1mif [ ! -f "$target" ]; then[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8545182Z [36;1m  echo "Creating dummy google-services.json for build..."[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8545510Z [36;1m  echo '{[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8545703Z [36;1m    "project_info": {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8545951Z [36;1m      "project_number": "123456789012",[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8546241Z [36;1m      "project_id": "dummy-project",[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8547032Z [36;1m      "storage_bucket": "dummy-project.appspot.com"[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8547382Z [36;1m    },[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8547586Z [36;1m    "client": [[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8547785Z [36;1m      {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8547965Z [36;1m        "client_info": {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8548290Z [36;1m          "mobilesdk_app_id": "1:123456789012:android:abcdef0123456789",[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8548693Z [36;1m          "android_client_info": {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8548999Z [36;1m            "package_name": "com.mrswami.chess_trainer"[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8549301Z [36;1m          }[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8549479Z [36;1m        },[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8549670Z [36;1m        "oauth_client": [],[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8549899Z [36;1m        "api_key": [[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8550105Z [36;1m          {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8550311Z [36;1m            "current_key": "dummy_api_key"[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8550572Z [36;1m          }[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8550773Z [36;1m        ],[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8550961Z [36;1m        "services": {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8551191Z [36;1m          "appinvite_service": {[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8551671Z [36;1m            "other_platform_oauth_client": [][0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8551941Z [36;1m          }[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8552121Z [36;1m        }[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8552299Z [36;1m      }[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8552471Z [36;1m    ],[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8552665Z [36;1m    "configuration_version": "1"[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8552909Z [36;1m  }' > "$target"[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8553105Z [36;1mfi[0m
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8601284Z shell: /usr/bin/bash -e {0}
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8601522Z env:
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8601768Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8602167Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8602568Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8602895Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Create dummy google-services.json	2026-03-09T20:35:25.8603126Z ##[endgroup]
+Build Android APK	Build Fat APK	∩╗┐2026-03-09T20:35:25.8693587Z ##[group]Run flutter build apk --release
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8693910Z [36;1mflutter build apk --release[0m
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8737862Z shell: /usr/bin/bash -e {0}
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8738098Z env:
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8738348Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8738744Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.18-8/x64
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8739156Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.41.4-x64
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8739494Z   PUB_CACHE: /home/runner/.pub-cache
+Build Android APK	Build Fat APK	2026-03-09T20:35:25.8739732Z ##[endgroup]
+Build Android APK	Build Fat APK	2026-03-09T20:36:42.7955240Z e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:
+Build Android APK	Build Fat APK	2026-03-09T20:36:42.7956370Z Running Gradle task 'assembleRelease'...                        
+Build Android APK	Build Fat APK	2026-03-09T20:36:42.7958841Z     1. Kotlin compile daemon is ready
+Build Android APK	Build Fat APK	2026-03-09T20:38:10.7839454Z Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.5.2) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 8.6.0 soon.
+Build Android APK	Build Fat APK	2026-03-09T20:38:10.7854117Z Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+Build Android APK	Build Fat APK	2026-03-09T20:38:10.7854804Z 
+Build Android APK	Build Fat APK	2026-03-09T20:38:10.7866938Z Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (/home/runner/work/chessfr/chessfr/flutter/android/settings.gradle), by a plugin with the id of com.android.application. 
+Build Android APK	Build Fat APK	2026-03-09T20:38:10.7870770Z If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (/home/runner/work/chessfr/chessfr/flutter/android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+Build Android APK	Build Fat APK	2026-03-09T20:38:10.7872368Z 
+Build Android APK	Build Fat APK	2026-03-09T20:41:03.7805248Z Checking the license for package NDK (Side by side) 26.1.10909125 in /usr/local/lib/android/sdk/licenses
+Build Android APK	Build Fat APK	2026-03-09T20:41:03.7810463Z License for package NDK (Side by side) 26.1.10909125 accepted.
+Build Android APK	Build Fat APK	2026-03-09T20:41:03.7811245Z Preparing "Install NDK (Side by side) 26.1.10909125 v.26.1.10909125".
+Build Android APK	Build Fat APK	2026-03-09T20:41:16.4795902Z "Install NDK (Side by side) 26.1.10909125 v.26.1.10909125" ready.
+Build Android APK	Build Fat APK	2026-03-09T20:41:16.4797076Z Installing NDK (Side by side) 26.1.10909125 in /usr/local/lib/android/sdk/ndk/26.1.10909125
+Build Android APK	Build Fat APK	2026-03-09T20:41:16.4797850Z "Install NDK (Side by side) 26.1.10909125 v.26.1.10909125" complete.
+Build Android APK	Build Fat APK	2026-03-09T20:41:16.6827728Z "Install NDK (Side by side) 26.1.10909125 v.26.1.10909125" finished.
+Build Android APK	Build Fat APK	2026-03-09T20:41:42.2797266Z Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 11080 bytes (99.3% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Build Android APK	Build Fat APK	2026-03-09T20:42:00.1797580Z Checking the license for package CMake 3.22.1 in /usr/local/lib/android/sdk/licenses
+Build Android APK	Build Fat APK	2026-03-09T20:42:00.1801595Z License for package CMake 3.22.1 accepted.
+Build Android APK	Build Fat APK	2026-03-09T20:42:00.1802122Z Preparing "Install CMake 3.22.1 v.3.22.1".
+Build Android APK	Build Fat APK	2026-03-09T20:42:01.6796215Z "Install CMake 3.22.1 v.3.22.1" ready.
+Build Android APK	Build Fat APK	2026-03-09T20:42:01.6797565Z Installing CMake 3.22.1 in /usr/local/lib/android/sdk/cmake/3.22.1
+Build Android APK	Build Fat APK	2026-03-09T20:42:01.6803165Z "Install CMake 3.22.1 v.3.22.1" complete.
+Build Android APK	Build Fat APK	2026-03-09T20:42:01.6804088Z "Install CMake 3.22.1 v.3.22.1" finished.
+Build Android APK	Build Fat APK	2026-03-09T20:44:37.2828566Z Note: /home/runner/.pub-cache/hosted/pub.dev/flutter_vision-2.0.0/android/src/main/java/com/vladih/computer_vision/flutter_vision/utils/RenderScriptHelper.java uses or overrides a deprecated API.
+Build Android APK	Build Fat APK	2026-03-09T20:44:37.2839283Z Note: Recompile with -Xlint:deprecation for details.
+Build Android APK	Build Fat APK	2026-03-09T20:44:37.2841004Z Note: /home/runner/.pub-cache/hosted/pub.dev/flutter_vision-2.0.0/android/src/main/java/com/vladih/computer_vision/flutter_vision/FlutterVisionPlugin.java uses unchecked or unsafe operations.
+Build Android APK	Build Fat APK	2026-03-09T20:44:37.2843099Z Note: Recompile with -Xlint:unchecked for details.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1814127Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1834118Z FAILURE: Build failed with an exception.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1838894Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1843634Z * What went wrong:
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1848329Z Execution failed for task ':app:checkReleaseAarMetadata'.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1852631Z > A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1865279Z    > 11 issues were found when checking AAR metadata:
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1885471Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1890488Z        1.  Dependency 'androidx.camera:camera-video:1.5.3' requires Android Gradle plugin 8.6.0 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1895550Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1898874Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1901770Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1903733Z        2.  Dependency 'androidx.camera:camera-lifecycle:1.5.3' requires Android Gradle plugin 8.6.0 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1908789Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1909081Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1910398Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1911547Z        3.  Dependency 'androidx.camera:camera-camera2:1.5.3' requires Android Gradle plugin 8.6.0 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1913050Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1913778Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1914550Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1915802Z        4.  Dependency 'androidx.camera:camera-core:1.5.3' requires Android Gradle plugin 8.6.0 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1916464Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1917799Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1918207Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1919650Z        5.  Dependency 'androidx.browser:browser:1.9.0' requires Android Gradle plugin 8.9.1 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1921131Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1921376Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1922791Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1923288Z        6.  Dependency 'androidx.activity:activity-ktx:1.12.4' requires Android Gradle plugin 8.9.1 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1925695Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1926200Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1926756Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1927429Z        7.  Dependency 'androidx.navigationevent:navigationevent-android:1.0.2' requires Android Gradle plugin 8.9.1 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1928274Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1928523Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1928938Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1932582Z        8.  Dependency 'androidx.activity:activity:1.12.4' requires Android Gradle plugin 8.9.1 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1933242Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1933490Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1933906Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1934346Z        9.  Dependency 'androidx.core:core-ktx:1.17.0' requires Android Gradle plugin 8.9.1 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1934963Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1935205Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1936164Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1936709Z       10.  Dependency 'androidx.core:core:1.17.0' requires Android Gradle plugin 8.9.1 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1937549Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1937809Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1938208Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1938957Z       11.  Dependency 'androidx.camera.featurecombinationquery:featurecombinationquery:1.5.3' requires Android Gradle plugin 8.6.0 or higher.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1939882Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1940120Z            This build currently uses Android Gradle plugin 8.5.2.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1940525Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1940652Z * Try:
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1941032Z > Run with --stacktrace option to get the stack trace.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1941655Z > Run with --info or --debug option to get more log output.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1942198Z > Run with --scan to get full insights.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1942957Z > Get more help at https://help.gradle.org.
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1943307Z 
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.1949770Z BUILD FAILED in 9m 25s
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.6487882Z Running Gradle task 'assembleRelease'...                          566.0s
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.6582156Z Gradle task assembleRelease failed with exit code 1
+Build Android APK	Build Fat APK	2026-03-09T20:44:52.6641425Z ##[error]Process completed with exit code 1.
+Build Android APK	Post Run subosito/flutter-action@v2	∩╗┐2026-03-09T20:44:52.6802310Z Post job cleanup.
+Build Android APK	Post Run actions/setup-java@v4	∩╗┐2026-03-09T20:44:52.6890168Z Post job cleanup.
+Build Android APK	Post Run actions/checkout@v4	∩╗┐2026-03-09T20:44:52.8855524Z Post job cleanup.
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0043805Z [command]/usr/bin/git version
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0090449Z git version 2.53.0
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0149377Z Temporarily overriding HOME='/home/runner/work/_temp/5b7ece40-bc60-439e-b4c7-38e7edc2bd9a' before making global git config changes
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0150694Z Adding repository directory to the temporary git global config as a safe directory
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0157946Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/chessfr/chessfr
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0204787Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0242992Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0557826Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0584086Z http.https://github.com/.extraheader
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0601836Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0638432Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0929974Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build Android APK	Post Run actions/checkout@v4	2026-03-09T20:44:53.0966356Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build Android APK	Complete job	∩╗┐2026-03-09T20:44:53.1347984Z Cleaning up orphan processes
+Build Android APK	Complete job	2026-03-09T20:44:53.1699459Z Terminate orphan process: pid (3132) (java)
+Build Android APK	Complete job	2026-03-09T20:44:53.1737681Z Terminate orphan process: pid (3306) (java)
+Build Android APK	Complete job	2026-03-09T20:44:53.1818864Z Terminate orphan process: pid (4137) (java)
