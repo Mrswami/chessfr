@@ -232,7 +232,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
               children: [
                 Text(
                   '$xp',
-                  style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.black, fontSize: 16),
+                  style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w900, fontSize: 16),
                 ),
                 const Text('XP', style: TextStyle(color: Colors.white24, fontSize: 10)),
               ],

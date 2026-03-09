@@ -244,67 +244,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
                     ).animate().fadeIn(duration: 200.ms).slideY(begin: 0.3, end: 0),
                   
                   if (_openingStats != null && _openingStats!.name != 'Unknown Position')
-<<<<<<< HEAD
                     _buildOpeningCard(context),
-=======
-                     Container(
-                      margin: const EdgeInsets.only(bottom: 14),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _openingStats!.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (_openingStats!.eco.isNotEmpty)
-                                  Text(
-                                    'ECO: ${_openingStats!.eco}',
-                                    style: const TextStyle(fontSize: 12, color: Colors.white54),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black26,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.public, size: 14, color: Colors.white54),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${_openingStats!.totalGames}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ).animate().fadeIn(),
->>>>>>> 3795176 (feat: UI stabilization, release build fixes, password autofill integration, and sleek Santa icon redesign)
+
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

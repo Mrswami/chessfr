@@ -11,6 +11,7 @@ import '../projection/ui/camera_recognition_screen.dart';
 import '../projection/ui/board_connection_screen.dart';
 import '../profile/profile_screen.dart';
 import '../social/social_hub_screen.dart';
+import '../training/mastery_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -158,6 +159,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (mounted) _loadStats();
                     },
                     delay: 150,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'Mastery Journey',
+                    subtitle: 'Visualize your neural progression.',
+                    icon: Icons.map_rounded,
+                    color: Colors.cyanAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MasteryScreen()),
+                      );
+                    },
+                    delay: 175,
                   ),
                   const SizedBox(height: 14),
                   _buildActionTile(
