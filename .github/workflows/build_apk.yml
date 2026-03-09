@@ -30,6 +30,11 @@ jobs:
         run: flutter pub get
         working-directory: flutter
 
+      # Create dummy .env for analyze to pass
+      - name: Create dummy .env
+        run: touch .env
+        working-directory: flutter
+
       # Analyze gate (Fail fast if code is broken)
       - name: Analyze
         run: flutter analyze --fatal-infos
