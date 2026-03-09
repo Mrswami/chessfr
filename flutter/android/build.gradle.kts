@@ -1,3 +1,7 @@
+buildscript {
+    val kotlin_version by extra("2.1.0")
+}
+
 allprojects {
     repositories {
         google()
