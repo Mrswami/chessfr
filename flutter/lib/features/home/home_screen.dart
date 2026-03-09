@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             _buildStatChip(context, Icons.local_fire_department_rounded, '$_streak', 'Streak'),
                             const SizedBox(width: 12),
-                            _buildStatChip(context, Icons.star_rounded, '$_xp', 'XP'),
+                            _buildStatChip(context, Icons.star_rounded, '$_xp', 'Aura'),
                           ],
                         ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
                       ],

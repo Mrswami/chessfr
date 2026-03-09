@@ -140,7 +140,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
                             ),
                             const TextSpan(text: 'a technical puzzle '),
                             TextSpan(
-                              text: '+${xp}xp',
+                              text: '+${xp} Aura',
                               style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -234,7 +234,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
                   '$xp',
                   style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w900, fontSize: 16),
                 ),
-                const Text('XP', style: TextStyle(color: Colors.white24, fontSize: 10)),
+                const Text('Aura', style: TextStyle(color: Colors.white24, fontSize: 10)),
               ],
             ),
           ),

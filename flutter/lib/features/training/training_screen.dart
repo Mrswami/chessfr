@@ -116,10 +116,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
     setState(() {
       if (isCorrect) {
-        _feedback = "Excellent! That's the DankFish choice. +$xpEarned XP";
+        _feedback = "Excellent! That's the DankFish choice. +$xpEarned Aura";
         _feedbackIsPositive = true;
       } else if (isRecommended) {
-        _feedback = "Good choice. ${_rankedMoves[rank - 1].explanation} +$xpEarned XP";
+        _feedback = "Good choice. ${_rankedMoves[rank - 1].explanation} +$xpEarned Aura";
         _feedbackIsPositive = true;
       } else {
         _feedback = "Not quite. Check your piece connectivity!";

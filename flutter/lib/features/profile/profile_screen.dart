@@ -224,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: 'Check out my $mode profile in Chess XL! I have $_totalXp XP and a $_currentStreak day streak. 🔥',
+        text: 'Check out my $mode profile in Chess XL! I have $_totalXp Aura and a $_currentStreak day streak. 🔥',
       );
     } catch (e) {
       debugPrint('Error sharing profile: $e');
@@ -493,7 +493,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatsSection() {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('XP', _totalXp.toString(), Icons.stars, Colors.amber)),
+        Expanded(child: _buildStatCard('Aura', _totalXp.toString(), Icons.stars, Colors.amber)),
         const SizedBox(width: 12),
         Expanded(child: _buildStatCard('Streak', '$_currentStreak 🔥', Icons.local_fire_department, Colors.orange)),
       ],

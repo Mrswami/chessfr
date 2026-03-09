@@ -138,7 +138,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'BRAIN SCORE: $_totalXp',
+                  'AURA SCORE: $_totalXp',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
