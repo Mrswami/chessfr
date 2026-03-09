@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final UserRoleService _roleService = UserRoleService();
   
   int _streak = 0;
-  int _xp = 0;
+  int _aura = 0;
   UserRole _role = UserRole.free;
 
   @override
@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted && stats != null) {
       setState(() {
         _streak = stats['current_streak'] as int? ?? 0;
-        _xp = stats['total_xp'] as int? ?? 0;
+        _aura = stats['total_aura'] as int? ?? 0;
       });
     }
   }
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             _buildStatChip(context, Icons.local_fire_department_rounded, '$_streak', 'Streak'),
                             const SizedBox(width: 12),
-                            _buildStatChip(context, Icons.star_rounded, '$_xp', 'Aura'),
+                            _buildStatChip(context, Icons.star_rounded, '$_aura', 'Aura'),
                           ],
                         ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2, end: 0),
                       ],

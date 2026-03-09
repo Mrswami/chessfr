@@ -13,7 +13,7 @@ class MasteryScreen extends StatefulWidget {
 
 class _MasteryScreenState extends State<MasteryScreen> {
   final TrainingRepository _repo = TrainingRepository();
-  int _totalXp = 0;
+  int _totalAura = 0;
   double _consistencyScore = 0;
   int _currentLevel = 0;
   String? _avatarUrl;
@@ -36,14 +36,14 @@ class _MasteryScreenState extends State<MasteryScreen> {
     final profile = await _repo.getProfile();
     
     if (mounted && stats != null) {
-      final xp = stats['total_xp'] as int? ?? 0;
+      final aura = (stats['total_aura'] as num? ?? 0).toInt();
       final consistency = (stats['consistency_score'] as num? ?? 0).toDouble();
       setState(() {
-        _totalXp = xp;
+        _totalAura = aura;
         _consistencyScore = consistency;
         _avatarUrl = profile?['avatar_url'];
-        // Simple level calculation: Level = totalXp / 500
-        _currentLevel = (xp / 500).floor();
+        // Simple level calculation: Level = totalAura / 500
+        _currentLevel = (aura / 500).floor();
         _isLoading = false;
       });
     }
@@ -79,7 +79,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
           : Stack(
               children: [
                 MasteryPath(
-                  totalXp: _totalXp,
+                  aura: _totalAura,
                   currentLevel: _currentLevel,
                 ),
                 // The Brain Balloon (User) - Floating in the atmosphere
@@ -87,7 +87,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
                   left: MediaQuery.of(context).size.width / 2 - 30,
                   bottom: 300 + (_consistencyScore * 8), // Vertical buoyancy
                   child: BrainBalloon(
-                    brainScore: _totalXp,
+                    aura: _totalAura,
                     avatarUrl: _avatarUrl,
                     label: 'YOU',
                     isUser: true,
@@ -99,7 +99,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
                   left: 0,
                   right: 0,
                   child: MasterMap(
-                    totalXp: _totalXp,
+                    totalXp: _totalAura,
                     currentLevel: _currentLevel,
                   ),
                 ),
@@ -138,7 +138,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'AURA SCORE: $_totalXp',
+                  'AURA SCORE: $_totalAura',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -149,7 +149,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    value: (_totalXp % 500) / 500,
+                    value: (_totalAura % 500) / 500,
                     backgroundColor: Colors.white12,
                     color: Colors.cyanAccent,
                     minHeight: 6,

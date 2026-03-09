@@ -91,7 +91,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
         final position = activity['positions'] as Map<String, dynamic>?;
         final name = profile?['display_name'] ?? 'A player';
         final time = DateTime.parse(activity['created_at']).toLocal();
-        final xp = activity['xp_earned'] ?? 0;
+        final aura = activity['aura_earned'] ?? 0;
         final outcome = activity['outcome'] ?? 'solved';
 
         return Card(
@@ -140,7 +140,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
                             ),
                             const TextSpan(text: 'a technical puzzle '),
                             TextSpan(
-                              text: '+$xp Aura',
+                              text: '+$aura Aura',
                               style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -192,7 +192,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
         final player = _topPlayers[index];
         final profile = player['profiles'] as Map<String, dynamic>?;
         final name = profile?['display_name'] ?? 'Player';
-        final xp = player['total_xp'] ?? 0;
+        final aura = player['total_aura'] ?? 0;
         final streak = player['current_streak'] ?? 0;
 
         return Container(
@@ -231,7 +231,7 @@ class _SocialHubScreenState extends State<SocialHubScreen> with SingleTickerProv
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '$xp',
+                  '$aura',
                   style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w900, fontSize: 16),
                 ),
                 const Text('Aura', style: TextStyle(color: Colors.white24, fontSize: 10)),

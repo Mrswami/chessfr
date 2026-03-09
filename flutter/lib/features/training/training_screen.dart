@@ -104,22 +104,22 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final isCorrect = moveSan == bestMove.moveSan;
     final isRecommended = rank >= 1 && rank <= 3;
     String outcome = 'incorrect';
-    int xpEarned = 0;
+    int auraEarned = 0;
     
     if (isCorrect) {
       outcome = 'correct';
-      xpEarned = 10;
+      auraEarned = 10;
     } else if (isRecommended) {
       outcome = 'correct';
-      xpEarned = 5;
+      auraEarned = 5;
     }
 
     setState(() {
       if (isCorrect) {
-        _feedback = "Excellent! That's the DankFish choice. +$xpEarned Aura";
+        _feedback = "Excellent! That's the DankFish choice. +$auraEarned Aura";
         _feedbackIsPositive = true;
       } else if (isRecommended) {
-        _feedback = "Good choice. ${_rankedMoves[rank - 1].explanation} +$xpEarned Aura";
+        _feedback = "Good choice. ${_rankedMoves[rank - 1].explanation} +$auraEarned Aura";
         _feedbackIsPositive = true;
       } else {
         _feedback = "Not quite. Check your piece connectivity!";
@@ -137,7 +137,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         chosenMove: moveSan,
         responseLatencyMs: latencyMs,
         outcome: outcome,
-        xpEarned: xpEarned,
+        auraEarned: auraEarned,
       );
     }
   }

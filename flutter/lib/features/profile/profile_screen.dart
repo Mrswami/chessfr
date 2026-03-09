@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isDankFishMode = false;
   
   // User stats
-  int _totalXp = 0;
+  int _totalAura = 0;
   int _currentStreak = 0;
   String _tier = 'Free';
   
@@ -92,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           if (stats != null) {
-            _totalXp = stats['total_xp'] ?? 0;
+            _totalAura = stats['total_aura'] ?? 0;
             _currentStreak = stats['current_streak'] ?? 0;
             _tier = stats['tier'] ?? 'Free';
           }
@@ -224,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: 'Check out my $mode profile in Chess FR! I have $_totalXp Aura and a $_currentStreak day streak. 🔥',
+        text: 'Check out my $mode profile in Chess FR! I have $_totalAura Aura and a $_currentStreak day streak. 🔥',
       );
     } catch (e) {
       debugPrint('Error sharing profile: $e');
@@ -493,7 +493,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatsSection() {
     return Row(
       children: [
-        Expanded(child: _buildStatCard('Aura', _totalXp.toString(), Icons.stars, Colors.amber)),
+        Expanded(child: _buildStatCard('Aura', _totalAura.toString(), Icons.stars, Colors.amber)),
         const SizedBox(width: 12),
         Expanded(child: _buildStatCard('Streak', '$_currentStreak 🔥', Icons.local_fire_department, Colors.orange)),
       ],

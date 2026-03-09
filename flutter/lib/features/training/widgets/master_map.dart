@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 class MasterMap extends StatelessWidget {
-  final int totalXp;
+  final int aura;
   final int currentLevel;
 
   const MasterMap({
     super.key,
-    required this.totalXp,
+    required this.aura,
     required this.currentLevel,
   });
 
