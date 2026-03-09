@@ -123,7 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    _isSignUp ? 'Create Profile' : 'Chess Personal Trainer',
+                    _isSignUp ? 'Create Profile' : 'Chess FR',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,

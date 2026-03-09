@@ -41,7 +41,7 @@ class _ChessTrainerAppState extends State<ChessTrainerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chess Personal Trainer',
+      title: 'Chess FR',
       theme: AppTheme.dark,
       home: _showAd 
         ? LoadingAdScreen(onAdComplete: () => setState(() => _showAd = false))
