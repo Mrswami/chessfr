@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:math' as math;
 
 class BrainBalloon extends StatelessWidget {
-  final int brainScore;
+  final int aura;
   final double size;
   final String? label;
   final String? avatarUrl;
@@ -11,7 +11,7 @@ class BrainBalloon extends StatelessWidget {
 
   const BrainBalloon({
     super.key,
-    required this.brainScore,
+    required this.aura,
     this.size = 60,
     this.label,
     this.avatarUrl,
@@ -22,10 +22,10 @@ class BrainBalloon extends StatelessWidget {
   Widget build(BuildContext context) {
     // Scaling logic: head grows as score increases
     // Base size + growth proportional to log of score to avoid infinite growth
-    final double growthFactor = math.log(math.max(brainScore, 1) / 100 + 1) * 20;
+    final double growthFactor = math.log(math.max(aura, 1) / 100 + 1) * 20;
     final double totalSize = size + growthFactor;
     
-    // Wrinkle count: 1 wrinkle per 100 XP, max 10 for performance/style
+    // Wrinkle count: 1 wrinkle per 100 Aura, max 10 for performance/style
     // The wrinkle count is calculated directly in _BrainPainter, so this variable is unused.
 
     return Column(
@@ -83,7 +83,7 @@ class BrainBalloon extends StatelessWidget {
       size: Size(totalSize, totalSize),
       painter: _BrainPainter(
         color: isUser ? Colors.cyanAccent : Colors.white,
-        wrinkleCount: (brainScore / 500).floor().clamp(0, 12),
+        wrinkleCount: (aura / 500).floor().clamp(0, 12),
         isUser: isUser,
       ),
     );

@@ -3,12 +3,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:math' as math;
 
 class MasteryPath extends StatelessWidget {
-  final int totalXp;
+  final int aura;
   final int currentLevel;
 
   const MasteryPath({
     super.key,
-    required this.totalXp,
+    required this.aura,
     required this.currentLevel,
   });
 

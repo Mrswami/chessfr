@@ -102,6 +102,6 @@ jobs:
       - name: Distribute to Firebase App Distribution
         uses: w9jds/firebase-action@master
         with:
-          args: "appdistribution:distribute flutter/build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups 'testers' --release-notes '🚀 Auto-build from GitHub Actions: ${{ github.event.head_commit.message }}'"
+          args: "appdistribution:distribute flutter/build/app/outputs/flutter-apk/app-release.apk --app 1:221089588903:android:b3e0d3131a5bc686361d82 --groups 'testers' --release-notes '🚀 Auto-build from GitHub Actions: ${{ github.event.head_commit.message }}'"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

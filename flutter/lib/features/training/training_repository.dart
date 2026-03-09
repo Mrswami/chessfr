@@ -23,7 +23,7 @@ class TrainingRepository {
     if (userId == null) return null;
     final res = await _client
         .from('profiles')
-        .select('id, connectivity_weight, response_weight, influence_weight, engine_mode, avatar_url')
+        .select('id, connectivity_weight, response_weight, influence_weight, engine_mode, avatar_url, total_aura')
         .eq('user_id', userId)
         .maybeSingle();
     return res != null ? Map<String, dynamic>.from(res) : null;
@@ -77,7 +77,7 @@ class TrainingRepository {
     required String chosenMove,
     int? responseLatencyMs,
     required String outcome,
-    required int xpEarned,
+    required int auraEarned,
   }) async {
     await _client.from('training_sessions').insert({
       'profile_id': profileId,
@@ -86,20 +86,20 @@ class TrainingRepository {
       'response_latency_ms': responseLatencyMs,
       'outcome': outcome,
       'feedback_shown': true,
-      'xp_earned': xpEarned,
+      'aura_earned': auraEarned,
     });
 
-    await _updateUserStats(profileId, xpEarned);
+    await _updateUserStats(profileId, auraEarned);
   }
 
-  Future<void> _updateUserStats(String profileId, int xpEarned) async {
+  Future<void> _updateUserStats(String profileId, int auraEarned) async {
     final res = await _client
         .from('user_stats')
-        .select('total_xp, current_streak, longest_streak, last_training_date')
+        .select('total_aura, current_streak, longest_streak, last_training_date')
         .eq('profile_id', profileId)
         .single();
 
-    final totalXp = (res['total_xp'] as int? ?? 0) + xpEarned;
+    final totalAura = (res['total_aura'] as int? ?? 0) + auraEarned;
     final lastDate = res['last_training_date'] != null
         ? DateTime.parse(res['last_training_date'] as String)
         : null;
@@ -122,7 +122,7 @@ class TrainingRepository {
     final newLongest = newStreak > longest ? newStreak : longest;
 
     await _client.from('user_stats').update({
-      'total_xp': totalXp,
+      'total_aura': totalAura,
       'current_streak': newStreak,
       'longest_streak': newLongest,
       'positions_trained': (res['positions_trained'] as int? ?? 0) + 1,
@@ -151,17 +151,17 @@ class TrainingRepository {
   Future<Map<String, dynamic>?> getUserStats(String profileId) async {
     final res = await _client
         .from('user_stats')
-        .select('total_xp, current_streak, longest_streak, positions_trained, consistency_score')
+        .select('total_aura, current_streak, longest_streak, positions_trained, consistency_score')
         .eq('profile_id', profileId)
         .maybeSingle();
     return res != null ? Map<String, dynamic>.from(res) : null;
   }
-  /// Fetches the top players ordered by total XP.
+  /// Fetches the top players ordered by total Aura.
   Future<List<Map<String, dynamic>>> getLeaderboard({int limit = 10}) async {
     final res = await _client
         .from('user_stats')
         .select('''
-          total_xp,
+          total_aura,
           current_streak,
           profiles:profile_id (
             display_name,
@@ -169,7 +169,7 @@ class TrainingRepository {
             avatar_background
           )
         ''')
-        .order('total_xp', ascending: false)
+        .order('total_aura', ascending: false)
         .limit(limit);
   
     return List<Map<String, dynamic>>.from(res);
@@ -183,7 +183,7 @@ class TrainingRepository {
           id,
           created_at,
           outcome,
-          xp_earned,
+          aura_earned,
           positions:position_id (
             fen,
             tags

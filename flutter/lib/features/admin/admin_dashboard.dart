@@ -29,7 +29,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     try {
       final res = await _client
           .from('profiles')
-          .select('id, display_name, created_at, user_stats(total_xp, current_streak, tier)'); // Assume tier is in user_stats or profiles
+          .select('id, display_name, created_at, user_stats(total_aura, current_streak, tier)'); // Assume tier is in user_stats or profiles
       
       // If schema differs, just grab basic profile info.
       // Assuming 'user_stats' is a foreign table join.
@@ -46,8 +46,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           _isLoading = false;
           // Just mock for UI dev if database denies access
           _allUsers = [
-            {'id': '1', 'display_name': 'Test User', 'tier': 'Free', 'total_xp': 120},
-            {'id': '2', 'display_name': 'Admin', 'tier': 'Admin', 'total_xp': 9000},
+            {'id': '1', 'display_name': 'Test User', 'tier': 'Free', 'total_aura': 120},
+            {'id': '2', 'display_name': 'Admin', 'tier': 'Admin', 'total_aura': 9000},
           ];
         });
       }
@@ -82,7 +82,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   child: ListTile(
                     leading: CircleAvatar(child: Text(user['display_name']?[0] ?? '?')),
                     title: Text(user['display_name'] ?? 'Unknown'),
-                    subtitle: Text('Role: ${user['tier'] ?? 'Free'} • XP: ${user['total_xp'] ?? 0}'),
+                    subtitle: Text('Role: ${user['tier'] ?? 'Free'} • Aura: ${user['total_aura'] ?? 0}'),
                     trailing: PopupMenuButton<String>(
                       onSelected: (value) {
                         // Implement manual promotion/demotion logic here

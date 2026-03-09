@@ -18,14 +18,14 @@ class DevPanel extends StatefulWidget {
 
 class _DevPanelState extends State<DevPanel> {
   final _client = Supabase.instance.client;
-  final _xpController = TextEditingController(text: '500');
+  final _auraController = TextEditingController(text: '500');
   final _streakController = TextEditingController(text: '7');
   
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _xpController.dispose();
+    _auraController.dispose();
     _streakController.dispose();
     super.dispose();
   }
@@ -114,7 +114,7 @@ class _DevPanelState extends State<DevPanel> {
 
       // Update stats
       await _client.from('user_stats').update({
-        'total_xp': int.parse(_xpController.text),
+        'total_aura': int.parse(_auraController.text),
         'current_streak': int.parse(_streakController.text),
       }).eq('profile_id', profileId);
 
@@ -197,10 +197,10 @@ class _DevPanelState extends State<DevPanel> {
               '📊 Stats Editor',
               [
                 TextField(
-                  controller: _xpController,
+                  controller: _auraController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Total XP',
+                    labelText: 'Total Aura',
                     prefixIcon: Icon(Icons.star),
                   ),
                 ),
