@@ -99,7 +99,7 @@ class _MasteryScreenState extends State<MasteryScreen> {
                   left: 0,
                   right: 0,
                   child: MasterMap(
-                    totalXp: _totalAura,
+                    aura: _totalAura,
                     currentLevel: _currentLevel,
                   ),
                 ),
