@@ -1,76 +1,70 @@
-# ♟️ Chess XL: Personal Trainer 🎅🐟
+# ♟️ chessfr: Next-Gen Chess Mastery & Hardware Sync 🎅
 
-**Chess XL** is a next-generation chess training application that moves beyond raw engine evaluations. It introduces the **DankFish Personalized Logic Filter**, which ranks moves based on your unique cognitive strengths—balancing structural connectivity, piece influence, and response accuracy.
+**chessfr** is a high-performance, community-driven chess training ecosystem designed to bridge the gap between engine-perfect calculations and human-readable mastery. It leverages modern UI aesthetics with deep hardware integration to provide an unmatched training experience.
 
 ---
 
 ## 🌟 Key Features
 
-### 🧠 Personalized Training (DankFish)
-- **Engine vs. Design**: Toggle between pure **Stockfish** analysis and **DankFish Mode**.
-- **Cognitive Weights**: The app adapts to your playstyle by weighing connectivity, response, and influence metrics.
-- **Delta-V Logic**: Accepts minor evaluation losses in exchange for significantly clearer board structures.
+### 🧠 Personalized Training (DankFish Logic)
+- **Engine vs. Intuition**: Toggle between raw **Stockfish** analysis and **DankFish Mode**, which translates complex evaluations into human-readable patterns.
+- **Aura Point System**: Earn **Aura** as you master position connectivity, influence metrics, and response accuracy.
+- **Dynamic Mastery Path**: Visualize your progress through an animated world map of chess challenges.
 
-### 🎅 Customization & Social
-- **Santa Avatar System**: Choose from 8 unique Santa variants including **Ninja**, **Robot**, **King**, and **Space Santa**.
-- **High-End Themes**: 8 premium background gradients (Fire, Gold, Arctic, etc.).
-- **Profile Snapshots**: Capture and share your custom avatar and stats (XP, Streaks) directly to social media.
-- **Global Leaderboard**: Compete against players worldwide on a real-time animated podium.
+### 📡 Hardware & IoT Integration
+- **ChessUp Native Sync**: Connect directly to your **ChessUp** hardware via Bluetooth (BLE) for a tactile, electronic board experience.
+- **Auto-Sync Technology**: Positions and games are synchronized in real-time between your board, the app, and the cloud.
+- **Optical Vision**: Integrated camera support to scan and analyze physical chess boards using neural network processing.
 
-### 🔧 Secret Developer Tools
-- **Hidden Admin Panel**: Accessible via a secret 5-tap gesture with haptic feedback.
-- **Quick Switch**: Instant login as Admin, Free, or Premium users for testing.
-- **Stats Editor**: Real-time manipulation of XP and Streaks for development.
-
-### 📡 Advanced Integration
-- **Chess Vision**: Scan real boards using an optical neural network (Camera Integration).
-- **Hardwire Sync**: Connect directly to **ChessUp** hardware via Bluetooth.
-- **Auto-Sync**: Seamless synchronization with **Supabase** cloud backend.
+### 🎭 Customization & Social
+- **Aesthetic Avatars**: A premium collection of Santa-themed avatars (Ninja, Spaceship, King, etc.) that evolve with your progress.
+- **Global Hub**: Real-time leaderboards, activity feeds, and "Ghost Logic" puzzles for continuous improvement.
+- **Glassmorphic UI**: A stunning, modern interface built for maximum focus and high-end feel.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Component | Technology |
+| Domain | Technology |
 | :--- | :--- |
-| **Frontend** | Flutter (Multi-platform) |
-| **Backend** | Supabase (PostgreSQL, Auth, RLS) |
-| **Animation** | Flutter Animate (Physics-based UI) |
-| **CI/CD** | GitHub Actions + Firebase App Distribution |
-| **Chess Engine** | Stockfish (Local WASM/Native) |
+| **Frontend** | Flutter (Dart) |
+| **Backend** | Supabase (PostgreSQL, Real-time RLS) |
+| **Connectivity** | Bluetooth Low Energy (BLE) / JSON API |
+| **Intelligence** | Stockfish WASM / Custom Logic Filters |
+| **Visuals** | Flutter Animate / Shader-based UI |
 
 ---
 
-## 🚀 Development Setup
+## 🚀 Getting Started
 
 ### Prerequisites
-- Flutter SDK (Latest Stable)
-- Supabase Project (Tables: `profiles`, `user_stats`, `positions`, `training_sessions`)
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (Stable)
+- A Supabase Project (See `backend/supabase` for schema migrations)
+- Firebase Account (For CI/CD Distribution & Messaging)
 
-### Commands
+### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/Mrswami/ChessPersonalTrainer
+git clone https://github.com/Mrswami/chessfr
 
-# Install Flutter dependencies
+# Initialize dependencies
 cd flutter
 flutter pub get
 
-# Run the app
+# Launch development environment
 flutter run
 ```
 
 ---
 
-## 🤖 CI/CD Pipeline
-Every push to `master` automatically:
-1. Runs full static code analysis (Lints).
-2. Executes unit tests.
-3. Builds a fat Android APK.
-4. Distributes the build to **Firebase App Distribution** for beta testing.
+## 🛡️ Security & OPSEC
+This project prioritizes security and operational privacy:
+- **No Private Keys**: All API secrets and keys are managed via environmental variables (`.env`) and GitHub Secrets.
+- **Encrypted Storage**: Sensitive user preferences are stored securely on-device and synced via encrypted Supabase channels.
+- **Anonymized Analytics**: Minimal telemetry is used to ensure user privacy during beta testing.
 
 ---
 
-## 📜 License
-*Designed and built with ♟️ by the Chess XL Team.*
-
+## 📜 License & Acknowledgments
+Built with ♟️ by the **chessfr** team.
+Special thanks to the open-source chess community and hardware partners.

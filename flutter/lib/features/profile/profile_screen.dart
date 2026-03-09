@@ -224,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: 'Check out my $mode profile in Chess XL! I have $_totalXp Aura and a $_currentStreak day streak. 🔥',
+        text: 'Check out my $mode profile in Chess FR! I have $_totalXp Aura and a $_currentStreak day streak. 🔥',
       );
     } catch (e) {
       debugPrint('Error sharing profile: $e');

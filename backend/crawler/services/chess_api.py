@@ -11,7 +11,7 @@ class ChessCrawler:
 
     BASE_URL = "https://api.chess.com/pub/player"
     
-    def __init__(self, username: str, email: str = "jacobfluttereddev@gmail.com"):
+    def __init__(self, username: str, email: str = "your-email@example.com"):
         self.username = username
         self.email = email
         self.user_agent = f"ChessBehavioralProject/1.0 (Contact: {self.email})"
