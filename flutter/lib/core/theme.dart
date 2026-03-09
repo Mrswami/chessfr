@@ -13,7 +13,7 @@ class AppTheme {
     final colorScheme = ColorScheme.dark(
       primary: _teal,
       onPrimary: Colors.white,
-      primaryContainer: _teal.withOpacity(0.3),
+      primaryContainer: _teal.withValues(alpha: 0.3),
       onPrimaryContainer: _tealLight,
       secondary: _accent,
       onSecondary: Colors.black87,
@@ -39,6 +39,11 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
+      cardTheme: CardThemeData(
+        color: _surfaceCard,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -46,7 +51,7 @@ class AppTheme {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: _teal.withOpacity(0.3)),
+          borderSide: BorderSide(color: _teal.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

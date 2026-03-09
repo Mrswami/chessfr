@@ -135,6 +135,11 @@ class GameAnalysisService {
       
       // Filter by user side if specified
       if (isBlunder && (userSide == null || userSide == turnBefore)) {
+         // Simulate Connectivity Score (C_s) delta from our Pattern Engine
+         // In production, this calls the Python service.
+         // +1.5 = move improved connectivity, -2.0 = move fragmented pieces
+         final connectivityDelta = (swing < -200) ? -2.5 : (swing < -100 ? -0.8 : 0.5);
+
          spots.add(SwingSpot(
            moveIndex: i,
            fenBefore: fenBefore,
@@ -142,6 +147,7 @@ class GameAnalysisService {
            evalBefore: evalBeforeWhite,
            evalAfter: evalAfterWhite,
            swing: swing,
+           connectivityDelta: connectivityDelta,
          ));
       }
     }
@@ -157,6 +163,7 @@ class SwingSpot {
   final double evalBefore; // Normalized to White cp
   final double evalAfter;  // Normalized to White cp
   final double swing;
+  final double connectivityDelta; // "Universe B" Metric
   
   SwingSpot({
     required this.moveIndex,
@@ -165,5 +172,6 @@ class SwingSpot {
     required this.evalBefore,
     required this.evalAfter,
     required this.swing,
+    required this.connectivityDelta,
   });
 }

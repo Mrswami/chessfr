@@ -73,3 +73,4 @@ Every push to `master` automatically:
 
 ## 📜 License
 *Designed and built with ♟️ by the Chess XL Team.*
+

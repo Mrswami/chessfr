@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final TrainingRepository _repo = TrainingRepository();
   final UserRoleService _roleService = UserRoleService();
   
-
   int _streak = 0;
   int _xp = 0;
   UserRole _role = UserRole.free;
@@ -96,6 +95,49 @@ class _HomeScreenState extends State<HomeScreen> {
                     ).animate().fadeIn(delay: 50.ms),
                   ],
                 ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.amber.shade900.withValues(alpha: 0.2), Colors.transparent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.amber.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.psychology_outlined, color: Colors.amber, size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'MAGNUS INSIGHT',
+                              style: TextStyle(
+                                color: Colors.amber.shade200,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const Text(
+                              'Focus on piece connectivity over raw material today.',
+                              style: TextStyle(color: Colors.white, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ).animate().fadeIn(delay: 120.ms).slideY(begin: 0.1, end: 0),
               ),
             ),
             SliverPadding(
@@ -273,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               width: 1,
             ),
           ),
@@ -283,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, size: 28, color: color),

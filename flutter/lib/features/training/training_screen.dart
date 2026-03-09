@@ -208,13 +208,13 @@ class _TrainingScreenState extends State<TrainingScreen> {
                       margin: const EdgeInsets.only(bottom: 14),
                       decoration: BoxDecoration(
                         color: _feedbackIsPositive
-                            ? (isDankFish ? Colors.red.shade900.withOpacity(0.3) : const Color(0xFF0D9488).withOpacity(0.25))
-                            : const Color(0xFFF59E0B).withOpacity(0.25),
+                            ? (isDankFish ? Colors.red.shade900.withValues(alpha: 0.3) : const Color(0xFF0D9488).withValues(alpha: 0.25))
+                            : const Color(0xFFF59E0B).withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _feedbackIsPositive
-                              ? (isDankFish ? Colors.red : const Color(0xFF0D9488).withOpacity(0.5))
-                              : const Color(0xFFF59E0B).withOpacity(0.5),
+                              ? (isDankFish ? Colors.red : const Color(0xFF0D9488).withValues(alpha: 0.5))
+                              : const Color(0xFFF59E0B).withValues(alpha: 0.5),
                           width: 1,
                         ),
                       ),
@@ -244,7 +244,67 @@ class _TrainingScreenState extends State<TrainingScreen> {
                     ).animate().fadeIn(duration: 200.ms).slideY(begin: 0.3, end: 0),
                   
                   if (_openingStats != null && _openingStats!.name != 'Unknown Position')
+<<<<<<< HEAD
                     _buildOpeningCard(context),
+=======
+                     Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _openingStats!.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (_openingStats!.eco.isNotEmpty)
+                                  Text(
+                                    'ECO: ${_openingStats!.eco}',
+                                    style: const TextStyle(fontSize: 12, color: Colors.white54),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.public, size: 14, color: Colors.white54),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${_openingStats!.totalGames}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(),
+>>>>>>> 3795176 (feat: UI stabilization, release build fixes, password autofill integration, and sleek Santa icon redesign)
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -287,7 +347,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white12),
       ),
@@ -323,9 +383,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withOpacity(0.6),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(12),
-        border: isDankFish && index == 0 ? Border.all(color: Colors.amber.withOpacity(0.5)) : null,
+        border: isDankFish && index == 0 ? Border.all(color: Colors.amber.withValues(alpha: 0.5)) : null,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -334,7 +394,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           height: 36,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: (isDankFish && index == 0 ? Colors.amber : Colors.teal).withOpacity(0.3),
+            color: (isDankFish && index == 0 ? Colors.amber : Colors.teal).withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.w700, color: isDankFish && index == 0 ? Colors.amber : Colors.teal)),

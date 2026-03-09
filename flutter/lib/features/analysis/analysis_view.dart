@@ -104,73 +104,154 @@ class _AnalysisViewState extends State<AnalysisView> {
   }
 
   Widget _buildSpotCard(BuildContext context, SwingSpot spot, int index) {
-    // We want to show the board briefly or just stats
-    // showing board is expensive on resources in a list, 
-    // maybe just show move number and swing value for now.
+    bool isConnectivityImprovement = spot.connectivityDelta >= 0;
     
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          // Navigate to training with this FEN
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TrainingScreen(
-                initialFen: spot.fenBefore,
-              ),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '${spot.moveIndex ~/ 2 + 1}', // Approximate move number
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.redAccent,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.02),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TrainingScreen(
+                    initialFen: spot.fenBefore,
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: IntrinsicHeight(
+                child: Row(
                   children: [
-                    Text(
-                      'Missed Opportunity',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                    // Move Indicator
+                    Column(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                           ),
+                          child: Text(
+                            '${spot.moveIndex ~/ 2 + 1}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                        const Expanded(child: VerticalDivider(color: Colors.white10, width: 2, endIndent: 5, indent: 5)),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      // Format swing: -150 cp -> -1.5
-                      'Swing: ${(spot.swing / 100).toStringAsFixed(1)} pts',
-                      style: const TextStyle(color: Colors.white70),
+                    const SizedBox(width: 20),
+                    // Detail Section
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "CRITICAL MISSED MOMENT",
+                                style: TextStyle(
+                                  color: Colors.redAccent.withValues(alpha: 0.6),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 10,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const Spacer(),
+                              _buildMetricBadge(
+                                isConnectivityImprovement ? "CONNECTED" : "FRAGMENTED",
+                                isConnectivityImprovement ? Colors.cyanAccent : Colors.orangeAccent,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "You played ${spot.movePlayedSan}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              _buildInlineStat("Engine Loss", "${(spot.swing / 100).toStringAsFixed(1)}p", Colors.redAccent),
+                              const SizedBox(width: 16),
+                              _buildInlineStat("Connectivity", "${spot.connectivityDelta > 0 ? "+" : ""}${spot.connectivityDelta}", isConnectivityImprovement ? Colors.cyanAccent : Colors.orangeAccent),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                     Text(
-                      'You played: ${spot.movePlayedSan}',
-                      style: const TextStyle(color: Colors.white54, fontSize: 13),
-                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white10, size: 20),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white30),
-            ],
+            ),
           ),
         ),
       ),
-    ).animate().fadeIn(delay: (100 * index).ms).slideY(begin: 0.1, end: 0);
+    ).animate().fadeIn(delay: (100 * index).ms).slideX(begin: 0.1);
+  }
+
+  Widget _buildMetricBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 8,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInlineStat(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.3),
+            fontSize: 8,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
   }
 }

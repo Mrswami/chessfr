@@ -75,7 +75,7 @@ class _ImportViewState extends State<ImportView> {
                 hintText: '[Event "Live Chess"]...',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 12),
@@ -105,12 +105,15 @@ class _ImportViewState extends State<ImportView> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      hintText: 'Username (e.g. Hikaru)',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: AutofillGroup(
+                    child: TextField(
+                      controller: _usernameController,
+                      autofillHints: const [AutofillHints.username],
+                      decoration: InputDecoration(
+                        hintText: 'Username (e.g. Hikaru)',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
                     ),
                   ),
                 ),
@@ -161,7 +164,7 @@ class _ImportViewState extends State<ImportView> {
                             ? (game.result == '1-0' ? 'Won' : (game.result == '0-1' ? 'Lost' : 'Draw'))
                             : (game.result == '0-1' ? 'Won' : (game.result == '1-0' ? 'Lost' : 'Draw'))
                         ),
-                        backgroundColor: isWin ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                        backgroundColor: isWin ? Colors.green.withValues(alpha: 0.2) : Colors.red.withValues(alpha: 0.2),
                       ),
                       onTap: () => _analyzePgn(game.pgn, userSide: game.whiteUsername.toLowerCase() == _usernameController.text.toLowerCase() ? 'w' : 'b'),
                     ),

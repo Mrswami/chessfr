@@ -27,3 +27,16 @@ When implementing or auditing, map "Pattern-Aligned" product language to these c
 | **Connectivity** | Reward moves that reduce the distance between isolated piece clusters (Quad-Split support). |
 | **Response** | Penalty for moves with latency < 2.0s (Impulse control for MG/Emotional Authority). |
 | **Influence** | Reward moves where pieces are "Networked" (4-line logic). |
+
+---
+
+## 🛠️ Professional Standards (2026 Roadmap)
+
+*   **CI/CD:** Automated linting and builds via GitLab/GitHub Actions to maintain logic integrity.
+*   **Modern Packaging:** Using `pyproject.toml` and `venv` for reproducible, isolated Python builds.
+*   **Ethical Crawling:** 
+    -   Always check `robots.txt` before fetching data.
+    -   Identify the bot with a clear `User-Agent`.
+    -   Implement 'Polity' delays (randomized 1-3s) to respect platform resources.
+*   **Security:** Multi-layer secret management (.env and CI secrets).
+*   **Collaborative Ingestion:** The user selects games to "import" to avoid "flukes" and ensure high-quality training data.

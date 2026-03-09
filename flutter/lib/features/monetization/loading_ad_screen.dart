@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoadingAdScreen extends StatefulWidget {
   final VoidCallback onAdComplete;
@@ -36,22 +35,29 @@ class _LoadingAdScreenState extends State<LoadingAdScreen> {
             ),
           ),
           
-          // Ad Content
+          // Wisdom Content
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Play "Last War: Survival Game"',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
+              const Icon(Icons.tips_and_updates_rounded, size: 60, color: Colors.amber),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  '"Not being afraid isn\'t the same as being confident. You have to be both."',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ).animate().fadeIn().moveY(begin: 10, end: 0),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: () {
-                   launchUrl(Uri.parse('https://play.google.com/store/apps/details?id=com.fun.lastwar.gp'));
-                }, 
-                style: FilledButton.styleFrom(backgroundColor: Colors.blue),
-                child: const Text('INSTALL NOW'),
-              ).animate().scale(delay: 500.ms),
+              const SizedBox(height: 16),
+              const Text(
+                '— Magnus Carlsen',
+                style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+              ).animate().fadeIn(delay: 500.ms),
             ],
           ),
 

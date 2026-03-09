@@ -123,42 +123,80 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    _isSignUp ? 'Create Profile' : 'Welcome Back',
+                    _isSignUp ? 'Create Profile' : 'Chess Personal Trainer',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
                         ),
                     textAlign: TextAlign.center,
                   )
                       .animate()
                       .fadeIn(delay: 100.ms)
                       .slideY(begin: 0.2, end: 0, curve: Curves.easeOut),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5)),
+                        ),
+                        child: Text(
+                          'GOAT EDITION',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ).animate().fadeIn(delay: 150.ms),
+                  const SizedBox(height: 12),
                   Text(
-                    _isSignUp ? 'Start your pattern-aligned journey' : 'Train chess your way',
+                    _isSignUp ? 'Start your pattern-aligned journey' : 'Inspired by Magnus Carlsen\'s intuition',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
+                          fontStyle: FontStyle.italic,
                         ),
                     textAlign: TextAlign.center,
-                  ).animate().fadeIn(delay: 150.ms),
+                  ).animate().fadeIn(delay: 200.ms),
                   const SizedBox(height: 32),
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                  AutofillGroup(
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          textInputAction: TextInputAction.next,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            prefixIcon: Icon(Icons.email_outlined),
+                          ),
+                        ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.05, end: 0),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          autofillHints: [
+                            _isSignUp ? AutofillHints.newPassword : AutofillHints.password
+                          ],
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submit(),
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock_outline),
+                          ),
+                        ).animate().fadeIn(delay: 250.ms).slideX(begin: -0.05, end: 0),
+                      ],
                     ),
-                  ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.05, end: 0),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock_outline),
-                    ),
-                  ).animate().fadeIn(delay: 250.ms).slideX(begin: -0.05, end: 0),
+                  ),
                   const SizedBox(height: 28),
                   FilledButton(
                     onPressed: _isLoading ? null : _submit,

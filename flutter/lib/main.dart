@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme.dart';
 import 'features/auth/auth_screen.dart';
@@ -10,10 +11,11 @@ import 'features/monetization/loading_ad_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  await dotenv.load(fileName: "flutter/.env");
+  
   await Supabase.initialize(
-    // TODO: Move to .env or --dart-define in production
-    url: 'https://kticrtqrtnskgiqxewzd.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0aWNydHFydG5za2dpcXhld3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNDQ4MTEsImV4cCI6MjA4NjkyMDgxMX0.cfwhQz5jzAW9gjWcGQQfLnoghcQrgqpicBdZ1u_ZBw0',
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
   try {
@@ -39,7 +41,7 @@ class _ChessTrainerAppState extends State<ChessTrainerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ChessXL',
+      title: 'Chess Personal Trainer',
       theme: AppTheme.dark,
       home: _showAd 
         ? LoadingAdScreen(onAdComplete: () => setState(() => _showAd = false))

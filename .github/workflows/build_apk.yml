@@ -30,6 +30,11 @@ jobs:
         run: flutter pub get
         working-directory: flutter
 
+      # Analyze gate (Fail fast if code is broken)
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+        working-directory: flutter
+
       # Generate Debug Keystore (Required for release build signed with debug key)
       - name: Generate Debug Keystore
         run: |
