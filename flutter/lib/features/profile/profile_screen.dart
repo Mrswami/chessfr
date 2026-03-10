@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 import '../training/training_repository.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,6 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _totalAura = 0;
   int _currentStreak = 0;
   String _tier = 'Free';
+  String _displayName = 'Player';
   
   // Cognitive profile percentages
   double _connectivityPct = 33.0;
@@ -97,6 +99,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _tier = stats['tier'] ?? 'Free';
           }
           
+          _displayName = profile['display_name'] ?? _supabase.auth.currentUser?.email?.split('@').first ?? 'Player';
+          
           // Load cognitive profile
           final cognitiveProfile = profile['cognitive_profile'] as Map<String, dynamic>? ?? {};
           _connectivityPct = (cognitiveProfile['connectivity_weight'] ?? 0.33) * 100;
@@ -144,6 +148,100 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       debugPrint('Error saving engine mode: $e');
+    }
+  }
+
+  Future<void> _editUsername() async {
+    final filter = ProfanityFilter();
+    final controller = TextEditingController(text: _displayName);
+    final formKey = GlobalKey<FormState>();
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('Edit Username', style: TextStyle(color: Colors.white)),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: 'New Username',
+              labelStyle: TextStyle(color: Colors.white54),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.cyan)),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().length < 3) return 'Must be at least 3 characters';
+              if (value.trim().length > 15) return 'Max 15 characters';
+              if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) return 'Only letters, numbers, and underscores';
+              if (filter.hasProfanity(value)) return 'Inappropriate language detected';
+              return null;
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, controller.text.trim());
+              }
+            },
+            child: const Text('SAVE'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName != _displayName) {
+      setState(() => _isLoading = true);
+      try {
+        final userId = _supabase.auth.currentUser?.id;
+        if (userId == null) return;
+        
+        await _supabase
+            .from('profiles')
+            .update({'display_name': newName})
+            .eq('user_id', userId);
+            
+        setState(() {
+          _displayName = newName;
+          _isLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Username updated! 🎉')),
+          );
+        }
+      } on PostgrestException catch (e) {
+        if (mounted) setState(() => _isLoading = false);
+        // PostgreSQL Unique Violation is code 23505
+        if (e.code == '23505') {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Username is already taken!'), backgroundColor: Colors.red),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${e.message}'), backgroundColor: Colors.red),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
     }
   }
 
@@ -358,15 +456,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           
           // Username
-          Text(
-            _supabase.auth.currentUser?.email?.split('@').first ?? 'Player',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _displayName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.edit, size: 20, color: Colors.white54),
+                onPressed: _editUsername,
+                tooltip: 'Edit Username',
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 2),
           
           // Tier Badge
           Container(
