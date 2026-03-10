@@ -30,9 +30,11 @@ jobs:
         run: flutter pub get
         working-directory: flutter
 
-      # Create dummy .env for analyze to pass
-      - name: Create dummy .env
-        run: touch .env
+      # Create .env from secrets
+      - name: Create .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
         working-directory: flutter
 
       # Analyze gate (Fail fast if code is broken)
