@@ -7,6 +7,7 @@ import 'core/theme.dart';
 import 'features/auth/auth_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/monetization/loading_ad_screen.dart';
+import 'core/constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
