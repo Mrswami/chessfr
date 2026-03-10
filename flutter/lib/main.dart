@@ -56,6 +56,7 @@ class _ChessTrainerAppState extends State<ChessTrainerApp> {
   bool _showAd = true;
 
   @override
+  Widget build(BuildContext context) {
     Widget body;
     if (widget.error != null) {
       body = _BootstrapErrorScreen(error: widget.error!);
