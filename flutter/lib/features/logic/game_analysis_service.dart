@@ -1,170 +1,286 @@
 import 'package:chess/chess.dart' as chess_lib;
 import 'stockfish_service.dart';
 
+// ============================================
+// MOVE CLASSIFICATION ENUM
+// ============================================
+enum MoveClassification {
+  brilliant,   // ⭐ Only correct move in a complex position
+  excellent,   // Near-best move, low CPL
+  good,        // Solid, within acceptable range
+  inaccuracy,  // CPL 50-100
+  mistake,     // CPL 100-200
+  blunder,     // CPL > 200
+}
+
+extension MoveClassificationExtension on MoveClassification {
+  String get emoji {
+    switch (this) {
+      case MoveClassification.brilliant:  return '⭐';
+      case MoveClassification.excellent:  return '✅';
+      case MoveClassification.good:       return '👍';
+      case MoveClassification.inaccuracy: return '❓';
+      case MoveClassification.mistake:    return '❌';
+      case MoveClassification.blunder:    return '💀';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case MoveClassification.brilliant:  return 'Brilliant';
+      case MoveClassification.excellent:  return 'Excellent';
+      case MoveClassification.good:       return 'Good';
+      case MoveClassification.inaccuracy: return 'Inaccuracy';
+      case MoveClassification.mistake:    return 'Mistake';
+      case MoveClassification.blunder:    return 'Blunder';
+    }
+  }
+
+  String get name => toString().split('.').last;
+}
+
+// ============================================
+// MOVE ANNOTATION
+// ============================================
+class MoveAnnotation {
+  final int moveIndex;
+  final String fen;
+  final String san;
+  final double evalBefore;       // White-normalized centipawns
+  final double evalAfter;        // White-normalized centipawns
+  final double cpl;              // Centipawn Loss (always positive)
+  final MoveClassification classification;
+  final double connectivityDelta;
+
+  MoveAnnotation({
+    required this.moveIndex,
+    required this.fen,
+    required this.san,
+    required this.evalBefore,
+    required this.evalAfter,
+    required this.cpl,
+    required this.classification,
+    required this.connectivityDelta,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'moveIndex': moveIndex,
+    'fen': fen,
+    'san': san,
+    'evalBefore': evalBefore,
+    'evalAfter': evalAfter,
+    'cpl': cpl,
+    'classification': classification.name,
+    'connectivityDelta': connectivityDelta,
+  };
+}
+
+// ============================================
+// GAME ANALYSIS SUMMARY
+// ============================================
+class GameAnalysisSummary {
+  final String pgn;
+  final String? userSide;
+  final List<MoveAnnotation> annotatedMoves;
+
+  GameAnalysisSummary({
+    required this.pgn,
+    this.userSide,
+    required this.annotatedMoves,
+  });
+
+  int get brilliantCount => annotatedMoves.where((m) => m.classification == MoveClassification.brilliant).length;
+  int get excellentCount => annotatedMoves.where((m) => m.classification == MoveClassification.excellent).length;
+  int get goodCount => annotatedMoves.where((m) => m.classification == MoveClassification.good).length;
+  int get inaccuracyCount => annotatedMoves.where((m) => m.classification == MoveClassification.inaccuracy).length;
+  int get mistakeCount => annotatedMoves.where((m) => m.classification == MoveClassification.mistake).length;
+  int get blunderCount => annotatedMoves.where((m) => m.classification == MoveClassification.blunder).length;
+
+  List<MoveAnnotation> get brilliantMoves => annotatedMoves.where((m) => m.classification == MoveClassification.brilliant).toList();
+  List<MoveAnnotation> get blunderMoves => annotatedMoves.where((m) => m.classification == MoveClassification.blunder).toList();
+
+  // Converts to a format ready for Supabase insertion
+  Map<String, dynamic> toSupabaseMap(String profileId, {
+    String? chessComUrl,
+    String? opponentUsername,
+    int? opponentRating,
+    String? timeControl,
+    String? gameResult,
+  }) =>
+    {
+      'profile_id': profileId,
+      if (chessComUrl != null) 'chess_com_url': chessComUrl,
+      'pgn': pgn,
+      'user_side': userSide,
+      if (opponentUsername != null) 'opponent_username': opponentUsername,
+      if (opponentRating != null) 'opponent_rating': opponentRating,
+      if (timeControl != null) 'time_control': timeControl,
+      if (gameResult != null) 'game_result': gameResult,
+      'total_moves': annotatedMoves.length,
+      'brilliant_count': brilliantCount,
+      'excellent_count': excellentCount,
+      'good_count': goodCount,
+      'inaccuracy_count': inaccuracyCount,
+      'mistake_count': mistakeCount,
+      'blunder_count': blunderCount,
+      'annotated_moves': annotatedMoves.map((m) => m.toJson()).toList(),
+      'brilliant_moves': brilliantMoves.map((m) => m.toJson()).toList(),
+    };
+}
+
+// ============================================
+// GAME ANALYSIS SERVICE
+// ============================================
 class GameAnalysisService {
   final StockfishService _stockfish;
 
   GameAnalysisService(this._stockfish);
 
-  /// Analyzes a PGN string and finds "Swing Spots".
-  /// Returns a list of [SwingSpot]s.
-  Future<List<SwingSpot>> findSwingSpots(String pgn, {String? userSide}) async {
+  // -----------------------------------------------
+  // BRILLIANT MOVE CLASSIFIER
+  // A move is Brilliant when ALL are true:
+  // 1. Position is complex: |evalBefore| < 300cp (not already decisive)
+  // 2. The played move IS the engine's #1 choice
+  // 3. Gap between top-1 and top-2 engine move >= 50cp
+  // 4. CPL of the played move < 10cp (near-perfect)
+  // -----------------------------------------------
+  MoveClassification _classifyMove({
+    required double evalBeforeWhite,
+    required double evalAfterWhite,
+    required double cpl,
+    required List topMovesBefore,  // from Stockfish
+    required String playedMoveUci, // e.g. "e2e4"
+  }) {
+    // Blunder / Mistake / Inaccuracy thresholds
+    if (cpl >= 200) return MoveClassification.blunder;
+    if (cpl >= 100) return MoveClassification.mistake;
+    if (cpl >= 50) return MoveClassification.inaccuracy;
+
+    // Check for Brilliant:
+    // Condition 1: complex position
+    final isComplex = evalBeforeWhite.abs() < 300;
+    // Condition 2: was it the engine's top move?
+    final isTopMove = topMovesBefore.isNotEmpty &&
+        topMovesBefore.first.move == playedMoveUci;
+    // Condition 3: large gap to second-best
+    bool hasLargeGap = false;
+    if (topMovesBefore.length >= 2) {
+      final top1Eval = topMovesBefore[0].evaluation.toDouble();
+      final top2Eval = topMovesBefore[1].evaluation.toDouble();
+      hasLargeGap = (top1Eval - top2Eval).abs() >= 50;
+    }
+    // Condition 4: near-zero CPL
+    final isNearPerfect = cpl < 10;
+
+    if (isComplex && isTopMove && hasLargeGap && isNearPerfect) {
+      return MoveClassification.brilliant;
+    }
+    if (cpl < 10) return MoveClassification.excellent;
+    return MoveClassification.good;
+  }
+
+  /// Full per-move analysis of a PGN. Returns a [GameAnalysisSummary].
+  Future<GameAnalysisSummary> analyzeGame(String pgn, {String? userSide}) async {
     final game = chess_lib.Chess();
     game.load_pgn(pgn);
-    
-    // Determine user side if not provided. 
-    // We can guess from PGN headers if available, or assume White/User provided.
-    // simpler: pass userSide 'w' or 'b' or username.
-    // For now, let's analyze ALL swings and filter by who made the bad move.
-
-    // Replay the game move by move and analyze
-    // history is List<State>, each state has a move
-    final states = game.history; 
-    
-    // We need to iterate states to get moves.
-    // Note: State contains the move that *caused* the state.
-    
-    final spots = <SwingSpot>[];
-    
-    // Create a fresh board to replay
+    final states = game.history;
+    final annotated = <MoveAnnotation>[];
     final replayBoard = chess_lib.Chess();
-    // Assuming standard start (can support fen setups later)
 
-
-    
     for (int i = 0; i < states.length; i++) {
-      final move = states[i].move; // Move object
+      final move = states[i].move;
       final fenBefore = replayBoard.fen;
-      
-      // We analyze the position BEFORE the move to see what was expected
-      // BUT to detect a blunder, we usually compare:
-      // Eval(Position Before) vs Eval(Position After) ? 
-      // No, that measures how much the board changed.
-      // Better: 
-      // 1. Analyze Position Before -> Best Move Eval (Expected)
-      // 2. Analyze Position After (from opponent perspective) -> Current Eval (Actual)
-      // The difference is the error.
-      
-      // Optimization: We only need to analyze "Position After" if we want to know
-      // strictly how bad the move was.
-      // Swing = Eval(Before) - Eval(After_Corrected_For_Turn).
-      
-      // Let's keep it simple for MVP:
-      // Analyze Position Before. Get Top Move Eval.
-      // Analyze Position After. Get Top Move Eval.
-      // Compare.
-      // Note: Eval is always from side-to-move perspective in Engine,
-      // OR absolute (White positive). Stockfish usually gives centipawns relative to side to move
-      // but commonly normalized to White. Let's assume standard UCI (cp is relative to side moving).
-      // Actually my StockfishService returns raw CP.
-      
-      // For speed, let's analyze only every few moves or deep analyze on demand.
-      // But user wants "Swing Spots".
-      // Let's mock the "deep search" with the engine service we built.
-      
-      // To run this reasonably fast on a phone, we use lower depth (e.g. 10-12).
-      
-      final bestMovesBefore = await _stockfish.getTopMoves(fenBefore, depth: 10);
-      if (bestMovesBefore.isEmpty) {
-         replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
+      final turnBefore = i % 2 == 0 ? 'w' : 'b';
+
+      // Only analyze user's moves if userSide is specified
+      final isUserMove = userSide == null || userSide == turnBefore;
+
+      final topMovesBefore = await _stockfish.getTopMoves(fenBefore, depth: 12);
+      if (topMovesBefore.isEmpty) {
+        replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
         continue;
       }
-      
-      final bestEvalBefore = bestMovesBefore.first.evaluation; // Relative to side to move
-      
-      // Make the move on the replay board
-      // Use Map with from/to indices which 'chess' package supports
+      final bestEvalBefore = topMovesBefore.first.evaluation.toDouble();
+      final evalBeforeWhite = turnBefore == 'w' ? bestEvalBefore : -bestEvalBefore;
+
       replayBoard.move({'from': move.from, 'to': move.to, 'promotion': move.promotion});
-      String san = '${move.from}-${move.to}'; // Fallback to indices for now
-      // Attempt to get SAN if possible, or leave as simple representation
-
-      
       final fenAfter = replayBoard.fen;
-      
-      // To see if the move was bad, we check the eval of the NEW position.
-      // The new position is opponent to move.
-      // So if I am White, and I play bad, position after is Black to move.
-      // Black's eval should be HIGH (good for black).
-      // White's eval (previous) was HIGH (good for White).
-      // So Eval(Before, White) = +100.
-      // Eval(After, Black) = +100 (Black is winning? No).
-      
-      // Let's normalize everything to White's perspective for comparison.
-      // If side was White: WhiteEval = ReportEval.
-      // If side was Black: WhiteEval = -ReportEval.
-      
-      // final sideMoving = replayBoard.turn == chess_lib.Color.WHITE ? 'b' : 'w'; // Unused
-      // Before move i:
-      // If i=0 (Move 1), turn is White.
-      // After replayBoard.move(move), turn is Black.
-      
-      final turnBefore = i % 2 == 0 ? 'w' : 'b'; 
-      // (Standard game starting white)
-      
-      double evalBeforeWhite = turnBefore == 'w' ? bestEvalBefore.toDouble() : -bestEvalBefore.toDouble();
-      
-      // Now we have the Eval After. We can re-analyze OR just use the previous calculation 
-      // from the next iteration?
-      // Actually, accurate blunder check needs analysis of the move played.
-      // Stockfish "searchmoves" option can score specific moves.
-      // OR we just analyze the board after.
-      
-      final bestMovesAfter = await _stockfish.getTopMoves(fenAfter, depth: 10);
-       if (bestMovesAfter.isEmpty) continue;
-       
-      final bestEvalAfter = bestMovesAfter.first.evaluation; // Relative to side to move (Opponent)
-      
-      // Perspective of side who JUST moved.
-      // If White just moved. Now Black to move.
-      // Eval is for Black. 
-      // WhiteEval = -Eval(Black).
-      
-      double evalAfterWhite = turnBefore == 'w' ? -bestEvalAfter.toDouble() : bestEvalAfter.toDouble();
-      
-      // Swing calculation (Positive = White Improved, Negative = White Worsened)
-      double swing = evalAfterWhite - evalBeforeWhite;
-      
-      // If turn was White, we want Swing to be roughly 0. 
-      // If Swing is huge negative -> White Blundered.
-      // If turn was Black, we want Swing to be roughly 0.
-      // If Swing is huge positive -> Black Blundered.
-      
-      bool isBlunder = false;
-      if (turnBefore == 'w' && swing < -100) isBlunder = true; // Lost 1 pawn or more
-      if (turnBefore == 'b' && swing > 100) isBlunder = true; // Gained 1 pawn (for White) -> Black lost 1 pawn
-      
-      // Filter by user side if specified
-      if (isBlunder && (userSide == null || userSide == turnBefore)) {
-         // Simulate Connectivity Score (C_s) delta from our Pattern Engine
-         // In production, this calls the Python service.
-         // +1.5 = move improved connectivity, -2.0 = move fragmented pieces
-         final connectivityDelta = (swing < -200) ? -2.5 : (swing < -100 ? -0.8 : 0.5);
+      final playedMoveUci = '${move.from}${move.to}';
+      final san = playedMoveUci; // SAN approximation
 
-         spots.add(SwingSpot(
-           moveIndex: i,
-           fenBefore: fenBefore,
-           movePlayedSan: san,
-           evalBefore: evalBeforeWhite,
-           evalAfter: evalAfterWhite,
-           swing: swing,
-           connectivityDelta: connectivityDelta,
-         ));
-      }
+      final topMovesAfter = await _stockfish.getTopMoves(fenAfter, depth: 12);
+      if (topMovesAfter.isEmpty) continue;
+      final bestEvalAfter = topMovesAfter.first.evaluation.toDouble();
+      final evalAfterWhite = turnBefore == 'w' ? -bestEvalAfter : bestEvalAfter;
+
+      // CPL: how much did this move cost the player (always positive)
+      final swing = evalAfterWhite - evalBeforeWhite;
+      final cpl = isUserMove
+          ? (turnBefore == 'w' ? -swing : swing).clamp(0, double.infinity).toDouble()
+          : 0.0;
+
+      final classification = isUserMove
+          ? _classifyMove(
+              evalBeforeWhite: evalBeforeWhite,
+              evalAfterWhite: evalAfterWhite,
+              cpl: cpl,
+              topMovesBefore: topMovesBefore,
+              playedMoveUci: playedMoveUci,
+            )
+          : MoveClassification.good;
+
+      final connectivityDelta = (cpl >= 200) ? -2.5 : (cpl >= 100 ? -0.8 : (cpl < 10 ? 1.2 : 0.3));
+
+      annotated.add(MoveAnnotation(
+        moveIndex: i,
+        fen: fenBefore,
+        san: san,
+        evalBefore: evalBeforeWhite,
+        evalAfter: evalAfterWhite,
+        cpl: cpl,
+        classification: classification,
+        connectivityDelta: connectivityDelta,
+      ));
     }
-    
-    return spots;
+
+    return GameAnalysisSummary(
+      pgn: pgn,
+      userSide: userSide,
+      annotatedMoves: annotated,
+    );
+  }
+
+  /// Legacy: finds blunder swing spots (used by AnalysisView).
+  Future<List<SwingSpot>> findSwingSpots(String pgn, {String? userSide}) async {
+    final summary = await analyzeGame(pgn, userSide: userSide);
+    return summary.annotatedMoves
+        .where((m) => m.classification == MoveClassification.blunder ||
+                      m.classification == MoveClassification.mistake)
+        .map((m) => SwingSpot(
+              moveIndex: m.moveIndex,
+              fenBefore: m.fen,
+              movePlayedSan: m.san,
+              evalBefore: m.evalBefore,
+              evalAfter: m.evalAfter,
+              swing: m.evalAfter - m.evalBefore,
+              connectivityDelta: m.connectivityDelta,
+            ))
+        .toList();
   }
 }
 
+// ============================================
+// LEGACY SWING SPOT (backward compatibility)
+// ============================================
 class SwingSpot {
   final int moveIndex;
   final String fenBefore;
   final String movePlayedSan;
-  final double evalBefore; // Normalized to White cp
-  final double evalAfter;  // Normalized to White cp
+  final double evalBefore;
+  final double evalAfter;
   final double swing;
-  final double connectivityDelta; // "Universe B" Metric
-  
+  final double connectivityDelta;
+
   SwingSpot({
     required this.moveIndex,
     required this.fenBefore,

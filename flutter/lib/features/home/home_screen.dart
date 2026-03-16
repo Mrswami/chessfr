@@ -12,6 +12,8 @@ import '../projection/ui/board_connection_screen.dart';
 import '../profile/profile_screen.dart';
 import '../social/social_hub_screen.dart';
 import '../training/mastery_screen.dart';
+import '../social/hall_of_fame_screen.dart';
+import '../analysis/brilliant_tracker_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -142,6 +144,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              sliver: SliverToBoxAdapter(
+                child: const BrilliantTrackerWidget(),
+              ),
+            ),
+            SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
@@ -208,6 +216,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 14),
                   _buildActionTile(
                     context,
+                    title: 'Hall of Fame',
+                    subtitle: 'Community\'s greatest brilliant moves.',
+                    icon: Icons.emoji_events_rounded,
+                    color: Colors.amber,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HallOfFameScreen()),
+                      );
+                    },
+                    delay: 260,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
                     title: 'Community Hub',
                     subtitle: 'Pulse of the community.',
                     icon: Icons.diversity_3_rounded,
@@ -218,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         MaterialPageRoute(builder: (context) => const SocialHubScreen()),
                       );
                     },
-                    delay: 255,
+                    delay: 275,
                   ),
                   const SizedBox(height: 14),
                   _buildActionTile(
