@@ -8,6 +8,8 @@ import 'services/game_recorder.dart';
 import 'chess_protocol.dart';
 import 'game_screen.dart';
 import 'game_library_screen.dart';
+import 'patterns_library_screen.dart';
+import 'services/patterns_provider.dart';
 import 'responsive_utils.dart';
 import 'dart:async';
 
@@ -78,8 +80,9 @@ class _ScanningScreenState extends State<ScanningScreen> {
   // Need to discover valid game screen IDs
   bool get _isGameActive => _currentScreenId != 40 && _currentScreenId != 0;
   
-  // Recorder
+  // Recorder & Patterns
   final GameRecorder _recorder = GameRecorder();
+  final PatternsProvider _patternsProvider = PatternsProvider();
 
   // Auto-sync
   bool _autoSync = false;
@@ -96,6 +99,7 @@ class _ScanningScreenState extends State<ScanningScreen> {
     super.initState();
     _loadSavedDevice();
     _requestPermissions();
+    _patternsProvider.loadPatterns();
   }
   
   @override
@@ -509,6 +513,25 @@ class _ScanningScreenState extends State<ScanningScreen> {
         _lastSyncedFen = fen;
         // RECORDER HOOK
         _recorder.handleNewFen(fen);
+
+        // PATTERN ORACLE HOOK
+        final pattern = _patternsProvider.findByFen(fen);
+        if (pattern != null) {
+          _addLog("🔮 ORACLE: Pattern Detected! [${pattern.name}]", LogType.success);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("🔮 Pattern Detected: ${pattern.name}"),
+                backgroundColor: const Color(0xFF6C22F5),
+                action: SnackBarAction(
+                  label: "VIEW", 
+                  textColor: Colors.white,
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PatternsLibraryScreen()))
+                ),
+              )
+            );
+          }
+        }
 
         setState(() {
             _currentFen = fen;
@@ -1034,14 +1057,27 @@ class _ScanningScreenState extends State<ScanningScreen> {
         SizedBox(height: spacing),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C22F5),
-              foregroundColor: Colors.white,
-            ),
-            icon: const Icon(Icons.tv),
-            label: const Text("OPEN PROJECTION (Force)"),
-            onPressed: () => setState(() => _showProjection = true),
+          child: Column(
+            children: [
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6C22F5),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text("PATTERN ORACLE"),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PatternsLibraryScreen())),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.tv),
+                label: const Text("OPEN PROJECTION (Force)"),
+                onPressed: () => setState(() => _showProjection = true),
+              ),
+            ],
           ),
         ),
       ],

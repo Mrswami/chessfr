@@ -1,0 +1,1416 @@
+[
+    {
+        "category": "Types of Opening",
+        "name": "Types of Opening",
+        "description": "[Types of Opening](https://resetyourchess.shop/collections/types-of-opening)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Pawns (All Patterns)",
+        "name": "Types Of Pawns (All Patterns)",
+        "description": "[Types Of Pawns (All Patterns)](https://resetyourchess.shop/collections/types-of-pawns)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Types Of Endgame",
+        "description": "[Types Of Endgame](https://resetyourchess.shop/collections/types-of-endgame)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Control Of Space",
+        "name": "Control Of Space",
+        "description": "[Control Of Space](https://resetyourchess.shop/collections/control-of-space)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Condition Of Pieces",
+        "name": "Condition Of Pieces",
+        "description": "[Condition Of Pieces](https://resetyourchess.shop/collections/condition-of-pieces)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Development and Initiative",
+        "name": "Development and Initiative",
+        "description": "[Development and Initiative](https://resetyourchess.shop/collections/development-and-initiative)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Signals and Clues",
+        "description": "[Signals and Clues](https://resetyourchess.shop/collections/signals-and-clues)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Tactics and Techniques",
+        "name": "Tactics and Techniques",
+        "description": "[Tactics and Techniques](https://resetyourchess.shop/collections/tactics-and-techniques)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Body And Mind",
+        "description": "[Body And Mind](https://resetyourchess.shop/collections/body-and-mind)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Chess With Cards | Original Edition",
+        "name": "Chess With Cards | Original Edition",
+        "description": "[Chess With Cards | Original Edition](https://resetyourchess.shop/pages/all-chess-patterns)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Chess Streamers Visual Kit",
+        "name": "Chess Streamers Visual Kit",
+        "description": "[Chess Streamers Visual Kit](https://resetyourchess.shop/collections/chess-streamers-visual-kit)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Patterns and Creators",
+        "name": "Patterns and Creators",
+        "description": "[Patterns and Creators](https://resetyourchess.shop/collections/patterns-and-creators)",
+        "link": "",
+        "fen": ""
+    },
+    {
+        "category": "Types of Opening",
+        "name": "King's Pawn Opening",
+        "description": "The King's Pawn Opening begins with 1.e4, aiming to control the center and free the queen and bishop.",
+        "link": "https://resetyourchess.shop/products/kings-pawn-opening",
+        "fen": ""
+    },
+    {
+        "category": "Types of Opening",
+        "name": "Queen's Pawn Opening",
+        "description": "Opening where White starts with 1.d4, usually aiming for positional play and central control.",
+        "link": "https://resetyourchess.shop/products/queens-pawn-opening",
+        "fen": ""
+    },
+    {
+        "category": "Types of Opening",
+        "name": "Flank Opening",
+        "description": "A flank opening is a chess opening used by White that is characterized by moves focusing on one or both sides of the board rather than the center.",
+        "link": "https://resetyourchess.shop/products/flank-opening",
+        "fen": ""
+    },
+    {
+        "category": "Types of Opening",
+        "name": "Irregular Opening",
+        "description": "An irregular opening is an unusual or unorthodox chess opening not commonly played.",
+        "link": "https://resetyourchess.shop/products/irregular-opening",
+        "fen": ""
+    },
+    {
+        "category": "Types of Groupings",
+        "name": "Pawn Islands",
+        "description": "A Pawn Island is a group of pawns separated from other pawn groups by files with no friendly pawns.",
+        "link": "https://resetyourchess.shop/products/pawn-islands",
+        "fen": ""
+    },
+    {
+        "category": "Types of Groupings",
+        "name": "Queenside Pawn Majority",
+        "description": "You have a Queenside Pawn Majority when you have more pawns on the queenside than your opponent.",
+        "link": "https://resetyourchess.shop/products/queenside-pawn-majority",
+        "fen": ""
+    },
+    {
+        "category": "Types of Groupings",
+        "name": "Kingside Pawn Majority",
+        "description": "You have a Kingside Pawn Majority when you have more pawns on the kingside than your opponent.",
+        "link": "https://resetyourchess.shop/products/kingside-pawn-majority",
+        "fen": ""
+    },
+    {
+        "category": "Types of Groupings",
+        "name": "Pawn Chain Pointing to the Queenside",
+        "description": "A diagonal formation of connected pawns extending from the kingside towards the queenside.",
+        "link": "https://resetyourchess.shop/products/pawn-chain-pointing-to-the-queenside",
+        "fen": ""
+    },
+    {
+        "category": "Types of Groupings",
+        "name": "Pawn Chain Pointing to the Kingside",
+        "description": "A diagonal formation of connected pawns extending from the queenside towards the kingside.",
+        "link": "https://resetyourchess.shop/products/pawn-chain-pointing-to-the-kingside",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Backward Pawn",
+        "description": "A backward pawn is behind adjacent pawns and cannot advance without being captured.",
+        "link": "https://resetyourchess.shop/products/backward-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Non-Isolated Doubled Pawns",
+        "description": "Non-Isolated Doubled Pawns are two same-color pawns on the same file, supported by adjacent pawns.",
+        "link": "https://resetyourchess.shop/products/non-isolated-doubled-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Isolated Doubled Pawns",
+        "description": "Isolated Doubled Pawns are two same-color pawns on the same file, not supported by adjacent pawns.",
+        "link": "https://resetyourchess.shop/products/isolated-doubled-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Isolated Pawn",
+        "description": "An isolated pawn has no friendly pawns on adjacent files, making it a potential weakness or strength depending on the position.",
+        "link": "https://resetyourchess.shop/products/isolated-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Hanging Pawns",
+        "description": "A pair of side-by-side pawns without adjacent support, which can be a weakness or a dynamic advantage.",
+        "link": "https://resetyourchess.shop/products/hanging-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Wedge Pawn",
+        "description": "A Wedge Pawn is a pawn advanced to the sixth rank, exerting pressure and restricting opponent's movement.",
+        "link": "https://resetyourchess.shop/products/wedge-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Pawns",
+        "name": "Poisoned Pawn",
+        "description": "A seemingly free pawn that, when captured, leads to a disadvantage for the captor.",
+        "link": "https://resetyourchess.shop/products/poisoned-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Isolated Passed Pawn",
+        "description": "A pawn with no friendly pawns on adjacent files and no enemy pawns ahead on the same or adjacent files.",
+        "link": "https://resetyourchess.shop/products/isolated-passed-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Advanced Passed Pawn",
+        "description": "A near-promotion pawn with no opposing pawns to prevent it from advancing.",
+        "link": "https://resetyourchess.shop/products/advanced-passed-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Outside Passed Pawn",
+        "description": "A passed pawn located at the board's edge, drawing opponent's pieces away from key areas.",
+        "link": "https://resetyourchess.shop/products/outside-passed-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Protected Passed Pawn",
+        "description": "A passed pawn that is supported by another pawn.",
+        "link": "https://resetyourchess.shop/products/protected-passed-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Connected Passed Pawns",
+        "description": "Two or more passed pawns on adjacent files that support each other, increasing their promotion chances.",
+        "link": "https://resetyourchess.shop/products/connected-passed-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Split Passed Pawns",
+        "description": "Two passed pawns separated by one or more files with no opposing pawns between them.",
+        "link": "https://resetyourchess.shop/products/split-passed-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Rook's Pawn",
+        "description": "A pawn on the a-file or h-file. It can offer unique drawing opportunities in endgames.",
+        "link": "https://resetyourchess.shop/products/rooks-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Knight's Pawn",
+        "description": "A Pawn on the b- or g-file. It can offer unique endgame advantages or present promotion challenges near the board's edge.",
+        "link": "https://resetyourchess.shop/products/knights-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types of Passed Pawns",
+        "name": "Bishop's Pawn",
+        "description": "A Pawn on the c-file or f-file. It can offer unique drawing chances in endgames, unlike other pawns.",
+        "link": "https://resetyourchess.shop/products/bishops-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Winnable Pieces-Only Endgame",
+        "description": "A pawnless endgame where one side has a clear advantage and can force a win against best defense.",
+        "link": "https://resetyourchess.shop/products/winnable-pieces-only-endgame",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Winnable Pieces and Pawns Endgame",
+        "description": "An endgame with both pieces and pawns where one side has a clear advantage and can force a win against best defense.",
+        "link": "https://resetyourchess.shop/products/winnable-pieces-and-pawns-endgame",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Winnable Pawn Endgame",
+        "description": "A winnable pawn endgame occurs when only kings and pawns remain, and one side has a clear advantage to force a win.",
+        "link": "https://resetyourchess.shop/products/winnable-pawn-endgame",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Drawable Pieces-Only Endgame",
+        "description": "A pawnless endgame where precise play can secure a draw, even despite material disadvantage.",
+        "link": "https://resetyourchess.shop/products/drawable-pieces-only-endgame",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Drawable Pieces and Pawns Endgame",
+        "description": "An endgame with Pieces and Pawns where accurate defense can secure a draw, even despite material disadvantage.",
+        "link": "https://resetyourchess.shop/products/drawable-pieces-and-pawns-endgame",
+        "fen": ""
+    },
+    {
+        "category": "Types Of Endgame",
+        "name": "Drawable Pawn Endgame",
+        "description": "A drawable pawn endgame is a king and pawn endgame where accurate defense can hold a draw.",
+        "link": "https://resetyourchess.shop/products/drawable-pawn-endgame",
+        "fen": ""
+    },
+    {
+        "category": "Control of Center",
+        "name": "Strong Pawn Center",
+        "description": "Two or more pawns controlling central squares (e4, d4, e5, d5), supporting each other and restricting the opponent's pieces.",
+        "link": "https://resetyourchess.shop/products/strong-pawn-center",
+        "fen": ""
+    },
+    {
+        "category": "Control of Center",
+        "name": "Closed Center",
+        "description": "A Closed Center occurs when central pawns are locked, creating a barrier that leads to slower, positional play.",
+        "link": "https://resetyourchess.shop/products/closed-center",
+        "fen": ""
+    },
+    {
+        "category": "Control of Center",
+        "name": "Open Center",
+        "description": "An Open Center occurs when there are few or no pawns blocking the central squares (d4, d5, e4, e5).",
+        "link": "https://resetyourchess.shop/products/open-center",
+        "fen": ""
+    },
+    {
+        "category": "Control of Center",
+        "name": "Center Occupied by Pieces",
+        "description": "A center occupied by pieces occurs when central squares are held by pieces instead of pawns, enhancing control and mobility.",
+        "link": "https://resetyourchess.shop/products/center-occupied-by-pieces",
+        "fen": ""
+    },
+    {
+        "category": "Control of Center",
+        "name": "Center Controlled Indirectly",
+        "description": "A center is Controlled Indirectly, when the pieces exert influence over the central squares without physically occupying them.",
+        "link": "https://resetyourchess.shop/products/center-controlled-indirectly",
+        "fen": ""
+    },
+    {
+        "category": "Control of Space",
+        "name": "Queenside Space Advantage",
+        "description": "A Queenside Space Advantage occurs when your queenside pawns are more advanced than your opponent's, offering greater maneuvering room.",
+        "link": "https://resetyourchess.shop/products/queenside-space-advantage",
+        "fen": ""
+    },
+    {
+        "category": "Control of Space",
+        "name": "Central Space Advantage",
+        "description": "A Central Space Advantage occurs when your central pawns are more advanced than your opponent's, offering greater maneuverability and control.",
+        "link": "https://resetyourchess.shop/products/central-space-advantage",
+        "fen": ""
+    },
+    {
+        "category": "Control of Space",
+        "name": "Kingside Space Advantage",
+        "description": "A Kingside Space Advantage occurs when your kingside pawns are more advanced than your opponent's, offering greater maneuvering room.",
+        "link": "https://resetyourchess.shop/products/kingside-space-advantage",
+        "fen": ""
+    },
+    {
+        "category": "Control of Squares",
+        "name": "Weak Squares",
+        "description": "Squares that cannot be defended by pawns and are vulnerable to occupation by enemy pieces.",
+        "link": "https://resetyourchess.shop/products/weak-squares",
+        "fen": ""
+    },
+    {
+        "category": "Control of Squares",
+        "name": "Control of Color Complex",
+        "description": "Dominating most squares of a particular color to limit opponent mobility and gain positional advantage.",
+        "link": "https://resetyourchess.shop/products/control-of-color-complex",
+        "fen": ""
+    },
+    {
+        "category": "Control of Squares",
+        "name": "Control of Key Square",
+        "description": "A Key Square is a critical square that, when controlled or occupied, provides strategic and tactical advantages.",
+        "link": "https://resetyourchess.shop/products/control-of-key-square",
+        "fen": ""
+    },
+    {
+        "category": "Control of Squares",
+        "name": "Outpost",
+        "description": "A square in enemy territory, protected by a pawn, where a piece, often a knight, cannot be attacked by opposing pawns.",
+        "link": "https://resetyourchess.shop/products/outpost",
+        "fen": ""
+    },
+    {
+        "category": "Control of Squares",
+        "name": "Pawn Blockade",
+        "description": "Placing a piece directly in front of an opponent's pawn to prevent it from advancing.",
+        "link": "https://resetyourchess.shop/products/pawn-blockade",
+        "fen": ""
+    },
+    {
+        "category": "Control of Squares",
+        "name": "Control of Promotion Square",
+        "description": "Control of a Promotion Square means your pieces control the square where a pawn can promote.",
+        "link": "https://resetyourchess.shop/products/control-of-promotion-square",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Control of Half-Open File",
+        "description": "Controlling a half-open file involves placing rooks or queen on a file with only opponent's pawns to apply pressure and restrict movement.",
+        "link": "https://resetyourchess.shop/products/control-of-half-open-file",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Control of Open File",
+        "description": "Control of an Open File is when a Rook or Queen occupies a file with no pawns, restricting the opponent's movement.",
+        "link": "https://resetyourchess.shop/products/control-of-open-file",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Control of Key Rank",
+        "description": "Controlling a key rank means using your Rook or Queen to dominate an important row on the board.",
+        "link": "https://resetyourchess.shop/products/control-of-key-rank",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Control of Key Diagonal",
+        "description": "Control of a key diagonal occurs when your bishop or queen dominates an important diagonal, restricting opponent movement and supporting attacks.",
+        "link": "https://resetyourchess.shop/products/control-of-key-diagonal",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Material Advantage",
+        "description": "Having more valuable pieces on the board than your opponent means you have a material advantage.",
+        "link": "https://resetyourchess.shop/products/material-advantage",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Minor Piece vs. Pawn(s)",
+        "description": "A material imbalance where a minor piece faces one or more pawns, often favoring the piece due to its mobility.",
+        "link": "https://resetyourchess.shop/products/minor-piece-vs-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Rook vs. Minor Piece (and Pawns)",
+        "description": "A material imbalance where a rook is traded for a minor piece, impacting play dynamics.",
+        "link": "https://resetyourchess.shop/products/rook-vs-minor-piece-and-pawns",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Rook vs. Two Minor Pieces",
+        "description": "A material imbalance where a rook is traded for two minor pieces, impacting play dynamics.",
+        "link": "https://resetyourchess.shop/products/rook-vs-two-minor-pieces",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Queen vs. Rook and Minor Piece",
+        "description": "A material imbalance where a queen is traded for a rook and a minor piece, impacting play dynamics.",
+        "link": "https://resetyourchess.shop/products/queen-vs-rook-and-minor-piece",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Queen vs. Three Minor Pieces",
+        "description": "A material imbalance where a queen is traded for three minor pieces, impacting play dynamics.",
+        "link": "https://resetyourchess.shop/products/queen-vs-three-minor-pieces",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Queen vs. Two Rooks",
+        "description": "A material imbalance where a Queen faces two Rooks of roughly equal value.",
+        "link": "https://resetyourchess.shop/products/two-rooks-vs-queen",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Strong Knight",
+        "description": "A Strong Knight controls key squares, serves critical functions, and is well-supported.",
+        "link": "https://resetyourchess.shop/products/strong-knight",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Problematic Knight",
+        "description": "A Problematic Knight is a poorly positioned knight with limited mobility and coordination, offering minimal strategic value.",
+        "link": "https://resetyourchess.shop/products/problematic-knight",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Superior Knight vs. Inferior Bishop",
+        "description": "A Superior Knight vs. Inferior Bishop Imbalance occurs when piece exchanges leave you with a Knight that is more effective than the opponent's Bishop.",
+        "link": "https://resetyourchess.shop/products/superior-knight-vs-inferior-bishop",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Strong Bishop",
+        "description": "A strong bishop is a bishop that controls key squares, is mobile, and coordinates well with other pieces.",
+        "link": "https://resetyourchess.shop/products/strong-bishop",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Problematic Bishop",
+        "description": "A Problematic Bishop is obstructed by its own pawns, lacks mobility, and contributes little to attack or defense.",
+        "link": "https://resetyourchess.shop/products/problematic-bishop",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Superior Bishop vs. Inferior Knight",
+        "description": "A Superior Bishop vs. Inferior Knight Imbalance occurs when piece exchanges leave you with a Bishop that is more effective than the opponent's Knight.",
+        "link": "https://resetyourchess.shop/products/superior-bishop-vs-inferior-knight",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Bishop Pair",
+        "description": "You have a Bishop Pair Advantage when, in an open or semi-open position, you have both Bishops while the opponent has either one or no Bishops.",
+        "link": "https://resetyourchess.shop/products/bishop-pair",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Bishops of Opposite Color",
+        "description": "A position where each player has a bishop operating on different colored squares, often leading to drawish endgames.",
+        "link": "https://resetyourchess.shop/products/bishops-of-opposite-color",
+        "fen": ""
+    },
+    {
+        "category": "Control of Lines",
+        "name": "Bishops of Same Color",
+        "description": "When players have one Bishop each, and these Bishops move on the same colored squares, we have a Bishops of Same Color Imbalance.",
+        "link": "https://resetyourchess.shop/products/bishops-of-same-color",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Strong Rook",
+        "description": "A strong rook controls key files or ranks, has high mobility, coordinates with other pieces, and is securely placed deep in the opponent's camp.",
+        "link": "https://resetyourchess.shop/products/strong-rook",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Problematic Rook",
+        "description": "A problematic rook lacks mobility, is poorly positioned, or contributes little to attack or defense.",
+        "link": "https://resetyourchess.shop/products/problematic-rook",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Rook on the Seventh Rank",
+        "description": "A rook on the 7th (or 2nd) rank attacks pawns, controls key squares, and restricts enemy pieces.",
+        "link": "https://resetyourchess.shop/products/rook-on-the-seventh-rank",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Connected Rooks",
+        "description": "Two rooks on the same rank or file with no pieces between them, supporting each other.",
+        "link": "https://resetyourchess.shop/products/connected-rooks",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Non Connected Rooks",
+        "description": "Two Rooks separated by other pieces or not on the same rank or file.",
+        "link": "https://resetyourchess.shop/products/non-connected-rooks",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Rook Behind Passed Pawn",
+        "description": "A rook placed behind a passed pawn to support its advance or hinder an opponent's pawn.",
+        "link": "https://resetyourchess.shop/products/rook-behind-passed-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Strong Queen",
+        "description": "A Strong Queen controls key squares, has good mobility, coordinates well, and is placed on a strong support point.",
+        "link": "https://resetyourchess.shop/products/strong-queen",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Rooks and Queens",
+        "name": "Problematic Queen",
+        "description": "A Problematic Queen lacks mobility, is poorly positioned, or contributes little to attack or defense.",
+        "link": "https://resetyourchess.shop/products/problematic-queen",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Kings",
+        "name": "Strong King",
+        "description": "An active and well-positioned King, especially in the endgame, supporting pawns and controlling key squares.",
+        "link": "https://resetyourchess.shop/products/strong-king",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Kings",
+        "name": "King Not Yet Castled",
+        "description": "A King Not Yet Castled is a King that is still in the center and thus is more vulnerable to attacks by the opponent's pieces.",
+        "link": "https://resetyourchess.shop/products/king-not-yet-castled",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Kings",
+        "name": "Kings Castled on Opposite Sides",
+        "description": "In chess, opposite-side castling occurs when one player castles kingside and the other queenside.",
+        "link": "https://resetyourchess.shop/products/kings-castled-on-opposite-sides",
+        "fen": ""
+    },
+    {
+        "category": "Condition of Kings",
+        "name": "King with a Weak Cover",
+        "description": "A King with a Weak Cover lacks sufficient pawn protection, exposing it to potential threats.",
+        "link": "https://resetyourchess.shop/products/king-with-a-weak-cover",
+        "fen": ""
+    },
+    {
+        "category": "Development and Initiative",
+        "name": "Lead in Development",
+        "description": "A Lead in Development occurs when your pieces are more efficiently activated than your opponent's, controlling key squares and exerting pressure.",
+        "link": "https://resetyourchess.shop/products/lead-in-development",
+        "fen": ""
+    },
+    {
+        "category": "Development and Initiative",
+        "name": "Attack on the Queenside",
+        "description": "Conducting an Attack on the Queenside means actively using your pieces to create threats on the a-, b-, and c- file.",
+        "link": "https://resetyourchess.shop/products/attack-on-the-queenside",
+        "fen": ""
+    },
+    {
+        "category": "Development and Initiative",
+        "name": "Attack in the Center",
+        "description": "Conducting an Attack in the Center means actively using your pieces to create threats on the c-, d-, e-, and f- files.",
+        "link": "https://resetyourchess.shop/products/attack-in-the-center",
+        "fen": ""
+    },
+    {
+        "category": "Development and Initiative",
+        "name": "Attack on the Kingside",
+        "description": "Conducting an Attack on the Kingside means actively using your pieces to create threats on the f-, g-, and h- files.",
+        "link": "https://resetyourchess.shop/products/attack-on-the-kingside",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Problematic King",
+        "description": "A Problematic King is exposed to attack or lacks sufficient defense, leading to tactical opportunities.",
+        "link": "https://resetyourchess.shop/products/problematic-king",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Pieces with Weak Protection",
+        "description": "A Piece with Weak Protection is a piece that is either completely undefended or that lacks sufficient support, signaling tactical opportunities.",
+        "link": "https://resetyourchess.shop/products/pieces-with-weak-protection",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Problematic Defenders",
+        "description": "A piece too distant or overburdened to defend effectively, often leading to tactical opportunities.",
+        "link": "https://resetyourchess.shop/products/problematic-defenders",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Pieces with Few Escape Squares",
+        "description": "A piece with limited mobility and vulnerability due to a lack of safe squares for movement, signaling tactical opportunities.",
+        "link": "https://resetyourchess.shop/products/pieces-with-few-escape-squares",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Promising Alignments",
+        "description": "Promising Alignment occurs when your pieces are advantageously lined up with opponent's pieces or key squares, signaling tactical opportunities.",
+        "link": "https://resetyourchess.shop/products/favorable-alignments",
+        "fen": ""
+    },
+    {
+        "category": "Signals and Clues",
+        "name": "Promising Knight Squares",
+        "description": "You have Promising Knight Squares when the landing squares of your Knight allow it to fork your opponent's pieces or other important squares.",
+        "link": "https://resetyourchess.shop/products/favorable-knight-squares",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Pin",
+        "description": "A pin is a tactic where a piece can't move without exposing a more valuable piece behind it.",
+        "link": "https://resetyourchess.shop/products/pin",
+        "fen": "r1bqk1nr/ppppbppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Skewer",
+        "description": "A skewer is a tactic where a more valuable piece is attacked, exposing a lesser piece behind it to capture.",
+        "link": "https://resetyourchess.shop/products/skewer",
+        "fen": "8/8/8/4k3/8/8/1Q6/K7 w - - 0 1"
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "X-Ray Attack and Defense",
+        "description": "A tactic where a piece attacks or defends through another piece on the same line.",
+        "link": "https://resetyourchess.shop/products/x-ray-attack-defense",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Battery",
+        "description": "A Battery is a formation where two or more long-range pieces are aligned, and work together to create a powerful threat.",
+        "link": "https://resetyourchess.shop/products/battery",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Alekhine's Gun",
+        "description": "A formation with two rooks and a queen aligned on the same file, creating a powerful attacking force.",
+        "link": "https://resetyourchess.shop/products/alekhines-gun",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Hook and Ladder",
+        "description": "A tactic where a rook is lured away, leaving the queen vulnerable to capture.",
+        "link": "https://resetyourchess.shop/products/hook-and-ladder",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Discovered Attack",
+        "description": "A tactic where moving one piece reveals an attack by another, creating a powerful and unexpected threat.",
+        "link": "https://resetyourchess.shop/products/discovered-attack",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Discovered Check",
+        "description": "A tactic where moving one piece reveals a check by another piece behind it.",
+        "link": "https://resetyourchess.shop/products/discovered-check",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Double Check",
+        "description": "A tactic where the king is checked by two pieces simultaneously, forcing it to move.",
+        "link": "https://resetyourchess.shop/products/double-check",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Windmill",
+        "description": "A windmill is a tactic involving alternating checks and captures, often using a rook and bishop.",
+        "link": "https://resetyourchess.shop/products/windmill",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Line Tactics",
+        "name": "Interference",
+        "description": "Placing a piece to disrupt the coordination between two enemy pieces.",
+        "link": "https://resetyourchess.shop/products/interference",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Double Attack",
+        "description": "A tactic where a single move creates two threats simultaneously.",
+        "link": "https://resetyourchess.shop/products/double-attack",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Fork",
+        "description": "A Fork is a tactic where a single piece attacks multiple opponent pieces simultaneously, often leading to material gain.",
+        "link": "https://resetyourchess.shop/products/fork",
+        "fen": "rnbq1rk1/ppp2ppp/5n2/3pp3/1b1P4/2N1P3/PPPN1PPP/R1BQKB1R w KQ - 0 1"
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Capture the Defender",
+        "description": "Capture the Defender is a chess tactic in which you remove a piece that is defending an important square or piece.",
+        "link": "https://resetyourchess.shop/products/capture-the-defender",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Deflection",
+        "description": "A tactic that forces an opposing piece to leave its square, exposing the king or a valuable piece.",
+        "link": "https://resetyourchess.shop/products/deflection",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Decoy",
+        "description": "A tactic where a piece is lured into a specific square to be attacked.",
+        "link": "https://resetyourchess.shop/products/decoy",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Clearance",
+        "description": "A tactic where a square, rank, file, or diagonal is vacated to open a line of attack.",
+        "link": "https://resetyourchess.shop/products/clearance",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Intermezzo",
+        "description": "A tactic where an unexpected move is inserted into a seemingly forced sequence, disrupting the opponent's plan.",
+        "link": "https://resetyourchess.shop/products/intermezzo",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Gain of a Tempo",
+        "description": "A Gain of a Tempo occurs when a move forces the opponent to respond, granting an extra move without loss.",
+        "link": "https://resetyourchess.shop/products/gain-of-a-tempo",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | One-Idea Tactics",
+        "name": "Underpromotion",
+        "description": "Underpromotion is promoting a pawn to a piece other than a queen, like a knight, rook, or bishop.",
+        "link": "https://resetyourchess.shop/products/underpromotion",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Pawn Sacrifice",
+        "description": "A Pawn Sacrifice is a deliberate move where you offer a pawn to gain positional or tactical advantage.",
+        "link": "https://resetyourchess.shop/products/pawn-sacrifice",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Knight Sacrifice",
+        "description": "A Knight Sacrifice is a deliberate move where you offer a Knight to gain positional or tactical advantage.",
+        "link": "https://resetyourchess.shop/products/knight-sacrifice",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Bishop Sacrifice",
+        "description": "A Bishop Sacrifice is a deliberate move where you offer a Bishop to gain positional or tactical advantage.",
+        "link": "https://resetyourchess.shop/products/bishop-sacrifice",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Rook Sacrifice",
+        "description": "A Rook Sacrifice is a deliberate move where you offer a Rook to gain positional or tactical advantage.",
+        "link": "https://resetyourchess.shop/products/rook-sacrifice",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Queen Sacrifice",
+        "description": "A Queen Sacrifice is a deliberate move where you offer a Queen to gain positional or tactical advantage.",
+        "link": "https://resetyourchess.shop/products/queen-sacrifice",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Exchange Sacrifice",
+        "description": "Deliberately sacrificing a rook for a minor piece to gain positional or tactical advantage.",
+        "link": "https://resetyourchess.shop/products/exchange-sacrifice",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Desperado",
+        "description": "A piece about to be captured that creates a favorable situation with an aggressive last move.",
+        "link": "https://resetyourchess.shop/products/desperado",
+        "fen": ""
+    },
+    {
+        "category": "Tactical Patterns | Sacrifices",
+        "name": "Greek Gift",
+        "description": "A bishop sacrifice on h7 (or h2) to attack the opponent's castled king.",
+        "link": "https://resetyourchess.shop/products/greek-gift",
+        "fen": "r1bq1rk1/pp1nbppp/2p1pn2/3p2B1/2PP4/2N1PN2/PPQ2PPP/R3KB1R w KQ - 0 1"
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Noah's Ark",
+        "description": "A tactical maneuver to trap an opponent's bishop by advancing pawns to restrict its mobility.",
+        "link": "https://resetyourchess.shop/products/noahs-ark",
+        "fen": ""
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Pawn Break",
+        "description": "A move in which a pawn advances to a square where it can be captured by an enemy pawn, typically to open lines, gain space, or control important squares.",
+        "link": "https://resetyourchess.shop/products/pawn-break",
+        "fen": ""
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Pawn Storm",
+        "description": "An aggressive strategy where a player advances multiple pawns on one side to pressure the opponent's castled king.",
+        "link": "https://resetyourchess.shop/products/pawn-storm",
+        "fen": ""
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Minority Attack",
+        "description": "A Minority Attack is a strategy where a player advances fewer pawns (usually two) against more of the opponent\u2019s pawns (usually three).",
+        "link": "https://resetyourchess.shop/products/minority-attack",
+        "fen": ""
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Pawn Breakthrough",
+        "description": "A tactic where pawns are advanced and sacrificed to open a path in the opponent's position.",
+        "link": "https://resetyourchess.shop/products/pawn-breakthrough",
+        "fen": ""
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Pawn Race",
+        "description": "A Pawn Race occurs when both players advance their pawns rapidly to promote one to a Queen first.",
+        "link": "https://resetyourchess.shop/products/pawn-race",
+        "fen": ""
+    },
+    {
+        "category": "Pawn Techniques",
+        "name": "Reserve Tempi",
+        "description": "Spare pawn moves used to wait and force the opponent into a less favorable position.",
+        "link": "https://resetyourchess.shop/products/reserve-tempi",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Fianchetto",
+        "description": "A fianchetto develops a bishop on the long diagonal by moving the b/g-pawn and developing the bishop behind it.",
+        "link": "https://resetyourchess.shop/products/fianchetto",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Knight Maneuver",
+        "description": "A strategic sequence where a Knight is repositioned to a more advantageous square, often via a circuitous path.",
+        "link": "https://resetyourchess.shop/products/knight-maneuver",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Mating Net",
+        "description": "A chess technique where pieces create a net of threats around the opponent's King, leading to inevitable checkmate.",
+        "link": "https://resetyourchess.shop/products/mating-net",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Principle of One Diagonal",
+        "description": "Controlling a long diagonal with a Bishop is often more effective than controlling two shorter diagonals.",
+        "link": "https://resetyourchess.shop/products/principle-of-one-diagonal",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Centurini Position",
+        "description": "A same-colored bishops endgame where the side with an advanced pawn can win despite defensive attempts.",
+        "link": "https://resetyourchess.shop/products/centurini-position",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Knight and Bishop W-Maneuver",
+        "description": "Technique to checkmate a lone king using a bishop and knight.",
+        "link": "https://resetyourchess.shop/products/knight-and-bishop-w-maneuver",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Rook Lift",
+        "description": "A Rook Lift is a chess maneuver where a Rook is moved vertically up the board to become more active.",
+        "link": "https://resetyourchess.shop/products/rook-lift",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Rook Swing",
+        "description": "A Rook Swing is a maneuver where a Rook moves horizontally to a more advantageous position on the opposite side.",
+        "link": "https://resetyourchess.shop/products/rook-swing",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Philidor Position",
+        "description": "A fundamental drawing position in rook vs. rook and pawn endgames, where the defending rook cuts off the opposing king.",
+        "link": "https://resetyourchess.shop/products/philidor-position",
+        "fen": "8/4k3/1r6/4P3/4K3/8/8/5R2 w - - 0 1"
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Vancura Position",
+        "description": "A fundamental drawing position in Rook vs. Rook and Rook's pawn endgames.",
+        "link": "https://resetyourchess.shop/products/vancura-position",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Lucena Position",
+        "description": "A key rook and pawn vs. rook endgame where the attacking side builds a bridge to promote the pawn.",
+        "link": "https://resetyourchess.shop/products/lucena-position",
+        "fen": "1r6/8/8/8/8/2K5/k1P5/2R5 w - - 0 1"
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Saavedra Position",
+        "description": "A rare pawn vs. rook endgame where the pawn side outmaneuvers the rook with an underpromotion.",
+        "link": "https://resetyourchess.shop/products/saavedra-position",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Luft",
+        "description": "A pawn move creating an escape square for the king to prevent back rank mate.",
+        "link": "https://resetyourchess.shop/products/luft",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Key Squares in Front of Pawn",
+        "description": "In King and pawn vs. King endgames, the three squares in front of the pawn, two ranks ahead of it.",
+        "link": "https://resetyourchess.shop/products/key-squares-in-front-of-pawn",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Opposition",
+        "description": "Opposition is when kings face each other with one square between, forcing the player to move to yield ground.",
+        "link": "https://resetyourchess.shop/products/opposition",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Triangulation",
+        "description": "Triangulation is a technique used to \"lose a move\" by making a triangular path with the King.",
+        "link": "https://resetyourchess.shop/products/triangulation",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Outflanking",
+        "description": "Endgame technique where one King moves laterally to outflank the opposing King, creating separation and enabling advancement.",
+        "link": "https://resetyourchess.shop/products/outflanking",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Shouldering",
+        "description": "Shouldering is an endgame technique where a King blocks the opposing King from key squares.",
+        "link": "https://resetyourchess.shop/products/shouldering",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "King Inside the Square",
+        "description": "The Square of the Pawn is the area from the pawn\u2019s position to its promotion square. If the defending king can enter this square, it can stop the pawn from promoting.",
+        "link": "https://resetyourchess.shop/products/king-inside-the-square",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Reti's Maneuver",
+        "description": "Endgame technique where a king uses diagonal and lateral moves to pursue two goals simultaneously.",
+        "link": "https://resetyourchess.shop/products/retis-maneuver",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Corresponding Squares",
+        "description": "An endgame concept where specific squares are linked, requiring kings to occupy corresponding squares to maintain balance.",
+        "link": "https://resetyourchess.shop/products/corresponding-squares",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Zugzwang",
+        "description": "Zugzwang is when any move a player makes will worsen their position.",
+        "link": "https://resetyourchess.shop/products/zugzwang",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Umbrella Technique",
+        "description": "An endgame strategy that uses a pawn as a shield to protect the king from rook checks.",
+        "link": "https://resetyourchess.shop/products/umbrella-technique",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Fortress",
+        "description": "A defensive setup where the weaker side creates an impenetrable position that the stronger side cannot break through.",
+        "link": "https://resetyourchess.shop/products/fortress",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Stalemate",
+        "description": "A stalemate occurs when the player to move has no legal moves and their king is not in check, resulting in a draw.",
+        "link": "https://resetyourchess.shop/products/stalemate",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Perpetual Check",
+        "description": "A situation where one player can continuously check the opponent's king, forcing a draw.",
+        "link": "https://resetyourchess.shop/products/perpetual-check",
+        "fen": ""
+    },
+    {
+        "category": "Knight and Bishop Techniques",
+        "name": "Threefold Repetition of the Position",
+        "description": "A chess rule allowing a draw claim if the same position occurs three times with the same player to move.",
+        "link": "https://resetyourchess.shop/products/threefold-repetition-of-the-position",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates in the Opening",
+        "name": "Fool's Mate",
+        "description": "The fastest checkmate in chess, occurring after just two moves due to poor opening play.",
+        "link": "https://resetyourchess.shop/products/fools-mate",
+        "fen": "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 3"
+    },
+    {
+        "category": "Checkmate Patterns | Mates in the Opening",
+        "name": "Scholar's Mate",
+        "description": "A four-move checkmate using queen and bishop to attack f7 or f2, common in beginner games.",
+        "link": "https://resetyourchess.shop/products/scholars-mate",
+        "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR b KQkq - 3 3"
+    },
+    {
+        "category": "Checkmate Patterns | Mates in the Opening",
+        "name": "Legal's Mate",
+        "description": "A mating pattern where a pinned knight captures, leading to a queen sacrifice and checkmate with minor pieces.",
+        "link": "https://resetyourchess.shop/products/legals-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Minor Piece",
+        "name": "Pawn Mate",
+        "description": "A mating pattern where a pawn, supported by another piece, delivers mate to a king confined by its own pieces.",
+        "link": "https://resetyourchess.shop/products/pawn-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Minor Piece",
+        "name": "Smothered Mate",
+        "description": "A checkmate by a knight where the king is trapped by its own pieces.",
+        "link": "https://resetyourchess.shop/products/smothered-mate",
+        "fen": "6rk/5Npp/8/8/8/8/8/7K b - - 0 1"
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Minor Piece",
+        "name": "Corner Mate",
+        "description": "A checkmate where the enemy King is trapped in a corner.",
+        "link": "https://resetyourchess.shop/products/corner-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Minor Piece",
+        "name": "Double Knight Mate",
+        "description": "A checkmate pattern where two knights coordinate to trap the king, often near the corner or blocked by its own pieces.",
+        "link": "https://resetyourchess.shop/products/double-knight-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Minor Piece",
+        "name": "Reti's Mate",
+        "description": "A checkmate using a bishop supported by a rook, trapping the king with limited mobility.",
+        "link": "https://resetyourchess.shop/products/retis-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Minor Piece",
+        "name": "Blackburne's Mate",
+        "description": "A checkmate using a knight and two bishops to trap a castled king.",
+        "link": "https://resetyourchess.shop/products/blackburnes-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Arabian Mate",
+        "description": "A checkmate where a knight and rook trap the opposing king in a corner.",
+        "link": "https://resetyourchess.shop/products/arabian-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Killbox Mate",
+        "description": "A checkmate pattern where a Queen and Rook trap the enemy King in a 3x3 box.",
+        "link": "https://resetyourchess.shop/products/killbox-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Blind Swine Mate",
+        "description": "A checkmate pattern where two rooks on the 7th rank trap the king, with one rook delivering mate while protected by the other.",
+        "link": "https://resetyourchess.shop/products/blind-swine-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Mayet's Mate",
+        "description": "A checkmate where a rook, supported by a bishop, mates the king on the back rank, with escape squares blocked by its own pieces.",
+        "link": "https://resetyourchess.shop/products/mayets-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Opera Mate",
+        "description": "A bishop and rook coordinate to checkmate a king trapped on the back rank by its own pieces.",
+        "link": "https://resetyourchess.shop/products/opera-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Anderssen's Mate",
+        "description": "A checkmate where a rook, supported by a pawn, delivers mate to a king on the back rank.",
+        "link": "https://resetyourchess.shop/products/anderssens-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Vukovic's Mate",
+        "description": "A checkmate with a protected rook delivering mate on the board's edge, while a knight covers the king's escape squares.",
+        "link": "https://resetyourchess.shop/products/vukovics-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Hook Mate",
+        "description": "A mating pattern where a rook and knight combine to checkmate an exposed king, often aided by the opponent's own pieces.",
+        "link": "https://resetyourchess.shop/products/hook-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Triangle Mate",
+        "description": "A checkmate pattern involving a Queen that creates a shape on the board that resembles a triangle.",
+        "link": "https://resetyourchess.shop/products/triangle-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Swallow's Tail Mate",
+        "description": "A mating pattern where the king is trapped between two friendly pieces, resembling a swallow's tail.",
+        "link": "https://resetyourchess.shop/products/swallows-tail-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Dovetail Mate",
+        "description": "A checkmate where the king is trapped between two of its own pieces, resembling a dove's tail.",
+        "link": "https://resetyourchess.shop/products/dovetail-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Kiss of Death Mate",
+        "description": "A checkmate where the queen delivers mate from a square adjacent to the opposing king, resembling a \"kiss.\"",
+        "link": "https://resetyourchess.shop/products/kiss-of-death-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Damiano's Mate",
+        "description": "A classic checkmate where a queen, supported by a pawn, mates a castled king blocked by its own pieces.",
+        "link": "https://resetyourchess.shop/products/damianos-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Lolli's Mate",
+        "description": "A queen and pawn coordinate to checkmate a castled king by infiltrating the fianchetto position.",
+        "link": "https://resetyourchess.shop/products/lollis-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates by the Touch of a Rook",
+        "name": "Max Lange's Mate",
+        "description": "A mating pattern in which a Queen and Bishop coordinate to checkmate a castled King by exploiting weakened pawn cover.",
+        "link": "https://resetyourchess.shop/products/max-langes-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Back-Rank Mate",
+        "description": "A checkmate delivered by a rook or queen along the back rank, trapping the king behind its own pawns.",
+        "link": "https://resetyourchess.shop/products/back-rank-mate",
+        "fen": "6k1/5ppp/8/8/8/8/5PPP/1R4K1 w - - 0 1"
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Ladder Mate",
+        "description": "A checkmate pattern where two rooks (or rook and queen) drive the king to the board's edge step by step.",
+        "link": "https://resetyourchess.shop/products/ladder-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Box Mate",
+        "description": "A checkmate where a rook and king confine the enemy king to a corner or edge, delivering mate along a rank or file.",
+        "link": "https://resetyourchess.shop/products/box-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Anastasia's Mate",
+        "description": "A classical mating pattern involving a Knight and a Rook that attack a King on the edge of the board.",
+        "link": "https://resetyourchess.shop/products/anastasias-mate",
+        "fen": "7k/5Npp/8/8/8/8/8/1R5K b - - 0 1"
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Greco's Mate",
+        "description": "A checkmate pattern using a bishop and rook to trap a castled king, first documented by Gioachino Greco.",
+        "link": "https://resetyourchess.shop/products/grecos-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Pillsbury's Mate",
+        "description": "A mating pattern using a rook to deliver mate while a bishop controls the king\u2019s escape squares.",
+        "link": "https://resetyourchess.shop/products/pillsburys-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Epaulettes Mate",
+        "description": "A checkmate where two retreat squares for the king are blocked by its own pieces, resembling military epaulettes.",
+        "link": "https://resetyourchess.shop/products/epaulettes-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Morphy's Mate",
+        "description": "A checkmate pattern using a bishop and rook to trap a castled king on a weakened diagonal.",
+        "link": "https://resetyourchess.shop/products/morphys-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Boden's Mate",
+        "description": "A checkmate pattern where two bishops deliver mate on intersecting diagonals, trapping the king with its own pieces.",
+        "link": "https://resetyourchess.shop/products/bodens-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Balestra Mate",
+        "description": "A checkmate where a bishop and queen coordinate on diagonals to trap the opposing king.",
+        "link": "https://resetyourchess.shop/products/balestra-mate",
+        "fen": ""
+    },
+    {
+        "category": "Checkmate Patterns | Mates at a Distance",
+        "name": "Two Bishops Mate",
+        "description": "A mating pattern in which two bishops and a king force the opponent's king into a corner to deliver checkmate.",
+        "link": "https://resetyourchess.shop/products/two-bishops-mate",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Surprised by the Last Move",
+        "description": "An Unexpected Move can have a powerful psychological and tactical impact on your opponent.",
+        "link": "https://resetyourchess.shop/products/surprised-by-the-last-move",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Stuck in the Past",
+        "description": "A mental trap where focus on previous mistakes leads to poor decisions and missed opportunities.",
+        "link": "https://resetyourchess.shop/products/stuck-in-the-past",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Aware of the Coming Loss",
+        "description": "A mindset to stay resilient and maximize chances when facing a worse position.",
+        "link": "https://resetyourchess.shop/products/aware-of-the-coming-loss",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Pushing Hard for the Win",
+        "description": "Overextending by pushing too hard for a win and thus creating weaknesses and vulnerabilities.",
+        "link": "https://resetyourchess.shop/products/pushing-hard-for-the-win",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Energy Running Out",
+        "description": "A decline in focus and decision-making due to fatigue, leading to mistakes and slower play.",
+        "link": "https://resetyourchess.shop/products/energy-running-out",
+        "fen": ""
+    },
+    {
+        "category": "Body And Mind",
+        "name": "Time Pressure",
+        "description": "[Patterns and Creators](https://resetyourchess.shop/collections/patterns-and-creators)",
+        "link": "https://resetyourchess.shop/products/time-pressure",
+        "fen": ""
+    }
+]
