@@ -117,7 +117,7 @@ class _GeographicKingSafetyScreenState extends State<GeographicKingSafetyScreen>
             const SizedBox(height: 16),
             _buildControlsBar(),
             const SizedBox(height: 24),
-            _buildSidebarDirectory(),
+            _buildSidebarDirectory(isNested: true),
           ],
         ),
       ),
@@ -138,13 +138,16 @@ class _GeographicKingSafetyScreenState extends State<GeographicKingSafetyScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "CHIHUAHUAN DESERT SURVEY SECTOR: LONESOME RIDGE",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  letterSpacing: 1.0,
+              const Expanded(
+                child: Text(
+                  "CHIHUAHUAN DESERT SURVEY SECTOR: LONESOME RIDGE",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    letterSpacing: 1.0,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
@@ -247,57 +250,69 @@ class _GeographicKingSafetyScreenState extends State<GeographicKingSafetyScreen>
     );
   }
 
-  Widget _buildSidebarDirectory() {
-    return ListView(
+  Widget _buildSidebarDirectory({bool isNested = false}) {
+    final childrenList = [
+      const Text(
+        "RESEARCH & OPERATIONS",
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          letterSpacing: 1.2,
+        ),
+      ),
+      const Text(
+        "Carlsbad Field Station Directory",
+        style: TextStyle(color: Colors.white54, fontSize: 11),
+      ),
+      const Divider(color: Colors.white24, height: 24),
+
+      _buildContactTile(
+        "Dawn Jones",
+        "Carlsbad Field Station Manager",
+        "Office Contact: (575) 234-5972\nEmail: djones@blm.gov\nCoord: 32.1245° N, 104.2234° W",
+      ),
+      const SizedBox(height: 20),
+
+      const Text(
+        "MODALITY PROTOCOLS",
+        style: TextStyle(
+          color: Colors.cyanAccent,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          letterSpacing: 1.0,
+        ),
+      ),
+      const SizedBox(height: 12),
+      _buildProtocolDesc(
+        "Modality A (Lonesome Ridge ACEC)",
+        "Elevates the King to the Lonesome Ridge plateau. Uses the Area of Critical Environmental Concern (ACEC) designation as an absolute regulatory barrier to restrict opponent piece approaches.",
+      ),
+      const SizedBox(height: 12),
+      _buildProtocolDesc(
+        "Modality B (H-Pawn Bait Hook)",
+        "Fractures the h-file into a geological canyon fault line. Intentionally weakens the files to bait opponent attacks, drawing them into a spatial tactical trap.",
+      ),
+      const SizedBox(height: 12),
+      _buildProtocolDesc(
+        "Modality C (Pre-Emptive Evacuation)",
+        "Leverages access easements across the checkerboard split-estate land pattern, securing a clear lane for the King to traverse before hostile lines open.",
+      ),
+    ];
+
+    if (isNested) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: childrenList,
+      );
+    }
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
-      children: [
-        const Text(
-          "RESEARCH & OPERATIONS",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const Text(
-          "Carlsbad Field Station Directory",
-          style: TextStyle(color: Colors.white54, fontSize: 11),
-        ),
-        const Divider(color: Colors.white24, height: 24),
-
-        _buildContactTile(
-          "Dawn Jones",
-          "Carlsbad Field Station Manager",
-          "Office Contact: (575) 234-5972\nEmail: djones@blm.gov\nCoord: 32.1245° N, 104.2234° W",
-        ),
-        const SizedBox(height: 20),
-
-        const Text(
-          "MODALITY PROTOCOLS",
-          style: TextStyle(
-            color: Colors.cyanAccent,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-            letterSpacing: 1.0,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _buildProtocolDesc(
-          "Modality A (Lonesome Ridge ACEC)",
-          "Elevates the King to the Lonesome Ridge plateau. Uses the Area of Critical Environmental Concern (ACEC) designation as an absolute regulatory barrier to restrict opponent piece approaches.",
-        ),
-        const SizedBox(height: 12),
-        _buildProtocolDesc(
-          "Modality B (H-Pawn Bait Hook)",
-          "Fractures the h-file into a geological canyon fault line. Intentionally weakens the files to bait opponent attacks, drawing them into a spatial tactical trap.",
-        ),
-        const SizedBox(height: 12),
-        _buildProtocolDesc(
-          "Modality C (Pre-Emptive Evacuation)",
-          "Leverages access easements across the checkerboard split-estate land pattern, securing a clear lane for the King to traverse before hostile lines open.",
-        ),
-      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: childrenList,
+      ),
     );
   }
 
