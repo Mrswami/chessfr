@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import '../auth/user_role_service.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -12,7 +12,7 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final _client = Supabase.instance.client;
-
+  final _roleService = UserRoleService();
 
   bool _isLoading = true;
   List<Map<String, dynamic>> _allUsers = [];
@@ -24,15 +24,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Future<void> _loadAdminData() async {
-    // In production, RLS (Row Level Security) will prevent reading 'profiles'
-    // unless you are an admin.
     try {
       final res = await _client
           .from('profiles')
-          .select('id, display_name, created_at, user_stats(total_aura, current_streak, tier)'); // Assume tier is in user_stats or profiles
-      
-      // If schema differs, just grab basic profile info.
-      // Assuming 'user_stats' is a foreign table join.
+          .select('id, display_name, role, created_at, user_stats(total_aura, current_streak)');
       
       if (mounted) {
         setState(() {
@@ -41,17 +36,46 @@ class _AdminDashboardState extends State<AdminDashboard> {
         });
       }
     } catch (e) {
+      debugPrint('Admin query failed, falling back to mock: $e');
       if (mounted) {
         setState(() {
-          _isLoading = false;
-          // Just mock for UI dev if database denies access
           _allUsers = [
-            {'id': '1', 'display_name': 'Test User', 'tier': 'Free', 'total_aura': 120},
-            {'id': '2', 'display_name': 'Admin', 'tier': 'Admin', 'total_aura': 9000},
+            {
+              'id': 'mock-1',
+              'display_name': 'AmateurSwami',
+              'role': 'free',
+              'user_stats': {'total_aura': 1200, 'current_streak': 5}
+            },
+            {
+              'id': 'mock-2',
+              'display_name': 'MrSwami (Admin)',
+              'role': 'admin',
+              'user_stats': {'total_aura': 9000, 'current_streak': 30}
+            },
           ];
+          _isLoading = false;
         });
       }
     }
+  }
+
+  Future<void> _updateRole(String profileId, UserRole role) async {
+    setState(() => _isLoading = true);
+    try {
+      await _roleService.updateUserRole(profileId, role);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('User role updated to ${role.name}!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update role: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+    _loadAdminData();
   }
 
   @override
@@ -61,41 +85,81 @@ class _AdminDashboardState extends State<AdminDashboard> {
         title: const Text('Admin Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.psychology_outlined), // Placeholder for Ghost Analysis
-            tooltip: 'Ghost Analysis Log (Future)',
+            icon: const Icon(Icons.refresh),
             onPressed: () {
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text('Ghost Analysis implementation pinned for later.')),
-               );
+              setState(() => _isLoading = true);
+              _loadAdminData();
             },
-          ),
+          )
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _allUsers.length,
-              itemBuilder: (context, index) {
-                final user = _allUsers[index];
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(child: Text(user['display_name']?[0] ?? '?')),
-                    title: Text(user['display_name'] ?? 'Unknown'),
-                    subtitle: Text('Role: ${user['tier'] ?? 'Free'} • Aura: ${user['total_aura'] ?? 0}'),
-                    trailing: PopupMenuButton<String>(
-                      onSelected: (value) {
-                        // Implement manual promotion/demotion logic here
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'promote', child: Text('Promote to Premium')),
-                        const PopupMenuItem(value: 'ban', child: Text('Ban User')),
-                      ],
-                    ),
-                  ),
-                ).animate().fadeIn(delay: (50 * index).ms).slideX();
-              },
-            ),
+          : _allUsers.isEmpty
+              ? const Center(child: Text('No users found.'))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _allUsers.length,
+                  itemBuilder: (context, index) {
+                    final user = _allUsers[index];
+                    final stats = user['user_stats'];
+                    int aura = 0;
+                    int streak = 0;
+                    
+                    if (stats is Map) {
+                      aura = stats['total_aura'] ?? 0;
+                      streak = stats['current_streak'] ?? 0;
+                    } else if (stats is List && stats.isNotEmpty) {
+                      final first = stats.first;
+                      if (first is Map) {
+                        aura = first['total_aura'] ?? 0;
+                        streak = first['current_streak'] ?? 0;
+                      }
+                    }
+
+                    final String role = user['role'] ?? 'free';
+
+                    return Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Text(user['display_name']?[0]?.toUpperCase() ?? '?'),
+                        ),
+                        title: Text(user['display_name'] ?? 'Unknown'),
+                        subtitle: Text(
+                          'Role: ${role.toUpperCase()} • Aura: $aura • Streak: $streak 🔥',
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'free') {
+                              _updateRole(user['id'], UserRole.free);
+                            } else if (value == 'premium') {
+                              _updateRole(user['id'], UserRole.premium);
+                            } else if (value == 'admin') {
+                              _updateRole(user['id'], UserRole.admin);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'free',
+                              enabled: role != 'free',
+                              child: const Text('Set to Free'),
+                            ),
+                            PopupMenuItem(
+                              value: 'premium',
+                              enabled: role != 'premium',
+                              child: const Text('Set to Premium'),
+                            ),
+                            PopupMenuItem(
+                              value: 'admin',
+                              enabled: role != 'admin',
+                              child: const Text('Set to Admin'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ).animate().fadeIn(delay: (50 * index).ms).slideX();
+                  },
+                ),
     );
   }
 }

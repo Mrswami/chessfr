@@ -199,4 +199,19 @@ class TrainingRepository {
     
     return List<Map<String, dynamic>>.from(res);
   }
+
+  /// Fetches a random position FEN from the positions table.
+  Future<String?> getRandomPositionFen() async {
+    try {
+      final res = await _client.from('positions').select('fen');
+      if (res.isNotEmpty) {
+        final list = List<Map<String, dynamic>>.from(res);
+        list.shuffle();
+        return list.first['fen'] as String?;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  }
 }

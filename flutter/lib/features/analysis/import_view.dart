@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../logic/chess_com_service.dart';
+import '../logic/lichess_service.dart';
+import '../logic/warehouse_game.dart';
 import 'analysis_view.dart';
 
 class ImportView extends StatefulWidget {
@@ -14,10 +16,12 @@ class _ImportViewState extends State<ImportView> {
   final _usernameController = TextEditingController();
   final _pgnController = TextEditingController();
   final _chessComService = ChessComService();
+  final _lichessService = LichessService();
   
-  List<ChessComGame> _recentGames = [];
+  List<WarehouseGame> _recentGames = [];
   bool _isLoading = false;
   String? _error;
+  String _selectedPlatform = 'chess_com';
 
   Future<void> _fetchGames() async {
     final username = _usernameController.text.trim();
@@ -26,15 +30,25 @@ class _ImportViewState extends State<ImportView> {
     setState(() {
       _isLoading = true;
       _error = null;
+      _recentGames = [];
     });
 
     try {
-      final games = await _chessComService.getRecentGames(username);
+      List<WarehouseGame> games = [];
+      if (_selectedPlatform == 'chess_com') {
+        games = await _chessComService.getRecentGames(username);
+      } else {
+        games = await _lichessService.getRecentGames(username);
+      }
+      
       setState(() {
         _recentGames = games;
+        if (games.isEmpty) {
+          _error = 'No recent games found for "$username" on ${_selectedPlatform == 'chess_com' ? 'Chess.com' : 'Lichess'}.';
+        }
       });
     } catch (e) {
-      setState(() => _error = 'Failed to fetch games.');
+      setState(() => _error = 'Failed to fetch games from platform.');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -94,14 +108,41 @@ class _ImportViewState extends State<ImportView> {
             const Divider(),
             const SizedBox(height: 24),
 
-            // Chess.com Import Section
+            // Online Platforms Section
             Text(
-              'Chess.com Recent Games',
+              'Import from Online Profiles',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            
+            // Platform Selector SegmentedButton
+            SegmentedButton<String>(
+              segments: const <ButtonSegment<String>>[
+                ButtonSegment<String>(
+                  value: 'chess_com',
+                  label: Text('Chess.com'),
+                  icon: Icon(Icons.grid_goldenratio),
+                ),
+                ButtonSegment<String>(
+                  value: 'lichess',
+                  label: Text('Lichess'),
+                  icon: Icon(Icons.emoji_events),
+                ),
+              ],
+              selected: <String>{_selectedPlatform},
+              onSelectionChanged: (Set<String> newSelection) {
+                setState(() {
+                  _selectedPlatform = newSelection.first;
+                  _recentGames = [];
+                  _error = null;
+                });
+              },
+            ),
+            
+            const SizedBox(height: 16),
+            
             Row(
               children: [
                 Expanded(
@@ -110,7 +151,9 @@ class _ImportViewState extends State<ImportView> {
                       controller: _usernameController,
                       autofillHints: const [AutofillHints.username],
                       decoration: InputDecoration(
-                        hintText: 'Username (e.g. Hikaru)',
+                        hintText: _selectedPlatform == 'chess_com' 
+                            ? 'Chess.com Username (e.g. Hikaru)' 
+                            : 'Lichess Username (e.g. penguingim1)',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                       ),
@@ -158,7 +201,7 @@ class _ImportViewState extends State<ImportView> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       title: Text('${game.whiteUsername} vs ${game.blackUsername}'),
-                      subtitle: Text('${game.timeControl} • ${game.date.toString().split(' ')[0]}'),
+                      subtitle: Text('${game.timeControl} • ${game.playedAt.toString().split(' ')[0]}'),
                       trailing: Chip(
                         label: Text(game.whiteUsername.toLowerCase() == _usernameController.text.toLowerCase() 
                             ? (game.result == '1-0' ? 'Won' : (game.result == '0-1' ? 'Lost' : 'Draw'))
@@ -166,7 +209,10 @@ class _ImportViewState extends State<ImportView> {
                         ),
                         backgroundColor: isWin ? Colors.green.withValues(alpha: 0.2) : Colors.red.withValues(alpha: 0.2),
                       ),
-                      onTap: () => _analyzePgn(game.pgn, userSide: game.whiteUsername.toLowerCase() == _usernameController.text.toLowerCase() ? 'w' : 'b'),
+                      onTap: () => _analyzePgn(
+                        game.pgn, 
+                        userSide: game.whiteUsername.toLowerCase() == _usernameController.text.toLowerCase() ? 'w' : 'b'
+                      ),
                     ),
                   ).animate().fadeIn(delay: (50 * index).ms).slideX();
                 },

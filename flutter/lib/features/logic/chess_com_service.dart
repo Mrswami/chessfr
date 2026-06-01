@@ -1,98 +1,93 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'warehouse_game.dart';
 
 class ChessComService {
   final String _baseUrl = 'https://api.chess.com/pub';
 
-  /// Fetches monthly archives for a user.
+  /// Fetches monthly archive URLs for a user (newest first).
   Future<List<String>> getArchives(String username) async {
     try {
-      final response = await http.get(Uri.parse('$_baseUrl/player/$username/games/archives'));
+      final response = await http.get(
+        Uri.parse('$_baseUrl/player/$username/games/archives'),
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> archives = data['archives'];
-        // Return most recent first
         return archives.map((e) => e.toString()).toList().reversed.toList();
       }
     } catch (e) {
-      debugPrint('Error fetching archives: $e');
+      debugPrint('ChessComService.getArchives error: $e');
     }
     return [];
   }
 
   /// Fetches games from a specific monthly archive URL.
-  Future<List<ChessComGame>> getGamesFromArchive(String archiveUrl) async {
+  Future<List<WarehouseGame>> getGamesFromArchive(String archiveUrl) async {
     try {
       final response = await http.get(Uri.parse(archiveUrl));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data     = json.decode(response.body);
         final List<dynamic> games = data['games'];
-        return games.map((json) => ChessComGame.fromJson(json)).toList();
+        return games
+            .map((j) => _fromJson(j as Map<String, dynamic>))
+            .whereType<WarehouseGame>()
+            .toList();
       }
     } catch (e) {
-      debugPrint('Error fetching games: $e');
+      debugPrint('ChessComService.getGamesFromArchive error: $e');
     }
     return [];
   }
 
-  /// Fetches last 50 games for a user by iterating archives.
-  Future<List<ChessComGame>> getRecentGames(String username) async {
+  /// Fetches the most recent [limit] games for [username].
+  Future<List<WarehouseGame>> getRecentGames(
+    String username, {
+    int limit = 50,
+  }) async {
     final archives = await getArchives(username);
-    final allGames = <ChessComGame>[];
-    
-    // Iterate archives from newest to oldest until we have enough
+    final all = <WarehouseGame>[];
+
     for (final url in archives) {
-      if (allGames.length >= 50) break;
-      final games = await getGamesFromArchive(url);
-      // Sort games by end time (newest first) within the archive
-      games.sort((a, b) => b.endTime.compareTo(a.endTime));
-      allGames.addAll(games);
+      if (all.length >= limit) break;
+      final batch = await getGamesFromArchive(url);
+      batch.sort((a, b) => b.playedAt.compareTo(a.playedAt));
+      all.addAll(batch);
     }
-    
-    return allGames.take(50).toList();
+
+    return all.take(limit).toList();
   }
-}
 
-class ChessComGame {
-  final String url;
-  final String pgn;
-  final String timeControl;
-  final int endTime;
-  final bool rated;
-  final String whiteUsername;
-  final String blackUsername;
-  final int whiteRating;
-  final int blackRating;
-  final String? result; // win, checkmated, resigned, timeout, etc.
+  // -------------------------------------------------------
+  // Internal parser — Chess.com JSON → WarehouseGame
+  // -------------------------------------------------------
+  WarehouseGame? _fromJson(Map<String, dynamic> j) {
+    try {
+      final whiteResult = j['white']?['result'] as String? ?? '';
+      final blackResult = j['black']?['result'] as String? ?? '';
+      String result = '1/2-1/2';
+      if (whiteResult == 'win') result = '1-0';
+      if (blackResult == 'win') result = '0-1';
 
-  ChessComGame({
-    required this.url,
-    required this.pgn,
-    required this.timeControl,
-    required this.endTime,
-    required this.rated,
-    required this.whiteUsername,
-    required this.blackUsername,
-    required this.whiteRating,
-    required this.blackRating,
-    this.result,
-  });
+      final endTimeSec = (j['end_time'] as num? ?? 0).toInt();
 
-  factory ChessComGame.fromJson(Map<String, dynamic> json) {
-    return ChessComGame(
-      url: json['url'] ?? '',
-      pgn: json['pgn'] ?? '',
-      timeControl: json['time_control'] ?? '',
-      endTime: json['end_time'] ?? 0,
-      rated: json['rated'] ?? false,
-      whiteUsername: json['white']['username'] ?? 'Unknown',
-      blackUsername: json['black']['username'] ?? 'Unknown',
-      whiteRating: json['white']['rating'] ?? 0,
-      blackRating: json['black']['rating'] ?? 0,
-      result: json['white']['result'] == 'win' ? '1-0' : (json['black']['result'] == 'win' ? '0-1' : '1/2-1/2'), 
-    );
+      return WarehouseGame(
+        platformId:    j['url'] ?? '',
+        platform:      GamePlatform.chessCom,
+        pgn:           j['pgn'] ?? '',
+        whiteUsername: j['white']?['username'] ?? 'Unknown',
+        blackUsername: j['black']?['username'] ?? 'Unknown',
+        whiteRating:   (j['white']?['rating'] as num? ?? 0).toInt(),
+        blackRating:   (j['black']?['rating'] as num? ?? 0).toInt(),
+        timeControl:   j['time_control']?.toString() ?? '',
+        rated:         j['rated'] as bool? ?? false,
+        result:        result,
+        playedAt:      DateTime.fromMillisecondsSinceEpoch(endTimeSec * 1000),
+      );
+    } catch (e) {
+      debugPrint('ChessComService._fromJson error: $e');
+      return null;
+    }
   }
-  
-  DateTime get date => DateTime.fromMillisecondsSinceEpoch(endTime * 1000);
 }

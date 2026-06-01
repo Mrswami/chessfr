@@ -53,15 +53,11 @@ class ChessTrainerApp extends StatefulWidget {
 }
 
 class _ChessTrainerAppState extends State<ChessTrainerApp> {
-  bool _showAd = true;
-
   @override
   Widget build(BuildContext context) {
     Widget body;
     if (widget.error != null) {
       body = _BootstrapErrorScreen(error: widget.error!);
-    } else if (_showAd) {
-      body = LoadingAdScreen(onAdComplete: () => setState(() => _showAd = false));
     } else {
       body = StreamBuilder<AuthState>(
         stream: Supabase.instance.client.auth.onAuthStateChange,

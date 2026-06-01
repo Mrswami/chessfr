@@ -4,6 +4,8 @@ import 'package:flutter_chess_board/flutter_chess_board.dart' hide Color;
 import '../logic/move_ranker.dart';
 import '../logic/stockfish_service.dart';
 import '../logic/opening_service.dart';
+import '../logic/ml_service_client.dart';
+import '../logic/design_metrics.dart';
 import 'training_repository.dart';
 
 class TrainingScreen extends StatefulWidget {
@@ -22,12 +24,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
   final ChessBoardController _controller = ChessBoardController();
   final StockfishService _stockfish = StockfishService();
   final OpeningService _openingService = OpeningService();
+  final MLServiceClient _mlServiceClient = MLServiceClient();
   final MoveRanker _ranker = MoveRanker();
   final TrainingRepository _repo = TrainingRepository();
 
   List<RankedMove> _rankedMoves = [];
   OpeningStats? _openingStats;
   bool _isLoading = true;
+  bool _isLoadingNextPuzzle = false;
   String? _feedback;
   bool _feedbackIsPositive = true;
   DateTime? _positionShownAt;
@@ -36,6 +40,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
   String? _profileId;
   String? _positionId;
   late String _currentFen;
+
+  // Archetype & visual highlights state
+  String _selectedArchetype = 'London Squeezer';
+  final Map<int, Color> _squareHighlights = {};
 
   @override
   void initState() {
@@ -47,9 +55,18 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _resolveIdsAndAnalyze();
   }
 
+  int _squareToIdx(String sq) {
+    if (sq.length != 2) return -1;
+    final file = sq.codeUnitAt(0) - 'a'.codeUnitAt(0);
+    final rank = sq.codeUnitAt(1) - '1'.codeUnitAt(0);
+    if (file < 0 || file > 7 || rank < 0 || rank > 7) return -1;
+    return rank * 8 + file;
+  }
+
   Future<void> _resolveIdsAndAnalyze() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
+    _squareHighlights.clear();
     
     // Fetch profile and position in parallel
     final profileFuture = _repo.getProfile();
@@ -60,7 +77,79 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _profileId = _userProfile?['id'];
     _positionId = metaResults[1] as String?;
 
-    // Fetch engine moves and opening stats
+    final bool isDankFish = _userProfile?['engine_mode'] == 'dankfish';
+
+    // 1. If DankFish Mode is active, fetch predictions from our Dockerized ML Service
+    if (isDankFish) {
+      try {
+        final mlResponse = await _mlServiceClient.predictHumanMove(
+          fen: _controller.getFen(),
+          elo: 1200,
+          archetype: _selectedArchetype,
+        );
+
+        // Map ML predictions to RankedMoves
+        final List<RankedMove> ranked = [];
+        for (var i = 0; i < mlResponse.topMoves.length; i++) {
+          final pred = mlResponse.topMoves[i];
+          
+          // Generate square highlights
+          if (pred.uci.length >= 2) {
+            final dest = pred.uci.substring(pred.uci.length - 2);
+            final idx = _squareToIdx(dest);
+            if (idx != -1) {
+              Color? col;
+              if (pred.visuals.color == 'emerald') {
+                col = const Color(0xFF10B981).withOpacity(0.5); // Emerald Move Likelihood
+              } else if (pred.visuals.color == 'amber') {
+                col = const Color(0xFFF59E0B).withOpacity(0.5); // Amber Trap Warning
+              } else if (pred.visuals.color == 'crimson') {
+                col = const Color(0xFFEF4444).withOpacity(0.6); // Crimson Attention Tunnel
+              } else {
+                col = const Color(0xFF3B82F6).withOpacity(0.4); // Sapphire Connection
+              }
+
+              if (!_squareHighlights.containsKey(idx)) {
+                _squareHighlights[idx] = col;
+              }
+            }
+          }
+
+          ranked.add(
+            RankedMove(
+              moveSan: pred.san,
+              finalScore: pred.probability * 10,
+              engineEval: (pred.visuals.blunderRisk * -100).toInt(),
+              designMetrics: DesignMetrics(
+                isBridge: pred.visuals.cognitiveTunnel,
+                islandCount: 3,
+                connectivityGain: pred.probability,
+                responseGain: pred.probability,
+                influenceGain: pred.probability,
+              ),
+              explanation: pred.insights,
+            ),
+          );
+        }
+
+        // Fetch opening stats in parallel to complete loading
+        final openingStats = await _openingService.getOpeningStats(_controller.getFen());
+
+        if (mounted) {
+          setState(() {
+            _rankedMoves = ranked;
+            _openingStats = openingStats;
+            _isLoading = false;
+            _positionShownAt = DateTime.now();
+          });
+        }
+        return;
+      } catch (e) {
+        debugPrint('ML predictions failed, falling back to standard Stockfish: $e');
+      }
+    }
+
+    // 2. Fallback to standard client-side Stockfish + MoveRanker (if Stockfish Mode or ML API error)
     final engineMovesFuture = _stockfish.getTopMoves(_controller.getFen());
     final openingStatsFuture = _openingService.getOpeningStats(_controller.getFen());
 
@@ -68,7 +157,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final engineMoves = results[0] as List<EngineMove>;
     final openingStats = results[1] as OpeningStats?;
 
-    // Use actual user profile or fallback defaults
     final ranked = _ranker.rankMoves(
       _controller.getFen(), 
       engineMoves, 
@@ -116,7 +204,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
     setState(() {
       if (isCorrect) {
-        _feedback = "Excellent! That's the DankFish choice. +$auraEarned Aura";
+        _feedback = "Excellent! That's the recommended choice. +$auraEarned Aura";
         _feedbackIsPositive = true;
       } else if (isRecommended) {
         _feedback = "Good choice. ${_rankedMoves[rank - 1].explanation} +$auraEarned Aura";
@@ -139,6 +227,31 @@ class _TrainingScreenState extends State<TrainingScreen> {
         outcome: outcome,
         auraEarned: auraEarned,
       );
+    }
+  }
+
+  Future<void> _loadNextPuzzle() async {
+    setState(() {
+      _isLoadingNextPuzzle = true;
+      _feedback = null;
+      _squareHighlights.clear();
+    });
+
+    final nextFen = await _repo.getRandomPositionFen();
+    if (nextFen != null) {
+      _currentFen = nextFen;
+      _controller.loadFen(_currentFen);
+      await _resolveIdsAndAnalyze();
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not load next puzzle. Try again!')),
+        );
+      }
+    }
+    
+    if (mounted) {
+      setState(() => _isLoadingNextPuzzle = false);
     }
   }
 
@@ -179,14 +292,53 @@ class _TrainingScreenState extends State<TrainingScreen> {
           Expanded(
             flex: 3,
             child: Center(
-              child: ChessBoard(
-                controller: _controller,
-                boardColor: BoardColor.brown,
-                boardOrientation: PlayerColor.white,
-                onMove: () {
-                  final history = _controller.getSan();
-                  if (history.isNotEmpty) _onMove(history.last!);
-                },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ChessBoard(
+                    controller: _controller,
+                    boardColor: BoardColor.brown,
+                    boardOrientation: PlayerColor.white,
+                    onMove: () {
+                      final history = _controller.getSan();
+                      if (history.isNotEmpty) _onMove(history.last!);
+                    },
+                  ),
+                  // Visual overlays mapping to DankFish predictions
+                  if (isDankFish && _squareHighlights.isNotEmpty)
+                    IgnorePointer(
+                      child: AspectRatio(
+                        aspectRatio: 1.0,
+                        child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 8,
+                          ),
+                          itemCount: 64,
+                          itemBuilder: (context, index) {
+                            // Map GridView visual index (0 is top-left, 63 is bottom-right)
+                            // to python-chess square index (0 is bottom-left, 63 is top-right)
+                            final pythonChessSquare = (7 - (index ~/ 8)) * 8 + (index % 8);
+                            final color = _squareHighlights[pythonChessSquare];
+                            if (color != null) {
+                              return Container(
+                                margin: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: color.withOpacity(0.8),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -202,10 +354,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (_feedback != null)
+                  if (_feedback != null) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      margin: const EdgeInsets.only(bottom: 14),
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: _feedbackIsPositive
                             ? (isDankFish ? Colors.red.shade900.withValues(alpha: 0.3) : const Color(0xFF0D9488).withValues(alpha: 0.25))
@@ -242,10 +394,71 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         ],
                       ),
                     ).animate().fadeIn(duration: 200.ms).slideY(begin: 0.3, end: 0),
+                    
+                    // Next Puzzle Button Loop
+                    ElevatedButton.icon(
+                      onPressed: _isLoadingNextPuzzle ? null : _loadNextPuzzle,
+                      icon: _isLoadingNextPuzzle
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.arrow_forward_rounded),
+                      label: const Text('Next Puzzle', style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDankFish ? Colors.red.shade800 : const Color(0xFF0D9488),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ).animate().fadeIn(delay: 100.ms),
+                    const SizedBox(height: 12),
+                  ],
                   
                   if (_openingStats != null && _openingStats!.name != 'Unknown Position')
                     _buildOpeningCard(context),
 
+                  // Archetype Select Dropdown (Active in DankFish Mode)
+                  if (isDankFish) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Opponent Profile:',
+                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                        DropdownButton<String>(
+                          value: _selectedArchetype,
+                          dropdownColor: const Color(0xFF1E293B),
+                          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                          underline: Container(height: 1, color: Colors.redAccent),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _selectedArchetype = newValue;
+                              });
+                              _resolveIdsAndAnalyze();
+                            }
+                          },
+                          items: <String>[
+                            'London Squeezer',
+                            'Wayward Queen Raider',
+                            'Fried Liver Fanatic',
+                            'French/Caro Squeezer',
+                            'Gambiteer',
+                            'Symmetrical Copier'
+                          ].map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

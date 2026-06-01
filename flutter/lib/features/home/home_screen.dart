@@ -14,6 +14,7 @@ import '../social/social_hub_screen.dart';
 import '../training/mastery_screen.dart';
 import '../social/hall_of_fame_screen.dart';
 import '../analysis/brilliant_tracker_widget.dart';
+import '../analysis/synthesis_dashboard.dart';
 import 'concierge_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -146,6 +147,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     delay: 175,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: 'Cognitive Synthesis',
+                    subtitle: 'Mutate your opening DNA.',
+                    icon: Icons.biotech_rounded,
+                    color: Colors.purpleAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SynthesisDashboard()),
+                      );
+                    },
+                    delay: 185,
                   ),
                   const SizedBox(height: 14),
                   _buildActionTile(
