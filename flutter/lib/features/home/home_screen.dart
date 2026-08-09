@@ -156,10 +156,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.biotech_rounded,
                     color: Colors.purpleAccent,
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SynthesisDashboard()),
-                      );
+                      if (_role == UserRole.free) {
+                        _showPremiumLockDialog(context);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SynthesisDashboard()),
+                        ).then((_) => _loadStats());
+                      }
                     },
                     delay: 185,
                   ),
@@ -380,5 +384,73 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     ).animate().fadeIn(delay: Duration(milliseconds: delay)).slideX(begin: 0.05, end: 0, curve: Curves.easeOut);
+  }
+
+  void _showPremiumLockDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: const [
+            Icon(Icons.lock_rounded, color: Colors.amber, size: 24),
+            SizedBox(width: 8),
+            Text(
+              "PREMIUM FEATURE LOCKED",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              "Cognitive Synthesis and Geographic King Safety matrices require Magnus Intuition level access.",
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.cyanAccent.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.cyanAccent.withOpacity(0.2)),
+              ),
+              child: const Text(
+                "💡 QA Mode: Navigate to 'My Profile' and tap 'PREMIUM' or 'ADMIN' in the Role Simulator to unlock instantly.",
+                style: TextStyle(color: Colors.cyanAccent, fontSize: 11, height: 1.4),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCEL", style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber.shade700,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              ).then((_) => _checkRole());
+            },
+            child: const Text("GO TO PROFILE"),
+          ),
+        ],
+      ),
+    );
   }
 }

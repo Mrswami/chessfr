@@ -31,6 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _currentStreak = 0;
   String _tier = 'Free';
   String _displayName = 'Player';
+  String _role = 'free';
   
   // Cognitive profile percentages
   double _connectivityPct = 33.0;
@@ -93,6 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (mounted) {
         setState(() {
+          _role = profile['role'] ?? 'free';
           if (stats != null) {
             _totalAura = stats['total_aura'] ?? 0;
             _currentStreak = stats['current_streak'] ?? 0;
@@ -382,6 +384,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  
+                  // Role Simulator (QA Tool)
+                  _buildRoleSimulator(),
+                  const SizedBox(height: 16),
                   
                   // Engine Mode Toggle
                   _buildEngineModeToggle(),
@@ -903,5 +909,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ).animate().fadeIn(delay: 200.ms),
       ],
     );
+  }
+
+  Widget _buildRoleSimulator() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.cyanAccent.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.cyanAccent.withOpacity(0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.shield_outlined, color: Colors.cyanAccent, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'RBAC ROLE SIMULATOR (QA TEST)',
+                style: TextStyle(
+                  color: Colors.cyanAccent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Promote or demote your active account role to test subscription/admin gating behavior on your physical device.',
+            style: TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildRoleSimButton('FREE', 'free', Colors.cyan),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildRoleSimButton('PREMIUM', 'premium', Colors.amber),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildRoleSimButton('ADMIN', 'admin', Colors.red),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoleSimButton(String label, String roleValue, Color accentColor) {
+    final isSelected = _role == roleValue;
+    return InkWell(
+      onTap: () => _changeRole(roleValue),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor.withOpacity(0.15) : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? accentColor : Colors.white12,
+            width: 1.5,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white38,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _changeRole(String newRole) async {
+    setState(() => _isLoading = true);
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+      
+      await _supabase
+          .from('profiles')
+          .update({'role': newRole})
+          .eq('user_id', userId);
+
+      setState(() {
+        _role = newRole;
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Role updated to ${newRole.toUpperCase()}! Restart or refresh screens to apply.'),
+            backgroundColor: Colors.green.shade800,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error updating role: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Error updating role: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }
