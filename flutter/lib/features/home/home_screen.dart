@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../training/training_repository.dart';
 import '../training/training_screen.dart';
@@ -15,6 +16,8 @@ import '../training/mastery_screen.dart';
 import '../social/hall_of_fame_screen.dart';
 import '../analysis/brilliant_tracker_widget.dart';
 import '../analysis/synthesis_dashboard.dart';
+import '../analysis/screenshot_analysis_screen.dart';
+import '../logic/gemini_chess_service.dart';
 import 'concierge_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -181,6 +184,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     delay: 200,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildActionTile(
+                    context,
+                    title: '🧠 DankFish Analysis',
+                    subtitle: 'Submit a screenshot — AI reads your position.',
+                    icon: Icons.document_scanner_rounded,
+                    color: const Color(0xFF0D9488),
+                    onTap: () {
+                      final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+                      final service = GeminiChessService(apiKey: apiKey);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ScreenshotAnalysisScreen(geminiService: service),
+                        ),
+                      );
+                    },
+                    delay: 240,
                   ),
                   const SizedBox(height: 14),
                   _buildActionTile(

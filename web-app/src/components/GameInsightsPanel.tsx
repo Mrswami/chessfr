@@ -1,0 +1,231 @@
+import React from 'react';
+import { MoveAnalysis, MoveRating } from '../utils/analysisEngine';
+import { Award, Zap, AlertTriangle, AlertCircle, HelpCircle, CheckCircle, Flame, Swords, ExternalLink, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react';
+
+export interface LoadedGameInfo {
+  whiteUsername: string;
+  whiteRating?: number;
+  blackUsername: string;
+  blackRating?: number;
+  result: string;
+  url?: string;
+  dateStr?: string;
+}
+
+interface GameInsightsProps {
+  whiteAccuracy: number;
+  blackAccuracy: number;
+  moves: MoveAnalysis[];
+  currentMoveIndex: number;
+  onSelectMove: (index: number) => void;
+  evaluation: number; // in centipawns
+  loadedGame?: LoadedGameInfo | null;
+  onPrevMove?: () => void;
+  onNextMove?: () => void;
+  onFirstMove?: () => void;
+  onLastMove?: () => void;
+}
+
+const RATING_CONFIG: Record<MoveRating, { label: string; color: string; icon: any }> = {
+  brilliant: { label: 'Brilliant', color: '#06b6d4', icon: Flame },
+  best: { label: 'Best Move', color: '#10b981', icon: CheckCircle },
+  excellent: { label: 'Excellent', color: '#22c55e', icon: CheckCircle },
+  good: { label: 'Good', color: '#84cc16', icon: CheckCircle },
+  inaccuracy: { label: 'Inaccuracy', color: '#eab308', icon: HelpCircle },
+  mistake: { label: 'Mistake', color: '#f97316', icon: AlertTriangle },
+  blunder: { label: 'Blunder', color: '#ef4444', icon: AlertCircle },
+  book: { label: 'Book Move', color: '#a855f7', icon: Award },
+};
+
+export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
+  whiteAccuracy,
+  blackAccuracy,
+  moves,
+  currentMoveIndex,
+  onSelectMove,
+  evaluation,
+  loadedGame,
+  onPrevMove,
+  onNextMove,
+  onFirstMove,
+  onLastMove
+}) => {
+  // Count ratings
+  const counts = moves.reduce((acc, m) => {
+    acc[m.rating] = (acc[m.rating] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const evalInPawns = (evaluation / 100).toFixed(1);
+  const evalPercent = Math.min(95, Math.max(5, 50 + (evaluation / 20)));
+
+  return (
+    <div className="insights-panel">
+      {/* Loaded Game Banner (if analyzing a specific Chess.com game) */}
+      {loadedGame && (
+        <div className="analyzed-game-banner">
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-400">
+              <Swords size={14} />
+              <span>Full Game Analysis</span>
+            </div>
+            {loadedGame.url && (
+              <a
+                href={loadedGame.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+              >
+                <span>Chess.com</span>
+                <ExternalLink size={11} />
+              </a>
+            )}
+          </div>
+          <div className="flex items-center justify-between text-xs text-slate-200 font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-white inline-block border border-slate-600" />
+              <span>@{loadedGame.whiteUsername}</span>
+              {loadedGame.whiteRating && (
+                <span className="text-slate-400 font-mono text-[11px]">({loadedGame.whiteRating})</span>
+              )}
+            </div>
+            <span className="text-slate-500 font-normal">vs</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-900 inline-block border border-slate-600" />
+              <span>@{loadedGame.blackUsername}</span>
+              {loadedGame.blackRating && (
+                <span className="text-slate-400 font-mono text-[11px]">({loadedGame.blackRating})</span>
+              )}
+            </div>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Result: <strong className="text-slate-200 capitalize">{loadedGame.result}</strong></span>
+            {loadedGame.dateStr && <span>{loadedGame.dateStr}</span>}
+          </div>
+        </div>
+      )}
+
+      {/* Accuracy Cards */}
+      <div className="accuracy-header">
+        <div className="accuracy-card white-acc">
+          <div className="acc-label">White Accuracy</div>
+          <div className="acc-score">{whiteAccuracy}%</div>
+          <div className="acc-sub">Mastery Rating</div>
+        </div>
+        <div className="accuracy-card black-acc">
+          <div className="acc-label">Black Accuracy</div>
+          <div className="acc-score">{blackAccuracy}%</div>
+          <div className="acc-sub">Mastery Rating</div>
+        </div>
+      </div>
+
+      {/* Dynamic Evaluation Bar */}
+      <div className="eval-bar-section">
+        <div className="eval-bar-label">
+          <span>Engine Evaluation</span>
+          <span className="eval-val">{evaluation > 0 ? `+${evalInPawns}` : evalInPawns}</span>
+        </div>
+        <div className="eval-track">
+          <div className="eval-fill" style={{ width: `${evalPercent}%` }} />
+        </div>
+      </div>
+
+      {/* Move Quality Breakdown */}
+      <div className="move-quality-grid">
+        <div className="quality-pill brilliant-pill">
+          <Flame size={16} />
+          <span>Brilliant ({counts.brilliant || 0})</span>
+        </div>
+        <div className="quality-pill best-pill">
+          <CheckCircle size={16} />
+          <span>Best ({counts.best || 0})</span>
+        </div>
+        <div className="quality-pill blunder-pill">
+          <AlertCircle size={16} />
+          <span>Blunders ({counts.blunder || 0})</span>
+        </div>
+      </div>
+
+      {/* Move History Strip with Navigation Controls */}
+      <div className="move-list-section">
+        <div className="flex items-center justify-between mb-2">
+          <div className="section-title" style={{ marginBottom: 0 }}>Move Review</div>
+          {(onPrevMove || onNextMove) && (
+            <div className="flex items-center gap-1">
+              {onFirstMove && (
+                <button
+                  type="button"
+                  onClick={onFirstMove}
+                  disabled={currentMoveIndex < 0}
+                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  title="First Move"
+                >
+                  <SkipBack size={13} />
+                </button>
+              )}
+              {onPrevMove && (
+                <button
+                  type="button"
+                  onClick={onPrevMove}
+                  disabled={currentMoveIndex < 0}
+                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  title="Previous Move"
+                >
+                  <ChevronLeft size={13} />
+                </button>
+              )}
+              <span className="text-[11px] font-mono text-slate-400 px-1.5">
+                {currentMoveIndex >= 0 ? `${currentMoveIndex + 1}/${moves.length}` : `Start`}
+              </span>
+              {onNextMove && (
+                <button
+                  type="button"
+                  onClick={onNextMove}
+                  disabled={currentMoveIndex >= moves.length - 1}
+                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  title="Next Move"
+                >
+                  <ChevronRight size={13} />
+                </button>
+              )}
+              {onLastMove && (
+                <button
+                  type="button"
+                  onClick={onLastMove}
+                  disabled={currentMoveIndex >= moves.length - 1}
+                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  title="Last Move"
+                >
+                  <SkipForward size={13} />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="moves-scroll">
+          {moves.map((m, idx) => {
+            const config = RATING_CONFIG[m.rating] || RATING_CONFIG.good;
+            const IconComponent = config.icon;
+            const isSelected = idx === currentMoveIndex;
+
+            return (
+              <div
+                key={idx}
+                onClick={() => onSelectMove(idx)}
+                className={`move-row-item ${isSelected ? 'move-active' : ''}`}
+              >
+                <span className="move-num">{Math.floor(idx / 2) + 1}{idx % 2 === 0 ? '.' : '...'}</span>
+                <span className="move-san">{m.san}</span>
+                <span className="move-badge" style={{ backgroundColor: `${config.color}22`, color: config.color, borderColor: config.color }}>
+                  <IconComponent size={12} />
+                  <span>{config.label}</span>
+                </span>
+                <span className="move-cpl">{m.centipawnLoss > 0 ? `-${m.centipawnLoss} cp` : '✓'}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
