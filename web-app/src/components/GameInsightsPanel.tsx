@@ -150,19 +150,19 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
 
       {/* Move History Strip with Navigation Controls */}
       <div className="move-list-section">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
           <div className="section-title" style={{ marginBottom: 0 }}>Move Review</div>
           {(onPrevMove || onNextMove) && (
-            <div className="flex items-center gap-1">
+            <div className="review-nav-bar flex items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto">
               {onFirstMove && (
                 <button
                   type="button"
                   onClick={onFirstMove}
                   disabled={currentMoveIndex < 0}
-                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  className="nav-step-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-35 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center"
                   title="First Move"
                 >
-                  <SkipBack size={13} />
+                  <SkipBack size={18} />
                 </button>
               )}
               {onPrevMove && (
@@ -170,24 +170,26 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
                   type="button"
                   onClick={onPrevMove}
                   disabled={currentMoveIndex < 0}
-                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  className="nav-step-btn nav-step-primary px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-cyan-900/40 text-cyan-300 disabled:opacity-35 disabled:pointer-events-none transition-all border border-cyan-800/60 active:scale-95 flex items-center gap-1.5 font-bold text-xs"
                   title="Previous Move"
                 >
-                  <ChevronLeft size={13} />
+                  <ChevronLeft size={20} />
+                  <span className="hidden xs:inline">Prev</span>
                 </button>
               )}
-              <span className="text-[11px] font-mono text-slate-400 px-1.5">
-                {currentMoveIndex >= 0 ? `${currentMoveIndex + 1}/${moves.length}` : `Start`}
+              <span className="nav-step-counter text-xs font-mono font-bold text-slate-300 px-2.5 py-1.5 bg-slate-900/80 rounded-md border border-slate-700/60 text-center min-w-[70px]">
+                {currentMoveIndex >= 0 ? `${currentMoveIndex + 1} / ${moves.length}` : `Start`}
               </span>
               {onNextMove && (
                 <button
                   type="button"
                   onClick={onNextMove}
                   disabled={currentMoveIndex >= moves.length - 1}
-                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  className="nav-step-btn nav-step-primary px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-cyan-900/40 text-cyan-300 disabled:opacity-35 disabled:pointer-events-none transition-all border border-cyan-800/60 active:scale-95 flex items-center gap-1.5 font-bold text-xs"
                   title="Next Move"
                 >
-                  <ChevronRight size={13} />
+                  <span className="hidden xs:inline">Next</span>
+                  <ChevronRight size={20} />
                 </button>
               )}
               {onLastMove && (
@@ -195,10 +197,10 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
                   type="button"
                   onClick={onLastMove}
                   disabled={currentMoveIndex >= moves.length - 1}
-                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:pointer-events-none transition-colors border border-slate-700"
+                  className="nav-step-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-35 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center"
                   title="Last Move"
                 >
-                  <SkipForward size={13} />
+                  <SkipForward size={18} />
                 </button>
               )}
             </div>

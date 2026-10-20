@@ -1526,91 +1526,102 @@ body {
 
 /* ========================================================
    Mobile Single-Screen Optimization Rules (< 768px & < 480px)
-   Keeps board, eval bar, and key controls visible without
-   oversized vertical sprawl
+   Engineered for modern high-res flagships (Galaxy S26+, iPhone 16)
+   - Large, finger-friendly 44px+ touch targets
+   - Responsive chessboard & eval bar fitting comfortably in 1 screen
+   - Clear 2-column or 3-column action grids with readable icons/text
    ======================================================== */
 @media (max-width: 768px) {
   .app-header {
-    padding: 0.5rem 0.85rem;
+    padding: 0.55rem 0.9rem;
   }
 
   .brand {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
   }
 
   .app-container {
     padding: 0.5rem;
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
   .side-card {
-    padding: 0.85rem;
+    padding: 0.75rem;
     border-radius: 12px;
   }
 
   .view-tabs {
-    padding: 0.25rem;
-    margin-bottom: 0.75rem;
-    gap: 0.2rem;
+    padding: 0.3rem;
+    margin-bottom: 0.65rem;
+    gap: 0.3rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .view-tab-btn {
-    padding: 0.45rem 0.55rem;
-    font-size: 0.75rem;
-    gap: 0.3rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    min-height: 40px;
+    gap: 0.4rem;
   }
 
-  /* Keep board and eval bar within viewport bounds on smaller phones */
+  /* Adaptive Board Height to guarantee all controls fit on screen */
   .chess-board {
-    max-width: min(84vw, 420px, 48vh);
-    border-radius: 8px;
+    max-width: min(85vw, 420px, 46vh);
+    border-radius: 10px;
   }
 
   .board-actions {
     margin-top: 0.5rem;
-    gap: 0.35rem;
+    gap: 0.45rem;
+    width: 100%;
+    max-width: min(85vw, 420px, 46vh);
   }
 
   .action-btn {
-    padding: 0.45rem 0.7rem;
-    font-size: 0.78rem;
+    min-height: 42px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    border-radius: 9px;
   }
 
   .prompt-highlight {
-    padding: 0.6rem 0.75rem;
-    margin-bottom: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    margin-bottom: 0.45rem;
   }
 
   .accuracy-header {
     gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
   }
 
   .accuracy-card {
-    padding: 0.65rem;
+    padding: 0.6rem 0.75rem;
   }
 
   .acc-score {
-    font-size: 1.4rem;
+    font-size: 1.45rem;
     margin: 0.1rem 0;
   }
 
   .eval-bar-section {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
   }
 
   .move-quality-grid {
     gap: 0.35rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
   }
 
   .quality-pill {
-    padding: 0.3rem 0.55rem;
-    font-size: 0.7rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
   }
 
   .moves-scroll {
-    max-height: 180px;
+    max-height: 190px;
   }
 
   .puzzle-list, .opening-list {
@@ -1618,36 +1629,117 @@ body {
   }
 
   .recent-game-card {
-    padding: 0.5rem 0.65rem;
+    padding: 0.6rem 0.75rem;
   }
 }
 
 @media (max-width: 480px) {
+  /* Fits beautifully on tall 20:9 screens like Galaxy S26+ */
+  .board-eval-wrapper {
+    gap: 8px;
+  }
+
   .chess-board {
-    max-width: min(86vw, 360px, 44vh);
+    max-width: min(84vw, 360px, 42vh);
+  }
+
+  .engine-eval-bar-wrapper {
+    width: 22px;
+    min-width: 22px;
+  }
+
+  .eval-badge {
+    font-size: 9px;
+    font-weight: 800;
   }
 
   .piece {
-    font-size: clamp(1.4rem, 8.5vw, 2.1rem);
+    font-size: clamp(1.6rem, 9vw, 2.3rem);
   }
 
   .coord {
-    font-size: 0.55rem;
+    font-size: 0.6rem;
   }
 
+  /* Spacious 2-Column Action Button Grid for easy thumb tapping */
   .board-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     width: 100%;
-    max-width: min(86vw, 360px, 44vh);
-    margin: 0.4rem auto 0 auto;
+    max-width: min(84vw, 360px, 42vh);
+    margin: 0.5rem auto 0 auto;
+    gap: 0.5rem;
   }
 
   .action-btn {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.75rem;
+    min-height: 44px;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    gap: 0.45rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   }
+
+  .action-btn svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+  }
+
+  .view-tab-btn {
+    min-height: 42px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .view-tab-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .board-review-nav-bar {
+    max-width: min(84vw, 360px, 42vh);
+    margin: 0.5rem auto 0 auto;
+  }
+
+  .board-nav-btn {
+    min-height: 44px;
+  }
+}
+
+/* Base styles for Move Review Navigation Bar */
+.board-review-nav-bar {
+  width: 100%;
+  max-width: 554px;
+  margin: 0.6rem auto 0 auto;
+}
+
+.board-nav-btn {
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.board-nav-primary:hover {
+  background: rgba(6, 182, 212, 0.18) !important;
+  border-color: #06b6d4 !important;
+  color: #ffffff !important;
+}
+
+.nav-step-btn {
+  min-height: 40px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.nav-step-primary:hover {
+  background: rgba(6, 182, 212, 0.18) !important;
+  border-color: #06b6d4 !important;
+  color: #ffffff !important;
 }
 
 
