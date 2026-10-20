@@ -88,3 +88,95 @@ export function formatEvalPoints(evalCp: number, isMate?: boolean, mateInMoves?:
   if (pawns === 0) return '0.0';
   return pawns > 0 ? `+${pawns.toFixed(1)}` : pawns.toFixed(1);
 }
+
+/**
+ * Short-hand chess annotation glyphs used by Lichess and Chess.com
+ * !! = Brilliant
+ * !  = Best
+ * !? = Great / Interesting / Excellent
+ * (none or ✓) = Good
+ * ?! = Inaccuracy
+ * ?  = Mistake
+ * ?? = Blunder
+ * 📖 = Book
+ */
+export const MOVE_NOTATION_MAP: Record<MoveRating, {
+  glyph: string;
+  name: string;
+  symbol: string;
+  description: string;
+  color: string;
+  bgColor: string;
+}> = {
+  brilliant: {
+    glyph: '!!',
+    name: 'Brilliant',
+    symbol: '!!',
+    description: 'A brilliant sacrifice that maintains or increases a strong winning advantage (!!)',
+    color: '#06b6d4',
+    bgColor: 'rgba(6, 182, 212, 0.2)'
+  },
+  best: {
+    glyph: '!',
+    name: 'Best Move',
+    symbol: '!',
+    description: 'The engine\'s top-choice move (!)',
+    color: '#10b981',
+    bgColor: 'rgba(16, 185, 129, 0.2)'
+  },
+  excellent: {
+    glyph: '!?',
+    name: 'Great Move',
+    symbol: '!?',
+    description: 'An excellent, strong continuation (!?)',
+    color: '#22c55e',
+    bgColor: 'rgba(34, 197, 94, 0.2)'
+  },
+  good: {
+    glyph: '',
+    name: 'Good Move',
+    symbol: '',
+    description: 'A solid, reliable move',
+    color: '#84cc16',
+    bgColor: 'rgba(132, 204, 22, 0.15)'
+  },
+  inaccuracy: {
+    glyph: '?!',
+    name: 'Inaccuracy',
+    symbol: '?!',
+    description: 'An inaccuracy that slightly gives away advantage (?!)',
+    color: '#eab308',
+    bgColor: 'rgba(234, 179, 8, 0.2)'
+  },
+  mistake: {
+    glyph: '?',
+    name: 'Mistake',
+    symbol: '?',
+    description: 'A mistake that noticeably hurts the position (?)',
+    color: '#f97316',
+    bgColor: 'rgba(249, 115, 22, 0.2)'
+  },
+  blunder: {
+    glyph: '??',
+    name: 'Blunder',
+    symbol: '??',
+    description: 'A critical blunder that swings evaluation (??)',
+    color: '#ef4444',
+    bgColor: 'rgba(239, 68, 68, 0.25)'
+  },
+  book: {
+    glyph: '📖',
+    name: 'Book Move',
+    symbol: '📖',
+    description: 'Standard opening book move',
+    color: '#a855f7',
+    bgColor: 'rgba(168, 85, 247, 0.2)'
+  }
+};
+
+/**
+ * Returns the short-hand notation and details for a move rating
+ */
+export function getMoveAnnotation(rating: MoveRating) {
+  return MOVE_NOTATION_MAP[rating] || MOVE_NOTATION_MAP.good;
+}

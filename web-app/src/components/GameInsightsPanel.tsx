@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoveAnalysis, MoveRating, formatEvalPoints } from '../utils/analysisEngine';
+import { MoveAnalysis, MoveRating, formatEvalPoints, MOVE_NOTATION_MAP } from '../utils/analysisEngine';
 import { Award, Zap, AlertTriangle, AlertCircle, HelpCircle, CheckCircle, Flame, Swords, ExternalLink, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react';
 
 export interface LoadedGameInfo {
@@ -245,15 +245,31 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
               const IconComponent = config.icon;
               const isSelected = idx === currentMoveIndex;
               const moveEvalText = formatEvalPoints(m.evalAfter ?? 0);
+              const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
 
               return (
                 <div
                   key={idx}
                   onClick={() => onSelectMove(idx)}
-                  className={`move-row-item ${isSelected ? 'move-active' : ''}`}
+                  className={`move-row-item group relative ${isSelected ? 'move-active' : ''}`}
+                  title={`${annot.glyph ? `${annot.glyph} ` : ''}${annot.name} • Eval: ${moveEvalText} (${annot.description})`}
                 >
                   <span className="move-num">{Math.floor(idx / 2) + 1}{idx % 2 === 0 ? '.' : '...'}</span>
-                  <span className="move-san">{m.san}</span>
+                  <span className="move-san flex items-center gap-1">
+                    <span>{m.san}</span>
+                    {annot.glyph && (
+                      <span
+                        className="font-mono font-bold text-xs px-1 rounded"
+                        style={{
+                          backgroundColor: `${annot.color}25`,
+                          color: annot.color,
+                          border: `1px solid ${annot.color}55`
+                        }}
+                      >
+                        {annot.glyph}
+                      </span>
+                    )}
+                  </span>
                   <span className="move-badge" style={{ backgroundColor: `${config.color}22`, color: config.color, borderColor: config.color }}>
                     <IconComponent size={12} />
                     <span>{config.label}</span>
@@ -262,6 +278,21 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
                     {moveEvalText}
                   </span>
                   <span className="move-cpl">{m.centipawnLoss > 0 ? `-${m.centipawnLoss} cp` : '✓'}</span>
+
+                  {/* Lichess/Chess.com hover popup description */}
+                  <div className="pointer-events-none absolute left-12 bottom-full mb-1.5 hidden group-hover:flex flex-col items-start z-50">
+                    <div className="px-2.5 py-1.5 bg-slate-900/95 text-slate-200 text-xs rounded-lg shadow-2xl border border-slate-700 backdrop-blur-md flex items-center gap-2 whitespace-nowrap">
+                      {annot.glyph && (
+                        <span className="font-mono font-black text-sm" style={{ color: annot.color }}>
+                          {annot.glyph}
+                        </span>
+                      )}
+                      <div>
+                        <div className="font-bold text-white text-[11px]">{annot.name}</div>
+                        <div className="text-[10px] text-slate-400">{annot.description}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })

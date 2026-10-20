@@ -1672,48 +1672,54 @@ body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     width: 100%;
-    max-width: min(84vw, 360px, 42vh);
-    margin: 0.5rem auto 0 auto;
-    gap: 0.5rem;
+    max-width: min(88vw, 400px, 46vh);
+    margin: 0.6rem auto 0 auto;
+    gap: 0.6rem;
   }
 
   .action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
-    padding: 0.55rem 0.65rem;
-    font-size: 0.85rem;
+    min-height: 48px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.92rem;
     font-weight: 700;
-    gap: 0.45rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    gap: 0.5rem;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
   }
 
   .action-btn svg {
-    width: 17px;
-    height: 17px;
+    width: 19px;
+    height: 19px;
     flex-shrink: 0;
   }
 
   .view-tab-btn {
-    min-height: 42px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
+    min-height: 46px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.84rem;
   }
 
   .view-tab-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
   }
 
   .board-review-nav-bar {
-    max-width: min(84vw, 360px, 42vh);
-    margin: 0.5rem auto 0 auto;
+    max-width: min(88vw, 400px, 46vh);
+    margin: 0.6rem auto 0 auto;
+    gap: 0.4rem;
   }
 
   .board-nav-btn {
-    min-height: 44px;
+    min-height: 48px;
+  }
+
+  .board-inline-movelist-strip {
+    max-width: min(88vw, 400px, 46vh);
+    margin: 0.4rem auto 0 auto;
   }
 }
 
@@ -1725,7 +1731,7 @@ body {
 }
 
 .board-nav-btn {
-  min-height: 44px;
+  min-height: 46px;
   cursor: pointer;
   user-select: none;
 }
@@ -1737,7 +1743,30 @@ body {
 }
 
 .nav-step-btn {
-  min-height: 40px;
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Inline Move Notation Tape below navigation bar */
+.board-inline-movelist-strip {
+  width: 100%;
+  max-width: 554px;
+  margin: 0.5rem auto 0 auto;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0f172a;
+}
+
+.board-inline-movelist-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.board-inline-movelist-strip::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+.inline-move-chip {
   cursor: pointer;
   user-select: none;
 }

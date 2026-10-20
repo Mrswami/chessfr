@@ -43,7 +43,8 @@ import {
   calculateAccuracy,
   getMaterialEval,
   getEngineEval,
-  formatEvalPoints
+  formatEvalPoints,
+  MOVE_NOTATION_MAP
 } from './utils/analysisEngine';
 import { evaluatePosition, findBestLine } from './utils/chessSearch';
 import {
@@ -607,27 +608,12 @@ export function App() {
 
       setMoveHistory(newHistory);
       
-      // Replay full game into board chess instance safely
+      // Start position at the beginning of the game (Move 1 / starting board)
       chess.reset();
-      for (const m of history) {
-        try {
-          chess.move(m.san);
-        } catch (e) {
-          break;
-        }
-      }
-
-      setCurrentMoveIdx(newHistory.length - 1);
+      setCurrentMoveIdx(-1);
       setBoardOrientation(isUserWhite ? 'w' : 'b');
-
-      if (newHistory.length > 0) {
-        const last = newHistory[newHistory.length - 1];
-        setLastMove({ from: last.from, to: last.to });
-        setEvaluation(last.evalAfter);
-      } else {
-        setLastMove(null);
-        setEvaluation(0);
-      }
+      setLastMove(null);
+      setEvaluation(newHistory.length > 0 ? (newHistory[0].evalBefore ?? 0) : 0);
 
       const dateStr = game.end_time ? new Date(game.end_time * 1000).toLocaleDateString() : '';
       const userResult = isUserWhite ? game.white.result : game.black.result;
@@ -1054,6 +1040,88 @@ export function App() {
               >
                 <SkipForward size={20} />
               </button>
+            </div>
+          )}
+
+          {/* Inline Move Notation Tape beneath navigation bar with Lichess / Chess.com glyphs */}
+          {activeView === 'insights' && moveHistory.length > 0 && (
+            <div className="board-inline-movelist-strip mt-2 px-2 py-1.5 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center gap-1 overflow-x-auto shadow-inner">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
+                Moves:
+              </span>
+              <button
+                type="button"
+                onClick={() => handleSelectReviewMove(-1)}
+                className={`inline-move-chip text-[11px] font-mono px-2 py-0.5 rounded transition-all shrink-0 ${
+                  currentMoveIdx === -1
+                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-500/60'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                }`}
+                title="Starting Position (Move 1)"
+              >
+                Start
+              </button>
+              {moveHistory.map((m, idx) => {
+                const moveNum = Math.floor(idx / 2) + 1;
+                const isWhiteMove = idx % 2 === 0;
+                const isSelected = idx === currentMoveIdx;
+                const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
+                const evalText = formatEvalPoints(m.evalAfter ?? 0);
+
+                return (
+                  <div key={idx} className="flex items-center shrink-0">
+                    {isWhiteMove && (
+                      <span className="text-[10px] text-slate-500 font-mono mr-1">
+                        {moveNum}.
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectReviewMove(idx)}
+                      className={`inline-move-chip group relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-mono font-semibold transition-all ${
+                        isSelected
+                          ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                      style={
+                        !isSelected && annot.glyph
+                          ? { borderBottom: `2px solid ${annot.color}` }
+                          : undefined
+                      }
+                      title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san}${annot.glyph ? ` (${annot.glyph} ${annot.name})` : ''} • Eval: ${evalText}`}
+                    >
+                      <span>{m.san}</span>
+                      {annot.glyph && (
+                        <span
+                          className={`glyph-badge font-bold px-0.5 rounded ${
+                            isSelected ? 'text-slate-950' : ''
+                          }`}
+                          style={{
+                            color: isSelected ? '#020617' : annot.color,
+                            fontSize: '10px'
+                          }}
+                        >
+                          {annot.glyph}
+                        </span>
+                      )}
+                      {/* Rich Hover Notation Tooltip (Lichess/Chess.com style) */}
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex flex-col items-center z-50 whitespace-nowrap">
+                        <span className="px-2 py-1 bg-slate-900 text-slate-100 text-[10px] font-sans font-medium rounded-md shadow-xl border border-slate-700 flex items-center gap-1.5">
+                          {annot.glyph && (
+                            <strong style={{ color: annot.color }}>{annot.glyph}</strong>
+                          )}
+                          <span>{annot.name}</span>
+                          <span className="text-slate-400 font-mono">({evalText})</span>
+                        </span>
+                        <span className="w-1.5 h-1.5 bg-slate-900 border-r border-b border-slate-700 transform rotate-45 -mt-1" />
+                      </span>
+                    </button>
+                    {!isWhiteMove && idx < moveHistory.length - 1 && (
+                      <span className="text-slate-700 mx-0.5 font-sans">,</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
