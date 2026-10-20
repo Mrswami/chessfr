@@ -88,7 +88,7 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   max-width: 554px;
   margin: 0 auto;
@@ -96,8 +96,8 @@ body {
 
 /* Vertical Engine Evaluation Bar (Modern Chess App Style) */
 .engine-eval-bar-wrapper {
-  width: 26px;
-  min-width: 26px;
+  width: 24px;
+  min-width: 24px;
   display: flex;
   flex-direction: column;
   border-radius: 6px;
@@ -147,10 +147,10 @@ body {
 }
 
 .eval-badge {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  padding: 4px 1px;
+  padding: 3px 1px;
   line-height: 1;
   text-align: center;
   z-index: 2;
@@ -158,23 +158,41 @@ body {
 }
 
 .top-badge {
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 .bottom-badge {
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .center-badge {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
   color: #94a3b8;
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(15, 23, 42, 0.85);
   border-radius: 3px;
-  padding: 2px 2px;
+  padding: 1px 2px;
+}
+
+@media (max-width: 640px) {
+  .board-eval-wrapper {
+    gap: 6px;
+    max-width: 100%;
+  }
+
+  .engine-eval-bar-wrapper {
+    width: 20px;
+    min-width: 20px;
+    border-radius: 4px;
+  }
+
+  .eval-badge {
+    font-size: 8px;
+    padding: 2px 1px;
+  }
 }
 
 .chess-board-container {
@@ -1504,6 +1522,132 @@ body {
 .inspect-tree-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #f8fafc;
+}
+
+/* ========================================================
+   Mobile Single-Screen Optimization Rules (< 768px & < 480px)
+   Keeps board, eval bar, and key controls visible without
+   oversized vertical sprawl
+   ======================================================== */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0.5rem 0.85rem;
+  }
+
+  .brand {
+    font-size: 1.05rem;
+  }
+
+  .app-container {
+    padding: 0.5rem;
+    gap: 0.75rem;
+  }
+
+  .side-card {
+    padding: 0.85rem;
+    border-radius: 12px;
+  }
+
+  .view-tabs {
+    padding: 0.25rem;
+    margin-bottom: 0.75rem;
+    gap: 0.2rem;
+  }
+
+  .view-tab-btn {
+    padding: 0.45rem 0.55rem;
+    font-size: 0.75rem;
+    gap: 0.3rem;
+  }
+
+  /* Keep board and eval bar within viewport bounds on smaller phones */
+  .chess-board {
+    max-width: min(84vw, 420px, 48vh);
+    border-radius: 8px;
+  }
+
+  .board-actions {
+    margin-top: 0.5rem;
+    gap: 0.35rem;
+  }
+
+  .action-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.78rem;
+  }
+
+  .prompt-highlight {
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .accuracy-header {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .accuracy-card {
+    padding: 0.65rem;
+  }
+
+  .acc-score {
+    font-size: 1.4rem;
+    margin: 0.1rem 0;
+  }
+
+  .eval-bar-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .move-quality-grid {
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quality-pill {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .moves-scroll {
+    max-height: 180px;
+  }
+
+  .puzzle-list, .opening-list {
+    max-height: 320px;
+  }
+
+  .recent-game-card {
+    padding: 0.5rem 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chess-board {
+    max-width: min(86vw, 360px, 44vh);
+  }
+
+  .piece {
+    font-size: clamp(1.4rem, 8.5vw, 2.1rem);
+  }
+
+  .coord {
+    font-size: 0.55rem;
+  }
+
+  .board-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: min(86vw, 360px, 44vh);
+    margin: 0.4rem auto 0 auto;
+  }
+
+  .action-btn {
+    justify-content: center;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+  }
 }
 
 
