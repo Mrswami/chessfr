@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { formatEvalPoints } from '../utils/analysisEngine';
 
 interface EvalBarProps {
@@ -17,9 +17,10 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
   orientation = 'w',
   compact = false
 }) => {
+  const safeEval = typeof evaluation === 'number' && !isNaN(evaluation) ? evaluation : 0;
   // Convert centipawns to pawn points: 100 cp = 1.0 pawn
-  const pawns = evaluation / 100;
-  const isMate = Math.abs(evaluation) >= 20000;
+  const pawns = safeEval / 100;
+  const isMate = Math.abs(safeEval) >= 20000;
 
   // Modern chess app eval percentage formula with sigmoid/log scale:
   // 0 -> 50%
@@ -29,7 +30,7 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
   // Mate -> 100% or 0%
   let whitePercent = 50;
   if (isMate) {
-    whitePercent = evaluation > 0 ? 100 : 0;
+    whitePercent = safeEval > 0 ? 100 : 0;
   } else {
     // Standard logistic curve: 100 / (1 + 10^(-pawns / 4))
     const raw = 100 / (1 + Math.pow(10, -pawns / 4));
@@ -41,9 +42,9 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
   const bottomColorIsWhite = orientation === 'w';
 
   // Eval formatted string (+1.5, -2.4, M1, 0.0)
-  const evalText = formatEvalPoints(evaluation, isMate);
-  const isWhiteAdvantage = evaluation > 0;
-  const isZero = Math.abs(evaluation) < 15;
+  const evalText = formatEvalPoints(safeEval, isMate);
+  const isWhiteAdvantage = safeEval > 0;
+  const isZero = Math.abs(safeEval) < 15;
 
   return (
     <div

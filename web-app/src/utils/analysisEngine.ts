@@ -49,14 +49,19 @@ export function classifyMove(
 }
 
 export function calculateAccuracy(moves: MoveAnalysis[], color: 'w' | 'b'): number {
-  const playerMoves = moves.filter(m => m.color === color);
+  if (!Array.isArray(moves)) return 100;
+  const playerMoves = moves.filter(m => m && m.color === color);
   if (playerMoves.length === 0) return 100;
 
   // Chess.com style accuracy formula: 103.166 * exp(-0.0435 * cpl) - 3.166
-  const totalCpl = playerMoves.reduce((acc, m) => acc + Math.max(0, m.centipawnLoss), 0);
+  const totalCpl = playerMoves.reduce((acc, m) => {
+    const loss = typeof m.centipawnLoss === 'number' && !isNaN(m.centipawnLoss) ? m.centipawnLoss : 0;
+    return acc + Math.max(0, loss);
+  }, 0);
   const avgCpl = totalCpl / playerMoves.length;
 
   const rawScore = 103.166 * Math.exp(-0.0435 * (avgCpl / 10)) - 3.166;
+  if (isNaN(rawScore)) return 100;
   return Math.min(100, Math.max(30, Math.round(rawScore * 10) / 10));
 }
 
@@ -74,11 +79,12 @@ export function getMaterialEval(chess: Chess): number {
  * Formats centipawn evaluation into human-readable +1 / -2 pawn point rating or mate
  */
 export function formatEvalPoints(evalCp: number, isMate?: boolean, mateInMoves?: number): string {
-  if (Math.abs(evalCp) >= 20000) {
+  const safeVal = typeof evalCp === 'number' && !isNaN(evalCp) ? evalCp : 0;
+  if (Math.abs(safeVal) >= 20000) {
     const moves = mateInMoves ? Math.abs(mateInMoves) : 1;
-    return evalCp > 0 ? `M${moves}` : `-M${moves}`;
+    return safeVal > 0 ? `M${moves}` : `-M${moves}`;
   }
-  const pawns = evalCp / 100;
+  const pawns = safeVal / 100;
   if (pawns === 0) return '0.0';
   return pawns > 0 ? `+${pawns.toFixed(1)}` : pawns.toFixed(1);
 }

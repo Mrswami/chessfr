@@ -63,7 +63,11 @@ import {
   Lightbulb,
   Bookmark,
   Swords,
-  ShieldAlert
+  ShieldAlert,
+  SkipBack,
+  ChevronLeft,
+  ChevronRight,
+  SkipForward
 } from 'lucide-react';
 import { OpeningTreePanel } from './components/OpeningTreePanel';
 import { RecentGamesList } from './components/RecentGamesList';
@@ -560,8 +564,19 @@ export function App() {
 
     try {
       const isUserWhite = game.white.username.toLowerCase() === chessComUsername.toLowerCase();
+      // Strip clock annotations, eval comments, and non-standard tags for safe parsing
+      const cleanPgn = (game.pgn || '')
+        .replace(/\{[^}]*\}/g, '')
+        .replace(/\$\d+/g, '')
+        .trim();
+
       const pgnChess = new Chess();
-      pgnChess.loadPgn(game.pgn);
+      try {
+        pgnChess.loadPgn(cleanPgn);
+      } catch (err) {
+        // Fallback to original pgn
+        pgnChess.loadPgn(game.pgn);
+      }
       const history = pgnChess.history({ verbose: true });
 
       const newHistory: MoveAnalysis[] = [];
@@ -591,15 +606,27 @@ export function App() {
       }
 
       setMoveHistory(newHistory);
-      chess.loadPgn(game.pgn);
+      
+      // Replay full game into board chess instance safely
+      chess.reset();
+      for (const m of history) {
+        try {
+          chess.move(m.san);
+        } catch (e) {
+          break;
+        }
+      }
+
       setCurrentMoveIdx(newHistory.length - 1);
       setBoardOrientation(isUserWhite ? 'w' : 'b');
 
       if (newHistory.length > 0) {
         const last = newHistory[newHistory.length - 1];
         setLastMove({ from: last.from, to: last.to });
+        setEvaluation(last.evalAfter);
       } else {
         setLastMove(null);
+        setEvaluation(0);
       }
 
       const dateStr = game.end_time ? new Date(game.end_time * 1000).toLocaleDateString() : '';

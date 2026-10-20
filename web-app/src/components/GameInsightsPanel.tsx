@@ -50,14 +50,20 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
   onFirstMove,
   onLastMove
 }) => {
+  const safeMoves = Array.isArray(moves) ? moves : [];
   // Count ratings
-  const counts = moves.reduce((acc, m) => {
-    acc[m.rating] = (acc[m.rating] || 0) + 1;
+  const counts = safeMoves.reduce((acc, m) => {
+    if (m && m.rating) {
+      acc[m.rating] = (acc[m.rating] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
-  const evalInPawns = (evaluation / 100).toFixed(1);
-  const evalPercent = Math.min(95, Math.max(5, 50 + (evaluation / 20)));
+  const safeEval = typeof evaluation === 'number' && !isNaN(evaluation) ? evaluation : 0;
+  const evalInPawns = (safeEval / 100).toFixed(1);
+  const evalPercent = Math.min(95, Math.max(5, 50 + (safeEval / 20)));
+  const safeWhiteAcc = typeof whiteAccuracy === 'number' && !isNaN(whiteAccuracy) ? whiteAccuracy : 100;
+  const safeBlackAcc = typeof blackAccuracy === 'number' && !isNaN(blackAccuracy) ? blackAccuracy : 100;
 
   return (
     <div className="insights-panel">
@@ -109,12 +115,12 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
       <div className="accuracy-header">
         <div className="accuracy-card white-acc">
           <div className="acc-label">White Accuracy</div>
-          <div className="acc-score">{whiteAccuracy}%</div>
+          <div className="acc-score">{safeWhiteAcc}%</div>
           <div className="acc-sub">Mastery Rating</div>
         </div>
         <div className="accuracy-card black-acc">
           <div className="acc-label">Black Accuracy</div>
-          <div className="acc-score">{blackAccuracy}%</div>
+          <div className="acc-score">{safeBlackAcc}%</div>
           <div className="acc-sub">Mastery Rating</div>
         </div>
       </div>
@@ -124,7 +130,7 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
         <div className="eval-bar-label">
           <span>Engine Evaluation (Pawns)</span>
           <span className="eval-val font-mono font-bold text-sm">
-            {formatEvalPoints(evaluation)}
+            {formatEvalPoints(safeEval)}
           </span>
         </div>
         <div className="eval-track">
@@ -134,18 +140,40 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
 
       {/* Move Quality Breakdown */}
       <div className="move-quality-grid">
-        <div className="quality-pill brilliant-pill">
-          <Flame size={16} />
+        <div className="quality-pill brilliant-pill" title="Brilliant sacrifice preserving winning advantage">
+          <Flame size={14} />
           <span>Brilliant ({counts.brilliant || 0})</span>
         </div>
-        <div className="quality-pill best-pill">
-          <CheckCircle size={16} />
+        <div className="quality-pill best-pill" title="Engine top move">
+          <CheckCircle size={14} />
           <span>Best ({counts.best || 0})</span>
         </div>
-        <div className="quality-pill blunder-pill">
-          <AlertCircle size={16} />
+        <div className="quality-pill excellent-pill" title="Strong move within 45 cp of best">
+          <CheckCircle size={14} />
+          <span>Great ({counts.excellent || 0})</span>
+        </div>
+        <div className="quality-pill good-pill" title="Solid move within 90 cp">
+          <CheckCircle size={14} />
+          <span>Good ({counts.good || 0})</span>
+        </div>
+        <div className="quality-pill inaccuracy-pill" title="Inaccuracy (90-180 cp loss)">
+          <HelpCircle size={14} />
+          <span>Inaccuracy ({counts.inaccuracy || 0})</span>
+        </div>
+        <div className="quality-pill mistake-pill" title="Mistake (180-320 cp loss)">
+          <AlertTriangle size={14} />
+          <span>Mistake ({counts.mistake || 0})</span>
+        </div>
+        <div className="quality-pill blunder-pill" title="Blunder (320+ cp loss)">
+          <AlertCircle size={14} />
           <span>Blunders ({counts.blunder || 0})</span>
         </div>
+        {(counts.book || 0) > 0 && (
+          <div className="quality-pill book-pill" title="Opening book moves">
+            <Award size={14} />
+            <span>Book ({counts.book || 0})</span>
+          </div>
+        )}
       </div>
 
       {/* Move History Strip with Navigation Controls */}
@@ -178,13 +206,13 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
                 </button>
               )}
               <span className="nav-step-counter text-xs font-mono font-bold text-slate-300 px-2.5 py-1.5 bg-slate-900/80 rounded-md border border-slate-700/60 text-center min-w-[70px]">
-                {currentMoveIndex >= 0 ? `${currentMoveIndex + 1} / ${moves.length}` : `Start`}
+                {currentMoveIndex >= 0 ? `${currentMoveIndex + 1} / ${safeMoves.length}` : `Start`}
               </span>
               {onNextMove && (
                 <button
                   type="button"
                   onClick={onNextMove}
-                  disabled={currentMoveIndex >= moves.length - 1}
+                  disabled={currentMoveIndex >= safeMoves.length - 1}
                   className="nav-step-btn nav-step-primary px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-cyan-900/40 text-cyan-300 disabled:opacity-35 disabled:pointer-events-none transition-all border border-cyan-800/60 active:scale-95 flex items-center gap-1.5 font-bold text-xs"
                   title="Next Move"
                 >
@@ -196,7 +224,7 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
                 <button
                   type="button"
                   onClick={onLastMove}
-                  disabled={currentMoveIndex >= moves.length - 1}
+                  disabled={currentMoveIndex >= safeMoves.length - 1}
                   className="nav-step-btn p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-35 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center"
                   title="Last Move"
                 >
@@ -207,31 +235,37 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
           )}
         </div>
         <div className="moves-scroll">
-          {moves.map((m, idx) => {
-            const config = RATING_CONFIG[m.rating] || RATING_CONFIG.good;
-            const IconComponent = config.icon;
-            const isSelected = idx === currentMoveIndex;
-            const moveEvalText = formatEvalPoints(m.evalAfter);
+          {safeMoves.length === 0 ? (
+            <div className="p-4 text-center text-xs text-slate-400">
+              No moves recorded for this game.
+            </div>
+          ) : (
+            safeMoves.map((m, idx) => {
+              const config = RATING_CONFIG[m.rating] || RATING_CONFIG.good;
+              const IconComponent = config.icon;
+              const isSelected = idx === currentMoveIndex;
+              const moveEvalText = formatEvalPoints(m.evalAfter ?? 0);
 
-            return (
-              <div
-                key={idx}
-                onClick={() => onSelectMove(idx)}
-                className={`move-row-item ${isSelected ? 'move-active' : ''}`}
-              >
-                <span className="move-num">{Math.floor(idx / 2) + 1}{idx % 2 === 0 ? '.' : '...'}</span>
-                <span className="move-san">{m.san}</span>
-                <span className="move-badge" style={{ backgroundColor: `${config.color}22`, color: config.color, borderColor: config.color }}>
-                  <IconComponent size={12} />
-                  <span>{config.label}</span>
-                </span>
-                <span className="move-score font-mono text-xs px-1 text-slate-300 font-semibold" title={`Engine Eval after ${m.san}: ${moveEvalText}`}>
-                  {moveEvalText}
-                </span>
-                <span className="move-cpl">{m.centipawnLoss > 0 ? `-${m.centipawnLoss} cp` : '✓'}</span>
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={idx}
+                  onClick={() => onSelectMove(idx)}
+                  className={`move-row-item ${isSelected ? 'move-active' : ''}`}
+                >
+                  <span className="move-num">{Math.floor(idx / 2) + 1}{idx % 2 === 0 ? '.' : '...'}</span>
+                  <span className="move-san">{m.san}</span>
+                  <span className="move-badge" style={{ backgroundColor: `${config.color}22`, color: config.color, borderColor: config.color }}>
+                    <IconComponent size={12} />
+                    <span>{config.label}</span>
+                  </span>
+                  <span className="move-score font-mono text-xs px-1 text-slate-300 font-semibold" title={`Engine Eval after ${m.san}: ${moveEvalText}`}>
+                    {moveEvalText}
+                  </span>
+                  <span className="move-cpl">{m.centipawnLoss > 0 ? `-${m.centipawnLoss} cp` : '✓'}</span>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
