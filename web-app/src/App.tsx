@@ -29,6 +29,7 @@ import { TrainingModulesPanel } from './components/TrainingModulesPanel';
 import { AuthModal } from './components/AuthModal';
 import { PlaystyleAnalysisPanel } from './components/PlaystyleAnalysisPanel';
 import { ChallengingVariationsPanel } from './components/ChallengingVariationsPanel';
+import { DedicatedLoadingOverlay } from './components/DedicatedLoadingOverlay';
 import { analyzePlaystyle, PlaystyleProfile, OpeningStats } from './utils/playstyleAnalyzer';
 import {
   SAMPLE_PUZZLES,
@@ -110,6 +111,7 @@ export function App() {
   const [puzzlesList, setPuzzlesList] = useState<TacticalPuzzle[]>(SAMPLE_PUZZLES);
   const [progressMap, setProgressMap] = useState<Record<string, UserPuzzleProgress>>({});
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [playstyleProfile, setPlaystyleProfile] = useState<PlaystyleProfile | null>(null);
   const [recentGames, setRecentGames] = useState<ChessComGame[]>([]);
@@ -117,6 +119,7 @@ export function App() {
 
   // Load local progress & persistent chess.com account cache & saved positions on mount
   useEffect(() => {
+    let hasLoaded = false;
     try {
       const cached = localStorage.getItem('chessfr_puzzle_progress');
       if (cached) {
@@ -130,9 +133,15 @@ export function App() {
       if (cachedUser) {
         setChessComUsername(cachedUser);
         loadChessComGames(cachedUser);
+        hasLoaded = true;
       }
     } catch (e) {
       // Ignore local storage error
+    } finally {
+      if (!hasLoaded) {
+        // Quick splash for guest mode initial page load
+        setTimeout(() => setIsInitialLoading(false), 900);
+      }
     }
   }, []);
 
@@ -141,6 +150,8 @@ export function App() {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        setIsInitialLoading(true);
+        setSyncStatus(`Signing in @${user.email?.split('@')[0]} & loading cloud repertoire...`);
         try {
           // Load cloud puzzle progress
           const cloudProgress = await loadUserPuzzleProgress(user.uid);
@@ -165,16 +176,20 @@ export function App() {
             try {
               localStorage.setItem('chessfr_chesscom_username', handle);
             } catch (e) {}
-            loadChessComGames(handle, user.uid);
+            await loadChessComGames(handle, user.uid);
           } else {
             // If user has local handle stored, sync it up to their new cloud account
             const localHandle = localStorage.getItem('chessfr_chesscom_username');
             if (localHandle) {
               await setDoc(doc(db, 'users', user.uid), { chessComUsername: localHandle }, { merge: true });
+              await loadChessComGames(localHandle, user.uid);
             }
           }
         } catch (e) {
           console.error('Error loading user profile:', e);
+        } finally {
+          setIsInitialLoading(false);
+          setTimeout(() => setSyncStatus(null), 4000);
         }
       }
     });
@@ -242,6 +257,7 @@ export function App() {
       setSyncStatus('Failed to sync Chess.com games.');
     } finally {
       setIsSyncing(false);
+      setIsInitialLoading(false);
       setTimeout(() => setSyncStatus(null), 6000);
     }
   };
@@ -849,8 +865,22 @@ export function App() {
         </div>
       </header>
 
+      {/* Dedicated AI Loading Screen on Initial Load & Sign-in Sync */}
+      {(isInitialLoading || (isSyncing && recentGames.length === 0)) && (
+        <DedicatedLoadingOverlay
+          statusMessage={
+            syncStatus || (currentUser ? 'Synchronizing cloud profile & recent games...' : 'Initializing chessfr neural engine & repertoire...')
+          }
+          subMessage={
+            chessComUsername
+              ? `Crunching @${chessComUsername}'s games, blunders & 3-move response patterns`
+              : 'Loading tactical puzzles, mastery storage & master opening trees'
+          }
+        />
+      )}
+
       {/* Sync Status Banner */}
-      {syncStatus && (
+      {syncStatus && !isInitialLoading && (
         <div className="sync-banner">
           <Sparkles size={16} className="text-cyan-400" />
           <span>{syncStatus}</span>
