@@ -23,6 +23,7 @@ import {
   deleteSavedPosition
 } from './services/masteryStorageService';
 import { InteractiveBoard, BoardArrow } from './components/InteractiveBoard';
+import { EngineEvalBar } from './components/EngineEvalBar';
 import { GameInsightsPanel, LoadedGameInfo } from './components/GameInsightsPanel';
 import { TrainingModulesPanel } from './components/TrainingModulesPanel';
 import { AuthModal } from './components/AuthModal';
@@ -39,8 +40,11 @@ import {
   MoveAnalysis,
   classifyMove,
   calculateAccuracy,
-  getMaterialEval
+  getMaterialEval,
+  getEngineEval,
+  formatEvalPoints
 } from './utils/analysisEngine';
+import { evaluatePosition, findBestLine } from './utils/chessSearch';
 import {
   BarChart3,
   Compass,
@@ -68,7 +72,6 @@ import {
   OpeningTree,
   TreeMoveStats
 } from './utils/openingTreeBuilder';
-import { findBestLine } from './utils/chessSearch';
 
 export function App() {
   const [chess] = useState<Chess>(new Chess());
@@ -553,7 +556,7 @@ export function App() {
         const move = history[i];
         const evalBefore = lastEval;
         replayChess.move(move);
-        const evalAfter = getMaterialEval(replayChess);
+        const evalAfter = evaluatePosition(replayChess);
         const isSac = Boolean(move.captured) === false && ['q', 'r'].includes(move.piece);
         const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, evalAfter > 0);
         const cpl = Math.abs(evalBefore - evalAfter);
@@ -921,15 +924,21 @@ export function App() {
             </div>
           )}
 
-          <InteractiveBoard
-            chess={chess}
-            selectedSquare={selectedSquare}
-            onSquareClick={handleSquareClick}
-            validMoves={validMoves}
-            orientation={boardOrientation}
-            lastMove={lastMove}
-            arrows={boardArrows}
-          />
+          <div className="board-eval-wrapper">
+            <EngineEvalBar
+              evaluation={evaluation}
+              orientation={boardOrientation}
+            />
+            <InteractiveBoard
+              chess={chess}
+              selectedSquare={selectedSquare}
+              onSquareClick={handleSquareClick}
+              validMoves={validMoves}
+              orientation={boardOrientation}
+              lastMove={lastMove}
+              arrows={boardArrows}
+            />
+          </div>
 
           {puzzleSolved && (
             <div className="module-banner" style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', marginTop: '1rem' }}>

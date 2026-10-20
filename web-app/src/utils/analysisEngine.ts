@@ -1,4 +1,5 @@
 import { Chess, Square, Move } from 'chess.js';
+import { evaluatePosition, findBestLine } from './chessSearch';
 
 export type MoveRating = 'brilliant' | 'best' | 'excellent' | 'good' | 'inaccuracy' | 'mistake' | 'blunder' | 'book';
 
@@ -35,15 +36,15 @@ export function classifyMove(
   const cpLoss = turn === 'w' ? (evalBefore - evalAfter) : (evalAfter - evalBefore);
 
   // Brilliant move: A sacrifice that maintains or increases a strong winning advantage
-  if (isSacrifice && cpLoss <= 15 && isWinningAfter) {
+  if (isSacrifice && cpLoss <= 25 && isWinningAfter) {
     return 'brilliant';
   }
 
-  if (cpLoss <= 10) return 'best';
-  if (cpLoss <= 35) return 'excellent';
-  if (cpLoss <= 70) return 'good';
-  if (cpLoss <= 150) return 'inaccuracy';
-  if (cpLoss <= 300) return 'mistake';
+  if (cpLoss <= 15) return 'best';
+  if (cpLoss <= 45) return 'excellent';
+  if (cpLoss <= 90) return 'good';
+  if (cpLoss <= 180) return 'inaccuracy';
+  if (cpLoss <= 320) return 'mistake';
   return 'blunder';
 }
 
@@ -59,18 +60,25 @@ export function calculateAccuracy(moves: MoveAnalysis[], color: 'w' | 'b'): numb
   return Math.min(100, Math.max(30, Math.round(rawScore * 10) / 10));
 }
 
-// Evaluate piece material values for heuristics
-export function getMaterialEval(chess: Chess): number {
-  const board = chess.board();
-  const values: Record<string, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
-  let score = 0;
+// Full positional engine evaluation (pawn = 100cp, minors = 320-330cp, rooks = 500cp, queen = 900cp + center/piece-square tables)
+export function getEngineEval(chess: Chess): number {
+  return evaluatePosition(chess);
+}
 
-  for (const row of board) {
-    for (const piece of row) {
-      if (!piece) continue;
-      const val = values[piece.type] || 0;
-      score += piece.color === 'w' ? val : -val;
-    }
+// Backward compatible export for existing callers
+export function getMaterialEval(chess: Chess): number {
+  return evaluatePosition(chess);
+}
+
+/**
+ * Formats centipawn evaluation into human-readable +1 / -2 pawn point rating or mate
+ */
+export function formatEvalPoints(evalCp: number, isMate?: boolean, mateInMoves?: number): string {
+  if (Math.abs(evalCp) >= 20000) {
+    const moves = mateInMoves ? Math.abs(mateInMoves) : 1;
+    return evalCp > 0 ? `M${moves}` : `-M${moves}`;
   }
-  return score;
+  const pawns = evalCp / 100;
+  if (pawns === 0) return '0.0';
+  return pawns > 0 ? `+${pawns.toFixed(1)}` : pawns.toFixed(1);
 }

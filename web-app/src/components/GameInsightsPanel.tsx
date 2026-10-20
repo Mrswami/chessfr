@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoveAnalysis, MoveRating } from '../utils/analysisEngine';
+import { MoveAnalysis, MoveRating, formatEvalPoints } from '../utils/analysisEngine';
 import { Award, Zap, AlertTriangle, AlertCircle, HelpCircle, CheckCircle, Flame, Swords, ExternalLink, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react';
 
 export interface LoadedGameInfo {
@@ -122,8 +122,10 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
       {/* Dynamic Evaluation Bar */}
       <div className="eval-bar-section">
         <div className="eval-bar-label">
-          <span>Engine Evaluation</span>
-          <span className="eval-val">{evaluation > 0 ? `+${evalInPawns}` : evalInPawns}</span>
+          <span>Engine Evaluation (Pawns)</span>
+          <span className="eval-val font-mono font-bold text-sm">
+            {formatEvalPoints(evaluation)}
+          </span>
         </div>
         <div className="eval-track">
           <div className="eval-fill" style={{ width: `${evalPercent}%` }} />
@@ -207,6 +209,7 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
             const config = RATING_CONFIG[m.rating] || RATING_CONFIG.good;
             const IconComponent = config.icon;
             const isSelected = idx === currentMoveIndex;
+            const moveEvalText = formatEvalPoints(m.evalAfter);
 
             return (
               <div
@@ -219,6 +222,9 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
                 <span className="move-badge" style={{ backgroundColor: `${config.color}22`, color: config.color, borderColor: config.color }}>
                   <IconComponent size={12} />
                   <span>{config.label}</span>
+                </span>
+                <span className="move-score font-mono text-xs px-1 text-slate-300 font-semibold" title={`Engine Eval after ${m.san}: ${moveEvalText}`}>
+                  {moveEvalText}
                 </span>
                 <span className="move-cpl">{m.centipawnLoss > 0 ? `-${m.centipawnLoss} cp` : '✓'}</span>
               </div>
