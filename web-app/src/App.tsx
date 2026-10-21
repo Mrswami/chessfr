@@ -68,7 +68,10 @@ import {
   SkipBack,
   ChevronLeft,
   ChevronRight,
-  SkipForward
+  SkipForward,
+  SlidersHorizontal,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { OpeningTreePanel } from './components/OpeningTreePanel';
 import { RecentGamesList } from './components/RecentGamesList';
@@ -121,6 +124,8 @@ export function App() {
   const [playstyleProfile, setPlaystyleProfile] = useState<PlaystyleProfile | null>(null);
   const [recentGames, setRecentGames] = useState<ChessComGame[]>([]);
   const [loadedAnalyzedGame, setLoadedAnalyzedGame] = useState<LoadedGameInfo | null>(null);
+  const [showBoardMoveChips, setShowBoardMoveChips] = useState<boolean>(true);
+  const [moveQualityFilter, setMoveQualityFilter] = useState<'all' | 'mistakes' | 'best'>('all');
   const movesBoxChipsRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll the move chip under the board into view when currentMoveIdx changes
@@ -1103,76 +1108,155 @@ export function App() {
             </div>
           )}
 
-          {/* Moves List in a Separate, Dedicated Scrollable Box */}
+          {/* Moves List in a Separate, Dedicated Scrollable Box with Filter Settings & Visibility Toggle */}
           {activeView === 'insights' && moveHistory.length > 0 && (
             <div className="board-moves-scrollbox mt-2 mb-2 p-2.5 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl flex flex-col w-full">
-              <div className="flex items-center justify-between mb-1.5 px-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <span>Game Moves</span>
-                  <span className="text-[10px] text-cyan-400 font-mono">({moveHistory.length} ply)</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-normal">Tap any move to review</span>
-              </div>
-              <div ref={movesBoxChipsRef} className="moves-box-chips flex flex-wrap items-center gap-1.5 max-h-[110px] overflow-y-auto p-1 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={() => handleSelectReviewMove(-1)}
-                  className={`inline-move-chip text-xs font-mono px-2 py-1 rounded-md transition-all shrink-0 font-bold ${
-                    currentMoveIdx === -1
-                      ? 'inline-move-chip-active bg-cyan-500 text-slate-950 shadow'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-slate-800'
-                  }`}
-                  title="Starting Position (Move 1)"
-                >
-                  Start
-                </button>
-                {moveHistory.map((m, idx) => {
-                  const moveNum = Math.floor(idx / 2) + 1;
-                  const isWhiteMove = idx % 2 === 0;
-                  const isSelected = idx === currentMoveIdx;
-                  const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
-                  const evalText = formatEvalPoints(m.evalAfter ?? 0);
+              <div className="flex items-center justify-between mb-2 px-1 gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
+                    <span>Move Order</span>
+                    <span className="text-[10px] text-cyan-400 font-mono">({moveHistory.length} ply)</span>
+                  </span>
+                </div>
 
-                  return (
-                    <div key={idx} className="flex items-center shrink-0">
-                      {isWhiteMove && (
-                        <span className="text-[11px] text-slate-500 font-mono font-medium mr-0.5">
-                          {moveNum}.
-                        </span>
-                      )}
+                {/* Filter Settings and Visibility Controls */}
+                <div className="flex items-center gap-1.5">
+                  {showBoardMoveChips && (
+                    <div className="flex items-center bg-slate-950/90 rounded-lg p-0.5 border border-slate-800 text-[10px]">
                       <button
                         type="button"
-                        onClick={() => handleSelectReviewMove(idx)}
-                        className={`inline-move-chip group relative inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono font-bold transition-all border ${
-                          isSelected
-                            ? 'inline-move-chip-active bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
-                            : 'bg-slate-900/80 text-slate-200 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'
+                        onClick={() => setMoveQualityFilter('all')}
+                        className={`px-2 py-0.5 rounded font-bold transition-all ${
+                          moveQualityFilter === 'all'
+                            ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
                         }`}
-                        title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san} ${annot.glyph || ''} (${annot.name}) • Eval: ${evalText}`}
+                        title="Show all moves"
                       >
-                        <span>{m.san}</span>
-                        {annot.glyph && (
-                          <span
-                            className="font-bold text-[11px]"
-                            style={{
-                              color: isSelected ? '#020617' : annot.color
-                            }}
-                          >
-                            {annot.glyph}
-                          </span>
-                        )}
-                        <span
-                          className={`text-[9px] font-mono font-normal opacity-70 ${
-                            isSelected ? 'text-slate-900' : 'text-slate-400'
-                          }`}
-                        >
-                          {evalText}
-                        </span>
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMoveQualityFilter('mistakes')}
+                        className={`px-2 py-0.5 rounded font-bold transition-all ${
+                          moveQualityFilter === 'mistakes'
+                            ? 'bg-rose-500 text-slate-950 shadow-sm'
+                            : 'text-slate-400 hover:text-rose-300'
+                        }`}
+                        title="Filter to inaccuracies, mistakes and blunders (? / ?? / ?!)"
+                      >
+                        Mistakes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMoveQualityFilter('best')}
+                        className={`px-2 py-0.5 rounded font-bold transition-all ${
+                          moveQualityFilter === 'best'
+                            ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                            : 'text-slate-400 hover:text-emerald-300'
+                        }`}
+                        title="Filter to best and brilliant moves (! / !!)"
+                      >
+                        Best
                       </button>
                     </div>
-                  );
-                })}
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowBoardMoveChips(!showBoardMoveChips)}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold transition-all border border-slate-700 active:scale-95"
+                    title={showBoardMoveChips ? 'Compact/Hide move list into Game Review tab' : 'Show move list'}
+                  >
+                    {showBoardMoveChips ? (
+                      <>
+                        <EyeOff size={13} className="text-slate-400" />
+                        <span>Hide</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={13} className="text-cyan-400" />
+                        <span>Show Moves</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
+
+              {showBoardMoveChips && (
+                <div ref={movesBoxChipsRef} className="moves-box-chips flex flex-wrap items-center gap-1.5 max-h-[110px] overflow-y-auto p-1 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectReviewMove(-1)}
+                    className={`inline-move-chip text-xs font-mono px-2 py-1 rounded-md transition-all shrink-0 font-bold ${
+                      currentMoveIdx === -1
+                        ? 'inline-move-chip-active bg-cyan-500 text-slate-950 shadow'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-slate-800'
+                    }`}
+                    title="Starting Position (Move 1)"
+                  >
+                    Start
+                  </button>
+                  {moveHistory
+                    .map((m, idx) => ({ ...m, originalIdx: idx }))
+                    .filter((m) => {
+                      if (moveQualityFilter === 'mistakes') {
+                        return ['inaccuracy', 'mistake', 'blunder'].includes(m.rating);
+                      }
+                      if (moveQualityFilter === 'best') {
+                        return ['brilliant', 'best', 'excellent'].includes(m.rating);
+                      }
+                      return true;
+                    })
+                    .map((m) => {
+                      const idx = m.originalIdx;
+                      const moveNum = Math.floor(idx / 2) + 1;
+                      const isWhiteMove = idx % 2 === 0;
+                      const isSelected = idx === currentMoveIdx;
+                      const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
+                      const evalText = formatEvalPoints(m.evalAfter ?? 0);
+
+                      return (
+                        <div key={idx} className="flex items-center shrink-0">
+                          {isWhiteMove && (
+                            <span className="text-[11px] text-slate-500 font-mono font-medium mr-0.5">
+                              {moveNum}.
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleSelectReviewMove(idx)}
+                            className={`inline-move-chip group relative inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono font-bold transition-all border ${
+                              isSelected
+                                ? 'inline-move-chip-active bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
+                                : 'bg-slate-900/80 text-slate-200 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'
+                            }`}
+                            title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san} ${annot.glyph || ''} (${annot.name}) • Eval: ${evalText}`}
+                          >
+                            <span>{m.san}</span>
+                            {annot.glyph && (
+                              <span
+                                className="font-bold text-[11px]"
+                                style={{
+                                  color: isSelected ? '#020617' : annot.color
+                                }}
+                              >
+                                {annot.glyph}
+                              </span>
+                            )}
+                            <span
+                              className={`text-[9px] font-mono font-normal opacity-70 ${
+                                isSelected ? 'text-slate-900' : 'text-slate-400'
+                              }`}
+                            >
+                              {evalText}
+                            </span>
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           )}
 
