@@ -1184,11 +1184,14 @@ export function App() {
               </div>
 
               {showBoardMoveChips && (
-                <div ref={movesBoxChipsRef} className="moves-box-chips flex flex-wrap items-center gap-1.5 max-h-[110px] overflow-y-auto p-1 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <div
+                  ref={movesBoxChipsRef}
+                  className="moves-box-chips flex flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden p-1.5 rounded-xl bg-slate-950/70 border border-slate-800/90 h-[48px] max-w-full"
+                >
                   <button
                     type="button"
                     onClick={() => handleSelectReviewMove(-1)}
-                    className={`inline-move-chip text-xs font-mono px-2 py-1 rounded-md transition-all shrink-0 font-bold ${
+                    className={`inline-move-chip text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all shrink-0 font-bold whitespace-nowrap ${
                       currentMoveIdx === -1
                         ? 'inline-move-chip-active bg-cyan-500 text-slate-950 shadow'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-slate-800'
@@ -1226,7 +1229,7 @@ export function App() {
                           <button
                             type="button"
                             onClick={() => handleSelectReviewMove(idx)}
-                            className={`inline-move-chip group relative inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono font-bold transition-all border ${
+                            className={`inline-move-chip group relative inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-all border shrink-0 whitespace-nowrap ${
                               isSelected
                                 ? 'inline-move-chip-active bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
                                 : 'bg-slate-900/80 text-slate-200 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'

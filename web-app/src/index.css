@@ -1851,17 +1851,27 @@ body {
 }
 
 .moves-box-chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 48px;
+  max-height: 48px;
+  white-space: nowrap;
   scrollbar-width: thin;
-  scrollbar-color: #334155 #020617;
+  scrollbar-color: #38bdf8 #020617;
+  -webkit-overflow-scrolling: touch;
 }
 
 .moves-box-chips::-webkit-scrollbar {
-  width: 5px;
+  height: 4px;
 }
 
 .moves-box-chips::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+  background: #0ea5e9;
+  border-radius: 9999px;
 }
 
 .nav-step-btn {
