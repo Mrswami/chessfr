@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Chess, Square } from 'chess.js';
 import confetti from 'canvas-confetti';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -121,6 +121,21 @@ export function App() {
   const [playstyleProfile, setPlaystyleProfile] = useState<PlaystyleProfile | null>(null);
   const [recentGames, setRecentGames] = useState<ChessComGame[]>([]);
   const [loadedAnalyzedGame, setLoadedAnalyzedGame] = useState<LoadedGameInfo | null>(null);
+  const movesBoxChipsRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll the move chip under the board into view when currentMoveIdx changes
+  useEffect(() => {
+    if (activeView === 'insights' && movesBoxChipsRef.current) {
+      if (currentMoveIdx >= 0) {
+        const activeChip = movesBoxChipsRef.current.querySelector<HTMLElement>('.inline-move-chip-active');
+        if (activeChip) {
+          activeChip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+      } else {
+        movesBoxChipsRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [currentMoveIdx, activeView]);
 
   // Load local progress & persistent chess.com account cache & saved positions on mount
   useEffect(() => {
@@ -997,7 +1012,7 @@ export function App() {
           {activeView === 'insights' && moveHistory.length > 0 && (
             <div className="board-review-nav-container mt-3 mb-2 flex flex-col items-center w-full">
               {/* Row 1: First, Prev, Move Counter, and Last Move */}
-              <div className="board-nav-secondary-row flex items-center justify-between w-full max-w-[554px] gap-2 px-1">
+              <div className="board-nav-secondary-row flex items-center justify-between w-full gap-2 px-1">
                 <button
                   type="button"
                   onClick={() => handleSelectReviewMove(-1)}
@@ -1043,7 +1058,7 @@ export function App() {
               </div>
 
               {/* Row 2: Central, Lower, Prominent NEXT MOVE Button */}
-              <div className="w-full max-w-[554px] mt-2 px-1">
+              <div className="w-full mt-2 px-1">
                 <button
                   type="button"
                   onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
@@ -1061,7 +1076,7 @@ export function App() {
 
           {/* Moves List in a Separate, Dedicated Scrollable Box */}
           {activeView === 'insights' && moveHistory.length > 0 && (
-            <div className="board-moves-scrollbox mt-2 mb-2 p-2.5 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl flex flex-col w-full max-w-[554px]">
+            <div className="board-moves-scrollbox mt-2 mb-2 p-2.5 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl flex flex-col w-full">
               <div className="flex items-center justify-between mb-1.5 px-1">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                   <span>Game Moves</span>
@@ -1069,13 +1084,13 @@ export function App() {
                 </span>
                 <span className="text-[10px] text-slate-500 font-normal">Tap any move to review</span>
               </div>
-              <div className="moves-box-chips flex flex-wrap items-center gap-1.5 max-h-[110px] overflow-y-auto p-1 rounded-xl bg-slate-950/60 border border-slate-800/80">
+              <div ref={movesBoxChipsRef} className="moves-box-chips flex flex-wrap items-center gap-1.5 max-h-[110px] overflow-y-auto p-1 rounded-xl bg-slate-950/60 border border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => handleSelectReviewMove(-1)}
                   className={`inline-move-chip text-xs font-mono px-2 py-1 rounded-md transition-all shrink-0 font-bold ${
                     currentMoveIdx === -1
-                      ? 'bg-cyan-500 text-slate-950 shadow'
+                      ? 'inline-move-chip-active bg-cyan-500 text-slate-950 shadow'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-slate-800'
                   }`}
                   title="Starting Position (Move 1)"
@@ -1101,7 +1116,7 @@ export function App() {
                         onClick={() => handleSelectReviewMove(idx)}
                         className={`inline-move-chip group relative inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono font-bold transition-all border ${
                           isSelected
-                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
+                            ? 'inline-move-chip-active bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
                             : 'bg-slate-900/80 text-slate-200 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'
                         }`}
                         title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san} ${annot.glyph || ''} (${annot.name}) • Eval: ${evalText}`}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MoveAnalysis, MoveRating, formatEvalPoints, MOVE_NOTATION_MAP } from '../utils/analysisEngine';
 import { Award, Zap, AlertTriangle, AlertCircle, HelpCircle, CheckCircle, Flame, Swords, ExternalLink, ChevronLeft, ChevronRight, SkipBack, SkipForward, ListOrdered, BarChart2, Shield } from 'lucide-react';
 
@@ -52,6 +52,22 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
 }) => {
   const [panelTab, setPanelTab] = useState<'moves' | 'accuracy' | 'breakdown'>('moves');
   const safeMoves = Array.isArray(moves) ? moves : [];
+  const movesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll the active move into view smoothly whenever currentMoveIndex changes
+  useEffect(() => {
+    if (panelTab === 'moves' && movesContainerRef.current) {
+      if (currentMoveIndex >= 0) {
+        const activeEl = movesContainerRef.current.querySelector<HTMLElement>('.move-active');
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } else {
+        // Scrolled to beginning (Start position)
+        movesContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [currentMoveIndex, panelTab]);
 
   // Count ratings
   const counts = safeMoves.reduce((acc, m) => {
@@ -282,7 +298,7 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
             </div>
           )}
         </div>
-        <div className="moves-scroll">
+        <div className="moves-scroll" ref={movesContainerRef}>
           {safeMoves.length === 0 ? (
             <div className="p-4 text-center text-xs text-slate-400">
               No moves recorded for this game.

@@ -67,7 +67,7 @@ body {
 
 /* Layout */
 .app-container {
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 1.5rem;
   width: 100%;
@@ -78,9 +78,16 @@ body {
 
 @media (min-width: 900px) {
   .app-container {
-    grid-template-columns: 1.25fr 1fr;
+    grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr);
     align-items: start;
-    gap: 2rem;
+    gap: 2.25rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .app-container {
+    grid-template-columns: minmax(0, 1.55fr) minmax(400px, 1fr);
+    gap: 2.75rem;
   }
 }
 
@@ -91,7 +98,7 @@ body {
   justify-content: center;
   gap: 14px;
   width: 100%;
-  max-width: 590px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -210,11 +217,11 @@ body {
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   width: 100%;
-  max-width: 550px;
+  max-width: 680px;
   aspect-ratio: 1 / 1;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
   user-select: none;
 }
 
@@ -1737,7 +1744,7 @@ body {
 /* Base styles for Move Review Navigation Bar */
 .board-review-nav-container {
   width: 100%;
-  max-width: 554px;
+  max-width: 680px;
   margin: 0.5rem auto 0.25rem auto;
 }
 
@@ -1767,7 +1774,7 @@ body {
 
 .board-moves-scrollbox {
   width: 100%;
-  max-width: 554px;
+  max-width: 680px;
   margin: 0.4rem auto;
 }
 
