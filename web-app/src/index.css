@@ -1708,17 +1708,17 @@ body {
   }
 
   .board-review-nav-bar {
-    max-width: min(88vw, 400px, 46vh);
-    margin: 0.6rem auto 0 auto;
-    gap: 0.4rem;
+    max-width: min(92vw, 420px, 48vh);
+    margin: 0.75rem auto 0.25rem auto;
+    gap: 0.5rem;
   }
 
   .board-nav-btn {
-    min-height: 48px;
+    min-height: 52px;
   }
 
   .board-inline-movelist-strip {
-    max-width: min(88vw, 400px, 46vh);
+    max-width: min(92vw, 420px, 48vh);
     margin: 0.4rem auto 0 auto;
   }
 }
@@ -1727,23 +1727,33 @@ body {
 .board-review-nav-bar {
   width: 100%;
   max-width: 554px;
-  margin: 0.6rem auto 0 auto;
+  margin: 0.75rem auto 0.25rem auto;
 }
 
 .board-nav-btn {
-  min-height: 46px;
+  min-height: 50px;
   cursor: pointer;
   user-select: none;
+  font-family: inherit;
+}
+
+.board-nav-primary {
+  transition: all 0.15s ease-in-out;
 }
 
 .board-nav-primary:hover {
-  background: rgba(6, 182, 212, 0.18) !important;
-  border-color: #06b6d4 !important;
-  color: #ffffff !important;
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 .nav-step-btn {
   min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Review Sub-Tabs (Moves List / Accuracy / Breakdown) */
+.review-subtabs button {
   cursor: pointer;
   user-select: none;
 }

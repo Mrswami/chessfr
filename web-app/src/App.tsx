@@ -993,31 +993,33 @@ export function App() {
             </div>
           )}
 
-          {/* Move Navigation Bar (Directly below board when reviewing games) */}
+          {/* Primary Move Navigation Controls (Easily clickable, centered, prominent) */}
           {activeView === 'insights' && moveHistory.length > 0 && (
-            <div className="board-review-nav-bar flex items-center justify-between gap-1.5 mt-2.5 px-1 py-1.5 bg-slate-900/90 rounded-xl border border-slate-700/80 shadow-lg">
+            <div className="board-review-nav-bar flex items-center justify-center gap-2 mt-3 px-2 py-2 bg-slate-900/95 rounded-2xl border border-cyan-500/30 shadow-2xl backdrop-blur-md">
               <button
                 type="button"
                 onClick={() => handleSelectReviewMove(-1)}
                 disabled={currentMoveIdx < 0}
-                className="board-nav-btn p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-30 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center flex-1 sm:flex-none"
-                title="First Move"
+                className="board-nav-btn p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-90 flex items-center justify-center shrink-0 shadow-sm"
+                title="First Move (Start)"
+                aria-label="First Move"
               >
-                <SkipBack size={20} />
+                <SkipBack size={22} />
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectReviewMove(currentMoveIdx - 1)}
                 disabled={currentMoveIdx < 0}
-                className="board-nav-btn board-nav-primary px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-cyan-900/40 text-cyan-300 disabled:opacity-30 disabled:pointer-events-none transition-all border border-cyan-700/60 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-sm flex-[2] sm:flex-none"
+                className="board-nav-btn board-nav-primary flex-1 py-3 px-3 rounded-xl bg-slate-800 hover:bg-cyan-950/60 text-cyan-300 disabled:opacity-25 disabled:pointer-events-none transition-all border border-cyan-700/60 active:scale-95 flex items-center justify-center gap-2 font-black text-sm tracking-wide shadow-md"
                 title="Previous Move"
+                aria-label="Previous Move"
               >
-                <ChevronLeft size={22} />
-                <span>Prev Move</span>
+                <ChevronLeft size={24} />
+                <span>Prev</span>
               </button>
-              <div className="board-nav-counter flex flex-col items-center justify-center px-3 py-1 bg-slate-950/80 rounded-lg border border-slate-800 text-center min-w-[75px]">
-                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Move</span>
-                <span className="text-xs font-mono font-bold text-cyan-300">
+              <div className="board-nav-counter flex flex-col items-center justify-center px-3 py-1.5 bg-slate-950 rounded-xl border border-slate-800 text-center min-w-[76px] shrink-0 select-none shadow-inner">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Move</span>
+                <span className="text-xs font-mono font-black text-cyan-300">
                   {currentMoveIdx >= 0 ? `${currentMoveIdx + 1} / ${moveHistory.length}` : `Start`}
                 </span>
               </div>
@@ -1025,20 +1027,22 @@ export function App() {
                 type="button"
                 onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
                 disabled={currentMoveIdx >= moveHistory.length - 1}
-                className="board-nav-btn board-nav-primary px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-cyan-900/40 text-cyan-300 disabled:opacity-30 disabled:pointer-events-none transition-all border border-cyan-700/60 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-sm flex-[2] sm:flex-none"
+                className="board-nav-btn board-nav-primary flex-1 py-3 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 disabled:opacity-25 disabled:pointer-events-none transition-all border border-cyan-400 active:scale-95 flex items-center justify-center gap-2 font-black text-sm tracking-wide shadow-lg shadow-cyan-950/50"
                 title="Next Move"
+                aria-label="Next Move"
               >
-                <span>Next Move</span>
-                <ChevronRight size={22} />
+                <span>Next</span>
+                <ChevronRight size={24} />
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectReviewMove(moveHistory.length - 1)}
                 disabled={currentMoveIdx >= moveHistory.length - 1}
-                className="board-nav-btn p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-30 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center flex-1 sm:flex-none"
-                title="Last Move"
+                className="board-nav-btn p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-90 flex items-center justify-center shrink-0 shadow-sm"
+                title="Last Move (End)"
+                aria-label="Last Move"
               >
-                <SkipForward size={20} />
+                <SkipForward size={22} />
               </button>
             </div>
           )}

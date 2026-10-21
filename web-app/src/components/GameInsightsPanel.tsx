@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MoveAnalysis, MoveRating, formatEvalPoints, MOVE_NOTATION_MAP } from '../utils/analysisEngine';
-import { Award, Zap, AlertTriangle, AlertCircle, HelpCircle, CheckCircle, Flame, Swords, ExternalLink, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react';
+import { Award, Zap, AlertTriangle, AlertCircle, HelpCircle, CheckCircle, Flame, Swords, ExternalLink, ChevronLeft, ChevronRight, SkipBack, SkipForward, ListOrdered, BarChart2, Shield } from 'lucide-react';
 
 export interface LoadedGameInfo {
   whiteUsername: string;
@@ -50,7 +50,9 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
   onFirstMove,
   onLastMove
 }) => {
+  const [panelTab, setPanelTab] = useState<'moves' | 'accuracy' | 'breakdown'>('moves');
   const safeMoves = Array.isArray(moves) ? moves : [];
+
   // Count ratings
   const counts = safeMoves.reduce((acc, m) => {
     if (m && m.rating) {
@@ -111,75 +113,121 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
         </div>
       )}
 
-      {/* Accuracy Cards */}
-      <div className="accuracy-header">
-        <div className="accuracy-card white-acc">
-          <div className="acc-label">White Accuracy</div>
-          <div className="acc-score">{safeWhiteAcc}%</div>
-          <div className="acc-sub">Mastery Rating</div>
-        </div>
-        <div className="accuracy-card black-acc">
-          <div className="acc-label">Black Accuracy</div>
-          <div className="acc-score">{safeBlackAcc}%</div>
-          <div className="acc-sub">Mastery Rating</div>
-        </div>
+      {/* Review Sub-Tabs: Moves List, Accuracy Scores, Move Quality */}
+      <div className="review-subtabs flex items-center gap-1.5 mb-3 p-1 bg-slate-900/90 rounded-xl border border-slate-800">
+        <button
+          type="button"
+          onClick={() => setPanelTab('moves')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-bold transition-all ${
+            panelTab === 'moves'
+              ? 'bg-cyan-500 text-slate-950 shadow-md'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+          }`}
+        >
+          <ListOrdered size={15} />
+          <span>Move List ({safeMoves.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setPanelTab('accuracy')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-bold transition-all ${
+            panelTab === 'accuracy'
+              ? 'bg-cyan-500 text-slate-950 shadow-md'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+          }`}
+        >
+          <BarChart2 size={15} />
+          <span>Accuracy ({safeWhiteAcc}% / {safeBlackAcc}%)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setPanelTab('breakdown')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg text-xs font-bold transition-all ${
+            panelTab === 'breakdown'
+              ? 'bg-cyan-500 text-slate-950 shadow-md'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+          }`}
+        >
+          <Shield size={15} />
+          <span>Move Quality</span>
+        </button>
       </div>
 
-      {/* Dynamic Evaluation Bar */}
-      <div className="eval-bar-section">
-        <div className="eval-bar-label">
-          <span>Engine Evaluation (Pawns)</span>
-          <span className="eval-val font-mono font-bold text-sm">
-            {formatEvalPoints(safeEval)}
-          </span>
-        </div>
-        <div className="eval-track">
-          <div className="eval-fill" style={{ width: `${evalPercent}%` }} />
-        </div>
-      </div>
-
-      {/* Move Quality Breakdown */}
-      <div className="move-quality-grid">
-        <div className="quality-pill brilliant-pill" title="Brilliant sacrifice preserving winning advantage">
-          <Flame size={14} />
-          <span>Brilliant ({counts.brilliant || 0})</span>
-        </div>
-        <div className="quality-pill best-pill" title="Engine top move">
-          <CheckCircle size={14} />
-          <span>Best ({counts.best || 0})</span>
-        </div>
-        <div className="quality-pill excellent-pill" title="Strong move within 45 cp of best">
-          <CheckCircle size={14} />
-          <span>Great ({counts.excellent || 0})</span>
-        </div>
-        <div className="quality-pill good-pill" title="Solid move within 90 cp">
-          <CheckCircle size={14} />
-          <span>Good ({counts.good || 0})</span>
-        </div>
-        <div className="quality-pill inaccuracy-pill" title="Inaccuracy (90-180 cp loss)">
-          <HelpCircle size={14} />
-          <span>Inaccuracy ({counts.inaccuracy || 0})</span>
-        </div>
-        <div className="quality-pill mistake-pill" title="Mistake (180-320 cp loss)">
-          <AlertTriangle size={14} />
-          <span>Mistake ({counts.mistake || 0})</span>
-        </div>
-        <div className="quality-pill blunder-pill" title="Blunder (320+ cp loss)">
-          <AlertCircle size={14} />
-          <span>Blunders ({counts.blunder || 0})</span>
-        </div>
-        {(counts.book || 0) > 0 && (
-          <div className="quality-pill book-pill" title="Opening book moves">
-            <Award size={14} />
-            <span>Book ({counts.book || 0})</span>
+      {/* Tab: Accuracy & Evaluation Bar */}
+      {panelTab === 'accuracy' && (
+        <div className="accuracy-tab-content">
+          <div className="accuracy-header">
+            <div className="accuracy-card white-acc">
+              <div className="acc-label">White Accuracy</div>
+              <div className="acc-score">{safeWhiteAcc}%</div>
+              <div className="acc-sub">Mastery Rating</div>
+            </div>
+            <div className="accuracy-card black-acc">
+              <div className="acc-label">Black Accuracy</div>
+              <div className="acc-score">{safeBlackAcc}%</div>
+              <div className="acc-sub">Mastery Rating</div>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Move History Strip with Navigation Controls */}
-      <div className="move-list-section">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
-          <div className="section-title" style={{ marginBottom: 0 }}>Move Review</div>
+          <div className="eval-bar-section">
+            <div className="eval-bar-label">
+              <span>Engine Evaluation (Pawns)</span>
+              <span className="eval-val font-mono font-bold text-sm">
+                {formatEvalPoints(safeEval)}
+              </span>
+            </div>
+            <div className="eval-track">
+              <div className="eval-fill" style={{ width: `${evalPercent}%` }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Move Quality Pills */}
+      {panelTab === 'breakdown' && (
+        <div className="move-quality-grid mb-3">
+          <div className="quality-pill brilliant-pill" title="Brilliant sacrifice preserving winning advantage">
+            <Flame size={14} />
+            <span>Brilliant ({counts.brilliant || 0})</span>
+          </div>
+          <div className="quality-pill best-pill" title="Engine top move">
+            <CheckCircle size={14} />
+            <span>Best ({counts.best || 0})</span>
+          </div>
+          <div className="quality-pill excellent-pill" title="Strong move within 45 cp of best">
+            <CheckCircle size={14} />
+            <span>Great ({counts.excellent || 0})</span>
+          </div>
+          <div className="quality-pill good-pill" title="Solid move within 90 cp">
+            <CheckCircle size={14} />
+            <span>Good ({counts.good || 0})</span>
+          </div>
+          <div className="quality-pill inaccuracy-pill" title="Inaccuracy (90-180 cp loss)">
+            <HelpCircle size={14} />
+            <span>Inaccuracy ({counts.inaccuracy || 0})</span>
+          </div>
+          <div className="quality-pill mistake-pill" title="Mistake (180-320 cp loss)">
+            <AlertTriangle size={14} />
+            <span>Mistake ({counts.mistake || 0})</span>
+          </div>
+          <div className="quality-pill blunder-pill" title="Blunder (320+ cp loss)">
+            <AlertCircle size={14} />
+            <span>Blunders ({counts.blunder || 0})</span>
+          </div>
+          {(counts.book || 0) > 0 && (
+            <div className="quality-pill book-pill" title="Opening book moves">
+              <Award size={14} />
+              <span>Book ({counts.book || 0})</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Move History Strip with Navigation Controls */}
+      {panelTab === 'moves' && (
+        <div className="move-list-section">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
+            <div className="section-title" style={{ marginBottom: 0 }}>Full Move Order</div>
           {(onPrevMove || onNextMove) && (
             <div className="review-nav-bar flex items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto">
               {onFirstMove && (
@@ -299,6 +347,7 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
           )}
         </div>
       </div>
+    )}
     </div>
   );
 };
