@@ -149,7 +149,31 @@ export function App() {
       if (cachedSaved) {
         setSavedPositions(JSON.parse(cachedSaved));
       }
+      // Preload cached recent games and analyzed profile so all tabs are populated immediately on first launch
+      const cachedGamesRaw = localStorage.getItem('chessfr_recent_games');
       const cachedUser = localStorage.getItem('chessfr_chesscom_username');
+      if (cachedGamesRaw && cachedUser) {
+        try {
+          const parsedGames: ChessComGame[] = JSON.parse(cachedGamesRaw);
+          if (Array.isArray(parsedGames) && parsedGames.length > 0) {
+            setRecentGames(parsedGames);
+            setTotalGamesAnalyzed(parsedGames.length);
+            const style = analyzePlaystyle(parsedGames, cachedUser);
+            setPlaystyleProfile(style);
+            const treeW = buildOpeningTree(parsedGames, cachedUser, 'white');
+            const treeB = buildOpeningTree(parsedGames, cachedUser, 'black');
+            setOpeningTreeWhite(treeW);
+            setOpeningTreeBlack(treeB);
+            const blunders = extractBlundersFromGames(parsedGames, cachedUser);
+            const scenarios = generateCommonPositionalScenarios(parsedGames, cachedUser);
+            const variationDrills = generateChallengingVariationPuzzles(style.problematicOpenings);
+            setPuzzlesList([...variationDrills, ...scenarios, ...blunders, ...SAMPLE_PUZZLES]);
+          }
+        } catch (e) {
+          // Ignore parse error
+        }
+      }
+
       if (cachedUser) {
         setChessComUsername(cachedUser);
         loadChessComGames(cachedUser);
@@ -160,7 +184,7 @@ export function App() {
     } finally {
       if (!hasLoaded) {
         // Quick splash for guest mode initial page load
-        setTimeout(() => setIsInitialLoading(false), 900);
+        setTimeout(() => setIsInitialLoading(false), 800);
       }
     }
   }, []);
@@ -225,6 +249,11 @@ export function App() {
       const games = await fetchRecentChessComGames(username, activeFilters);
       setRecentGames(games);
       setTotalGamesAnalyzed(games.length);
+      try {
+        localStorage.setItem('chessfr_recent_games', JSON.stringify(games.slice(0, 50)));
+      } catch (e) {
+        // Ignore quota
+      }
       if (games.length > 0) {
         // 1. Extract blunders in BOTH won and lost games
         const blunderPuzzles = extractBlundersFromGames(games, username);
@@ -917,8 +946,8 @@ export function App() {
 
       {/* Main Container */}
       <main className="app-container">
-        {/* Left Side: Chessboard & Controls */}
-        <section>
+        {/* Left Side: Chessboard & Controls (Stationary centerpiece) */}
+        <section className="board-section">
           {/* Active Training Status & Prompt Card */}
           {activeView === 'training' && (
             <div className="training-status-card">
