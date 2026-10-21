@@ -993,139 +993,142 @@ export function App() {
             </div>
           )}
 
-          {/* Primary Move Navigation Controls (Easily clickable, centered, prominent) */}
+          {/* Primary Move Navigation Controls: Central, Lower, Extra-Large Next Button with First, Prev, Last */}
           {activeView === 'insights' && moveHistory.length > 0 && (
-            <div className="board-review-nav-bar flex items-center justify-center gap-2 mt-3 px-2 py-2 bg-slate-900/95 rounded-2xl border border-cyan-500/30 shadow-2xl backdrop-blur-md">
-              <button
-                type="button"
-                onClick={() => handleSelectReviewMove(-1)}
-                disabled={currentMoveIdx < 0}
-                className="board-nav-btn p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-90 flex items-center justify-center shrink-0 shadow-sm"
-                title="First Move (Start)"
-                aria-label="First Move"
-              >
-                <SkipBack size={22} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSelectReviewMove(currentMoveIdx - 1)}
-                disabled={currentMoveIdx < 0}
-                className="board-nav-btn board-nav-primary flex-1 py-3 px-3 rounded-xl bg-slate-800 hover:bg-cyan-950/60 text-cyan-300 disabled:opacity-25 disabled:pointer-events-none transition-all border border-cyan-700/60 active:scale-95 flex items-center justify-center gap-2 font-black text-sm tracking-wide shadow-md"
-                title="Previous Move"
-                aria-label="Previous Move"
-              >
-                <ChevronLeft size={24} />
-                <span>Prev</span>
-              </button>
-              <div className="board-nav-counter flex flex-col items-center justify-center px-3 py-1.5 bg-slate-950 rounded-xl border border-slate-800 text-center min-w-[76px] shrink-0 select-none shadow-inner">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Move</span>
-                <span className="text-xs font-mono font-black text-cyan-300">
-                  {currentMoveIdx >= 0 ? `${currentMoveIdx + 1} / ${moveHistory.length}` : `Start`}
-                </span>
+            <div className="board-review-nav-container mt-3 mb-2 flex flex-col items-center w-full">
+              {/* Row 1: First, Prev, Move Counter, and Last Move */}
+              <div className="board-nav-secondary-row flex items-center justify-between w-full max-w-[554px] gap-2 px-1">
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(-1)}
+                  disabled={currentMoveIdx < 0}
+                  className="board-nav-btn px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-xs"
+                  title="First Move (Start)"
+                  aria-label="First Move"
+                >
+                  <SkipBack size={18} />
+                  <span className="hidden sm:inline">Start</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(currentMoveIdx - 1)}
+                  disabled={currentMoveIdx < 0}
+                  className="board-nav-btn flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-cyan-950/60 text-cyan-300 disabled:opacity-25 disabled:pointer-events-none transition-all border border-cyan-800/60 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm"
+                  title="Previous Move"
+                  aria-label="Previous Move"
+                >
+                  <ChevronLeft size={20} />
+                  <span>Prev Move</span>
+                </button>
+
+                <div className="board-nav-counter flex flex-col items-center justify-center px-3 py-1.5 bg-slate-950/90 rounded-xl border border-slate-800 text-center min-w-[76px] select-none shadow-inner">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Move</span>
+                  <span className="text-xs font-mono font-black text-cyan-300">
+                    {currentMoveIdx >= 0 ? `${currentMoveIdx + 1} / ${moveHistory.length}` : `Start`}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(moveHistory.length - 1)}
+                  disabled={currentMoveIdx >= moveHistory.length - 1}
+                  className="board-nav-btn px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-xs"
+                  title="Last Move (End)"
+                  aria-label="Last Move"
+                >
+                  <span className="hidden sm:inline">End</span>
+                  <SkipForward size={18} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
-                disabled={currentMoveIdx >= moveHistory.length - 1}
-                className="board-nav-btn board-nav-primary flex-1 py-3 px-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 disabled:opacity-25 disabled:pointer-events-none transition-all border border-cyan-400 active:scale-95 flex items-center justify-center gap-2 font-black text-sm tracking-wide shadow-lg shadow-cyan-950/50"
-                title="Next Move"
-                aria-label="Next Move"
-              >
-                <span>Next</span>
-                <ChevronRight size={24} />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSelectReviewMove(moveHistory.length - 1)}
-                disabled={currentMoveIdx >= moveHistory.length - 1}
-                className="board-nav-btn p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-90 flex items-center justify-center shrink-0 shadow-sm"
-                title="Last Move (End)"
-                aria-label="Last Move"
-              >
-                <SkipForward size={22} />
-              </button>
+
+              {/* Row 2: Central, Lower, Prominent NEXT MOVE Button */}
+              <div className="w-full max-w-[554px] mt-2 px-1">
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
+                  disabled={currentMoveIdx >= moveHistory.length - 1}
+                  className="board-nav-next-main w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-cyan-400 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-slate-950 font-black text-base tracking-wider disabled:opacity-30 disabled:pointer-events-none transition-all border border-cyan-300 shadow-xl shadow-cyan-950/40 active:scale-98 flex items-center justify-center gap-2"
+                  title="Next Move"
+                  aria-label="Next Move"
+                >
+                  <span>NEXT MOVE</span>
+                  <ChevronRight size={26} strokeWidth={3} />
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Inline Move Notation Tape beneath navigation bar with Lichess / Chess.com glyphs */}
+          {/* Moves List in a Separate, Dedicated Scrollable Box */}
           {activeView === 'insights' && moveHistory.length > 0 && (
-            <div className="board-inline-movelist-strip mt-2 px-2 py-1.5 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center gap-1 overflow-x-auto shadow-inner">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
-                Moves:
-              </span>
-              <button
-                type="button"
-                onClick={() => handleSelectReviewMove(-1)}
-                className={`inline-move-chip text-[11px] font-mono px-2 py-0.5 rounded transition-all shrink-0 ${
-                  currentMoveIdx === -1
-                    ? 'bg-cyan-500/25 text-cyan-300 font-bold border border-cyan-500/60'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
-                }`}
-                title="Starting Position (Move 1)"
-              >
-                Start
-              </button>
-              {moveHistory.map((m, idx) => {
-                const moveNum = Math.floor(idx / 2) + 1;
-                const isWhiteMove = idx % 2 === 0;
-                const isSelected = idx === currentMoveIdx;
-                const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
-                const evalText = formatEvalPoints(m.evalAfter ?? 0);
+            <div className="board-moves-scrollbox mt-2 mb-2 p-2.5 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl flex flex-col w-full max-w-[554px]">
+              <div className="flex items-center justify-between mb-1.5 px-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <span>Game Moves</span>
+                  <span className="text-[10px] text-cyan-400 font-mono">({moveHistory.length} ply)</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-normal">Tap any move to review</span>
+              </div>
+              <div className="moves-box-chips flex flex-wrap items-center gap-1.5 max-h-[110px] overflow-y-auto p-1 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(-1)}
+                  className={`inline-move-chip text-xs font-mono px-2 py-1 rounded-md transition-all shrink-0 font-bold ${
+                    currentMoveIdx === -1
+                      ? 'bg-cyan-500 text-slate-950 shadow'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-slate-800'
+                  }`}
+                  title="Starting Position (Move 1)"
+                >
+                  Start
+                </button>
+                {moveHistory.map((m, idx) => {
+                  const moveNum = Math.floor(idx / 2) + 1;
+                  const isWhiteMove = idx % 2 === 0;
+                  const isSelected = idx === currentMoveIdx;
+                  const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
+                  const evalText = formatEvalPoints(m.evalAfter ?? 0);
 
-                return (
-                  <div key={idx} className="flex items-center shrink-0">
-                    {isWhiteMove && (
-                      <span className="text-[10px] text-slate-500 font-mono mr-1">
-                        {moveNum}.
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleSelectReviewMove(idx)}
-                      className={`inline-move-chip group relative inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-mono font-semibold transition-all ${
-                        isSelected
-                          ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`}
-                      style={
-                        !isSelected && annot.glyph
-                          ? { borderBottom: `2px solid ${annot.color}` }
-                          : undefined
-                      }
-                      title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san}${annot.glyph ? ` (${annot.glyph} ${annot.name})` : ''} • Eval: ${evalText}`}
-                    >
-                      <span>{m.san}</span>
-                      {annot.glyph && (
-                        <span
-                          className={`glyph-badge font-bold px-0.5 rounded ${
-                            isSelected ? 'text-slate-950' : ''
-                          }`}
-                          style={{
-                            color: isSelected ? '#020617' : annot.color,
-                            fontSize: '10px'
-                          }}
-                        >
-                          {annot.glyph}
+                  return (
+                    <div key={idx} className="flex items-center shrink-0">
+                      {isWhiteMove && (
+                        <span className="text-[11px] text-slate-500 font-mono font-medium mr-0.5">
+                          {moveNum}.
                         </span>
                       )}
-                      {/* Rich Hover Notation Tooltip (Lichess/Chess.com style) */}
-                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex flex-col items-center z-50 whitespace-nowrap">
-                        <span className="px-2 py-1 bg-slate-900 text-slate-100 text-[10px] font-sans font-medium rounded-md shadow-xl border border-slate-700 flex items-center gap-1.5">
-                          {annot.glyph && (
-                            <strong style={{ color: annot.color }}>{annot.glyph}</strong>
-                          )}
-                          <span>{annot.name}</span>
-                          <span className="text-slate-400 font-mono">({evalText})</span>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectReviewMove(idx)}
+                        className={`inline-move-chip group relative inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono font-bold transition-all border ${
+                          isSelected
+                            ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
+                            : 'bg-slate-900/80 text-slate-200 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'
+                        }`}
+                        title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san} ${annot.glyph || ''} (${annot.name}) • Eval: ${evalText}`}
+                      >
+                        <span>{m.san}</span>
+                        {annot.glyph && (
+                          <span
+                            className="font-bold text-[11px]"
+                            style={{
+                              color: isSelected ? '#020617' : annot.color
+                            }}
+                          >
+                            {annot.glyph}
+                          </span>
+                        )}
+                        <span
+                          className={`text-[9px] font-mono font-normal opacity-70 ${
+                            isSelected ? 'text-slate-900' : 'text-slate-400'
+                          }`}
+                        >
+                          {evalText}
                         </span>
-                        <span className="w-1.5 h-1.5 bg-slate-900 border-r border-b border-slate-700 transform rotate-45 -mt-1" />
-                      </span>
-                    </button>
-                    {!isWhiteMove && idx < moveHistory.length - 1 && (
-                      <span className="text-slate-700 mx-0.5 font-sans">,</span>
-                    )}
-                  </div>
-                );
-              })}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
