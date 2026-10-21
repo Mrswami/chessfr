@@ -1217,27 +1217,30 @@ export function App() {
 
         {/* Right Side: Insights, Playstyle & Training Panels */}
         <section className="side-card">
-          <div className="view-tabs">
+          <div className="view-tabs" role="tablist">
             <button
               className={`view-tab-btn ${activeView === 'playstyle' ? 'view-tab-active' : ''}`}
               onClick={() => setActiveView('playstyle')}
+              title="Opening Diagnostics"
             >
-              <Compass size={16} />
-              <span>Opening Diagnostics</span>
+              <Compass size={17} />
+              <span>Diagnostics</span>
             </button>
             <button
               className={`view-tab-btn ${activeView === 'games' ? 'view-tab-active' : ''}`}
               onClick={() => setActiveView('games')}
+              title="Recent Games"
             >
-              <Swords size={16} />
-              <span>Recent Games</span>
+              <Swords size={17} />
+              <span>Games</span>
             </button>
             <button
               className={`view-tab-btn ${activeView === 'challenging' ? 'view-tab-active' : ''}`}
               onClick={() => setActiveView('challenging')}
+              title="Challenging Variations"
             >
-              <ShieldAlert size={16} className="text-rose-400" />
-              <span>Challenging Variations</span>
+              <ShieldAlert size={17} className="text-rose-400" />
+              <span>Variations</span>
             </button>
             <button
               className={`view-tab-btn ${activeView === 'tree' ? 'view-tab-active' : ''}`}
@@ -1248,22 +1251,25 @@ export function App() {
                 setBoardOrientation(treeColor === 'white' ? 'w' : 'b');
                 refreshBoard();
               }}
+              title="Opening Tree"
             >
-              <GitBranch size={16} />
-              <span>Opening Tree</span>
+              <GitBranch size={17} />
+              <span>Repertoire</span>
             </button>
             <button
               className={`view-tab-btn ${activeView === 'insights' ? 'view-tab-active' : ''}`}
               onClick={() => setActiveView('insights')}
+              title="Game Review & Move Analysis"
             >
-              <BarChart3 size={16} />
-              <span>Game Review</span>
+              <BarChart3 size={17} />
+              <span>Review</span>
             </button>
             <button
               className={`view-tab-btn ${activeView === 'training' ? 'view-tab-active' : ''}`}
               onClick={() => setActiveView('training')}
+              title="3-Move Drills & Puzzles"
             >
-              <GraduationCap size={16} />
+              <GraduationCap size={17} />
               <span>Drills</span>
             </button>
           </div>
