@@ -34,6 +34,7 @@ import { InteractiveBoard, BoardArrow } from './components/InteractiveBoard';
 import { EngineEvalBar } from './components/EngineEvalBar';
 import { GameInsightsPanel, LoadedGameInfo } from './components/GameInsightsPanel';
 import { TrainingModulesPanel } from './components/TrainingModulesPanel';
+import { stockfishService } from './services/stockfishService';
 import { AuthModal } from './components/AuthModal';
 import { PlaystyleAnalysisPanel } from './components/PlaystyleAnalysisPanel';
 import { ChallengingVariationsPanel } from './components/ChallengingVariationsPanel';
@@ -139,16 +140,59 @@ export function App() {
   const [engineLineArrow, setEngineLineArrow] = useState<BoardArrow | null>(null);
   const movesBoxChipsRef = useRef<HTMLDivElement>(null);
 
-  // Compute top 3-4 engine lines whenever the board position (fen) or move changes in analysis mode
+  // Compute top engine lines and precise evaluation using Stockfish WebAssembly Engine
   useEffect(() => {
+    let isCancelled = false;
+
     if (activeView === 'insights' || activeView === 'tree') {
+      const currentFen = chess.fen();
+      
+      // Immediate heuristic preview for instant responsiveness
       try {
-        const lines = findTopEngineLines(chess, 4, 2);
-        setTopEngineLines(lines);
-      } catch (e) {
-        setTopEngineLines([]);
-      }
+        const previewLines = findTopEngineLines(chess, 4, 2);
+        setTopEngineLines(previewLines);
+      } catch (e) {}
+
+      // Deep Stockfish Web Worker evaluation
+      stockfishService.evaluateFen(currentFen, 12).then((sfEval) => {
+        if (isCancelled) return;
+        setEvaluation(sfEval.scoreCp);
+
+        // Convert Stockfish best line into EngineLine format
+        if (sfEval.bestMoveUci && sfEval.bestMoveUci.length >= 4) {
+          try {
+            const probeChess = new Chess(currentFen);
+            const m = probeChess.move({
+              from: sfEval.bestMoveUci.slice(0, 2),
+              to: sfEval.bestMoveUci.slice(2, 4),
+              promotion: 'q'
+            });
+            if (m) {
+              setTopEngineLines(prev => {
+                const updated = [...prev];
+                if (updated.length > 0) {
+                  updated[0] = {
+                    ...updated[0],
+                    moveSan: m.san,
+                    moveUci: sfEval.bestMoveUci,
+                    eval: sfEval.scoreCp,
+                    pvSan: [m.san, ...(sfEval.pv.slice(1))]
+                  };
+                }
+                return updated;
+              });
+            }
+          } catch (err) {}
+        }
+      }).catch(() => {
+        // Fallback to local heuristic search
+      });
     }
+
+    return () => {
+      isCancelled = true;
+      stockfishService.stop();
+    };
   }, [fen, activeView, currentMoveIdx]);
 
   // Auto-scroll the move chip under the board into view horizontally ONLY without vertical page jumps
