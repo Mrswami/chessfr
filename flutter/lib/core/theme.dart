@@ -9,6 +9,10 @@ class AppTheme {
   static const Color _surfaceDark = Color(0xFF0F172A);
   static const Color _surfaceCard = Color(0xFF1E293B);
 
+  static Color get backgroundDark => _surfaceDark;
+  static Color get primaryTeal => _teal;
+  static Color get accentGold => _accent;
+
   static ThemeData get dark {
     final colorScheme = ColorScheme.dark(
       primary: _teal,

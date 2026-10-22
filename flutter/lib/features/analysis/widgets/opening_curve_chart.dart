@@ -7,12 +7,12 @@ class OpeningCurveChart extends StatefulWidget {
   final int totalGames;
 
   const OpeningCurveChart({
-    Key? key,
+    super.key,
     required this.openings,
     required this.selectedOpening,
     required this.onOpeningSelected,
     this.totalGames = 0,
-  }) : super(key: key);
+  });
 
   @override
   State<OpeningCurveChart> createState() => _OpeningCurveChartState();
@@ -111,7 +111,7 @@ class _OpeningCurveChartState extends State<OpeningCurveChart> with SingleTicker
             ),
           ),
           // X-Axis Labels
-          Container(
+          SizedBox(
             height: 40,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

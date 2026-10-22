@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum TabiyaState { Actual, Theoretical, Mutated }
+enum TabiyaState { actual, theoretical, mutated }
 
 class TabiyaVisualizerBoard extends StatelessWidget {
   final TabiyaState currentState;
@@ -8,11 +8,11 @@ class TabiyaVisualizerBoard extends StatelessWidget {
   final Function(TabiyaState) onStateChanged;
 
   const TabiyaVisualizerBoard({
-    Key? key,
+    super.key,
     required this.currentState,
     required this.openingName,
     required this.onStateChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +54,11 @@ class TabiyaVisualizerBoard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildStateToggle("Actual", TabiyaState.Actual),
+              _buildStateToggle("Actual", TabiyaState.actual),
               SizedBox(width: 8),
-              _buildStateToggle("Theory", TabiyaState.Theoretical),
+              _buildStateToggle("Theory", TabiyaState.theoretical),
               SizedBox(width: 8),
-              _buildStateToggle("Mutated", TabiyaState.Mutated),
+              _buildStateToggle("Mutated", TabiyaState.mutated),
             ],
           ),
         ],
@@ -115,9 +115,13 @@ class _TabiyaBoardPainter extends CustomPainter {
 
     // Colors depend on state
     Color nodeColor;
-    if (state == TabiyaState.Actual) nodeColor = Colors.cyanAccent;
-    else if (state == TabiyaState.Theoretical) nodeColor = Colors.orangeAccent;
-    else nodeColor = Colors.purpleAccent;
+    if (state == TabiyaState.actual) {
+      nodeColor = Colors.cyanAccent;
+    } else if (state == TabiyaState.theoretical) {
+      nodeColor = Colors.orangeAccent;
+    } else {
+      nodeColor = Colors.purpleAccent;
+    }
 
     // Draw generic nodes for demo
     final nodePaint = Paint()
@@ -136,13 +140,13 @@ class _TabiyaBoardPainter extends CustomPainter {
 
     // A predefined layout depending on the state
     List<Offset> nodes;
-    if (state == TabiyaState.Actual) {
+    if (state == TabiyaState.actual) {
       nodes = [
         Offset(squareSize * 4.5, squareSize * 4.5),
         Offset(squareSize * 3.5, squareSize * 3.5),
         Offset(squareSize * 5.5, squareSize * 3.5),
       ];
-    } else if (state == TabiyaState.Theoretical) {
+    } else if (state == TabiyaState.theoretical) {
       nodes = [
         Offset(squareSize * 4.5, squareSize * 3.5),
         Offset(squareSize * 3.5, squareSize * 4.5),

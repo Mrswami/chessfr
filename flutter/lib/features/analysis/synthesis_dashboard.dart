@@ -6,7 +6,7 @@ import 'widgets/psychosis_gears.dart';
 import 'geographic_king_safety_screen.dart';
 
 class SynthesisDashboard extends StatefulWidget {
-  const SynthesisDashboard({Key? key}) : super(key: key);
+  const SynthesisDashboard({super.key});
 
   @override
   State<SynthesisDashboard> createState() => _SynthesisDashboardState();
@@ -15,7 +15,7 @@ class SynthesisDashboard extends StatefulWidget {
 class _SynthesisDashboardState extends State<SynthesisDashboard> {
   final List<String> _demoOpenings = ["London", "Sicilian", "French", "King's Indian"];
   String _selectedOpening = "London";
-  TabiyaState _tabiyaState = TabiyaState.Actual;
+  TabiyaState _tabiyaState = TabiyaState.actual;
   
   // Val.exe terminology controllers
   final _triggerConditionCtrl = TextEditingController();
@@ -62,8 +62,9 @@ class _SynthesisDashboardState extends State<SynthesisDashboard> {
           'manual_grade': 'Unassessed',
         });
         
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Mutation Anomaly Logged Successfully!', style: TextStyle(color: Colors.greenAccent))),
+          const SnackBar(content: Text('Mutation Anomaly Logged Successfully!', style: TextStyle(color: Colors.greenAccent))),
         );
         
         _triggerConditionCtrl.clear();
@@ -72,11 +73,15 @@ class _SynthesisDashboardState extends State<SynthesisDashboard> {
         _blackjackRuleCtrl.clear();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving mutation: $e', style: TextStyle(color: Colors.redAccent))),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving mutation: $e', style: const TextStyle(color: Colors.redAccent))),
+        );
+      }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -160,7 +165,7 @@ class _SynthesisDashboardState extends State<SynthesisDashboard> {
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          Container(
+          SizedBox(
             height: 300,
             child: OpeningCurveChart(
               openings: _demoOpenings,
@@ -170,7 +175,7 @@ class _SynthesisDashboardState extends State<SynthesisDashboard> {
             ),
           ),
           SizedBox(height: 16),
-          Container(
+          SizedBox(
             height: 400,
             child: TabiyaVisualizerBoard(
               openingName: _selectedOpening,

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class PsychosisGears extends StatefulWidget {
   final bool isAnalyzing;
 
-  const PsychosisGears({Key? key, this.isAnalyzing = true}) : super(key: key);
+  const PsychosisGears({super.key, this.isAnalyzing = true});
 
   @override
   State<PsychosisGears> createState() => _PsychosisGearsState();

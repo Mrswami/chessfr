@@ -1,6 +1,5 @@
 // Feature exports
 export '../features/training/training_screen.dart';
-export '../features/monetization/loading_ad_screen.dart';
 export '../features/analysis/screenshot_analysis_screen.dart';
 
 import '../features/logic/gemini_chess_service.dart';
