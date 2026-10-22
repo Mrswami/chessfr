@@ -440,8 +440,10 @@ export function App() {
         return;
       }
 
-      // Attempt move
-      const evalBefore = evaluation;
+      // Search candidate engine lines from current position before making the move
+      const lines = findTopEngineLines(chess, 5, 2);
+      const bestLine = lines.length > 0 ? lines[0] : null;
+
       try {
         const move = chess.move({
           from: selectedSquare,
@@ -450,13 +452,38 @@ export function App() {
         });
 
         if (move) {
+          const evalAfter = evaluatePosition(chess);
+          const playedLine = lines.find(l => l.moveSan === move.san || l.moveUci === `${move.from}${move.to}`);
+
+          let cpl: number;
+          let bestEngineEval: number | undefined;
+
+          if (bestLine && playedLine) {
+            cpl = Math.max(0, move.color === 'w' ? (bestLine.eval - playedLine.eval) : (playedLine.eval - bestLine.eval));
+            bestEngineEval = bestLine.eval;
+          } else if (bestLine) {
+            bestEngineEval = bestLine.eval;
+            cpl = Math.max(0, move.color === 'w' ? (bestLine.eval - evalAfter) : (evalAfter - bestLine.eval));
+          } else {
+            cpl = Math.abs(evalBefore - evalAfter);
+          }
+
           const enemyColor = move.color === 'w' ? 'b' : 'w';
           const isTargetAttacked = chess.isAttacked(move.to as Square, enemyColor);
           const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
           const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
           const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
-          const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter);
-          const cpl = Math.abs(evalBefore - evalAfter);
+
+          let isOnlyGoodMove = false;
+          if (lines.length >= 2 && bestLine) {
+            const secondBest = lines[1];
+            const diff = move.color === 'w' ? (bestLine.eval - secondBest.eval) : (secondBest.eval - bestLine.eval);
+            if (diff >= 120 && cpl <= 15) {
+              isOnlyGoodMove = true;
+            }
+          }
+
+          const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter, bestEngineEval, isOnlyGoodMove);
 
           const analysis: MoveAnalysis = {
             san: move.san,
@@ -466,7 +493,8 @@ export function App() {
             evalBefore,
             evalAfter,
             centipawnLoss: cpl,
-            rating
+            rating,
+            bestMoveSan: bestLine ? bestLine.moveSan : undefined
           };
 
           const newHistory = [...moveHistory, analysis];
@@ -734,32 +762,45 @@ export function App() {
         const enemyColor = move.color === 'w' ? 'b' : 'w';
         const isTargetAttacked = replayChess.isAttacked(move.to as Square, enemyColor);
 
-        // Find best engine move from the position to accurately measure player's centipawn loss
-        let bestEngineEval: number | undefined;
-        try {
-          const best = findBestLine(replayChess, 2);
-          if (best) {
-            bestEngineEval = best.eval;
-          }
-        } catch (e) {}
+        // Search candidate engine lines from current position before making the move
+        const lines = findTopEngineLines(replayChess, 5, 2);
+        const bestLine = lines.length > 0 ? lines[0] : null;
+        const playedLine = lines.find(l => l.moveSan === move.san || l.moveUci === `${move.from}${move.to}`);
 
         // Execute move
         replayChess.move(move);
         const evalAfter = evaluatePosition(replayChess);
 
+        // Centipawn loss is computed on the same search horizon:
+        let cpl: number;
+        let bestEngineEval: number | undefined;
+
+        if (bestLine && playedLine) {
+          cpl = Math.max(0, move.color === 'w' ? (bestLine.eval - playedLine.eval) : (playedLine.eval - bestLine.eval));
+          bestEngineEval = bestLine.eval;
+        } else if (bestLine) {
+          bestEngineEval = bestLine.eval;
+          cpl = Math.max(0, move.color === 'w' ? (bestLine.eval - evalAfter) : (evalAfter - bestLine.eval));
+        } else {
+          cpl = Math.abs(evalBefore - evalAfter);
+        }
+
         // A true sacrifice puts a piece (Q, R, B, N) en prise on a defended square without capturing higher value
         const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
         const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
         const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
-        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter, bestEngineEval);
-        
-        // CPL relative to the best engine move if available, else static delta
-        let cpl: number;
-        if (typeof bestEngineEval === 'number') {
-          cpl = Math.max(0, move.color === 'w' ? (bestEngineEval - evalAfter) : (evalAfter - bestEngineEval));
-        } else {
-          cpl = Math.abs(evalBefore - evalAfter);
+
+        // Verify if this was the sole saving/winning move when alternatives lose significant advantage
+        let isOnlyGoodMove = false;
+        if (lines.length >= 2 && bestLine) {
+          const secondBest = lines[1];
+          const diff = move.color === 'w' ? (bestLine.eval - secondBest.eval) : (secondBest.eval - bestLine.eval);
+          if (diff >= 120 && cpl <= 15) {
+            isOnlyGoodMove = true;
+          }
         }
+
+        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter, bestEngineEval, isOnlyGoodMove);
 
         newHistory.push({
           san: move.san,
@@ -769,7 +810,8 @@ export function App() {
           evalBefore,
           evalAfter,
           centipawnLoss: cpl,
-          rating
+          rating,
+          bestMoveSan: bestLine ? bestLine.moveSan : undefined
         });
         lastEval = evalAfter;
       }

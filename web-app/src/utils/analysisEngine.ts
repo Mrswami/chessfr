@@ -31,7 +31,8 @@ export function classifyMove(
   turn: 'w' | 'b',
   isSacrifice: boolean,
   isWinningAfter: boolean,
-  bestEngineEval?: number // Optional evaluation of the top engine move from the position
+  bestEngineEval?: number, // Optional evaluation of the top engine move from the position
+  isOnlyGoodMove?: boolean  // Sole saving or winning move found
 ): MoveRating {
   // If bestEngineEval is provided, compare player move against best engine line
   // Otherwise, use evaluation change delta
@@ -46,19 +47,19 @@ export function classifyMove(
   const normalizedLoss = Math.max(0, cpLoss);
   const evalForPlayer = turn === 'w' ? evalAfter : -evalAfter;
 
-  // Brilliant move (!!): Truly rare piece sacrifice preserving winning advantage
+  // 1. Brilliant move (!!): Truly rare piece sacrifice preserving winning advantage
   if (isSacrifice && isWinningAfter && normalizedLoss <= 15 && evalForPlayer >= 150) {
     return 'brilliant';
   }
 
-  // Great Move (!?): Finding the sole move in an uncomfortable situation
-  // Must NOT have suffered any significant centipawn loss and must maintain balance or advantage
-  if (normalizedLoss <= 12 && cpLoss <= -120 && evalForPlayer >= 80) {
+  // 2. Great Move (!?): Truly exceptional sole-saving/winning move in difficult or decisive positions
+  // Must be verified as the single continuation when all alternatives dropped significant advantage
+  if (isOnlyGoodMove && normalizedLoss <= 15 && evalForPlayer >= -50) {
     return 'excellent';
   }
 
-  // Calibrated move tiers reflecting true engine quality:
-  if (normalizedLoss <= 15) return 'best';        // Top engine choice (!)
+  // 3. Calibrated standard move tiers reflecting true engine quality:
+  if (normalizedLoss <= 15) return 'best';        // Top engine choice
   if (normalizedLoss <= 60) return 'good';        // Sound natural move
   if (normalizedLoss <= 140) return 'inaccuracy'; // Minor inaccuracy (?!)
   if (normalizedLoss <= 275) return 'mistake';    // Clear mistake / missed tactic (?)
@@ -135,7 +136,7 @@ export const MOVE_NOTATION_MAP: Record<MoveRating, {
     bgColor: 'rgba(6, 182, 212, 0.2)'
   },
   best: {
-    glyph: '!',
+    glyph: '',
     name: 'Best Move',
     symbol: '!',
     description: 'The engine\'s top-choice move (!)',

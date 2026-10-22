@@ -12,15 +12,16 @@ $$CPL = \text{eval}(\text{BestEngineMove}) - \text{eval}(\text{PlayerMove})$$
 
 Where positive $CPL$ indicates loss of positional advantage.
 
-| Annotation | Symbol | Color | CPL Range / Criteria | Rationale |
-| :--- | :---: | :---: | :--- | :--- |
-| **Brilliant** | `!!` | Cyan (`#06b6d4`) | $CPL \le 12$, $Eval \ge +150\text{cp}$, `isSacrifice = true` | Truly rare piece sacrifice that preserves decisive winning advantage. |
-| **Great Move** | `!?` | Green (`#22c55e`) | $CPL \le 15$, `isOnlyGoodMove = true`, $Eval \ge -50\text{cp}$ | Found the sole saving or winning continuation when alternatives lost $\ge 150\text{cp}$. |
-| **Best Move** | `!` | Emerald (`#10b981`) | $CPL \le 15$ | Matches or equals the top engine recommendation within margin of error. |
-| **Good Move** | (none) | Lime (`#84cc16`) | $15 < CPL \le 60$ | Solid, natural move with negligible loss. |
-| **Inaccuracy** | `?!` | Yellow (`#facc15`) | $60 < CPL \le 140$ | Minor slip that weakens initiative or concedes equalizing counterplay. |
-| **Mistake** | `?` | Orange (`#fb923c`) | $140 < CPL \le 275$ | Significant error that turns a win into a draw or equality into disadvantage. |
-| **Blunder** | `??` | Red (`#ef4444`) | $CPL > 275$ | Decisive tactical blunder, hanging major piece, or allowing mate. |
+| Annotation | Shorthand Glyph | Color | CPL Range / Criteria | Shorthand Added to Move List? | Rationale |
+| :--- | :---: | :---: | :--- | :---: | :--- |
+| **Brilliant** | `!!` | Cyan (`#06b6d4`) | $CPL \le 15$, $Eval \ge +150\text{cp}$, `isSacrifice = true` | **Yes (`!!`)** | Truly rare piece sacrifice that preserves decisive winning advantage. |
+| **Great Move** | `!?` | Green (`#22c55e`) | $CPL \le 15$, `isOnlyGoodMove = true`, $Eval \ge -50\text{cp}$ | **Yes (`!?`)** | Found the sole saving or winning continuation when alternatives lost $\ge 120\text{cp}$. |
+| **Best Move** | (none in list, `!` in breakdown) | Emerald (`#10b981`) | $CPL \le 15$ | **No** (clean notation) | Matches top engine recommendation. No shorthand clutter added to move order list. |
+| **Good Move** | (none) | Lime (`#84cc16`) | $15 < CPL \le 60$ | **No** (clean notation) | Solid, natural move with negligible loss. |
+| **Inaccuracy** | `?!` | Yellow (`#eab308`) | $60 < CPL \le 140$ | **Yes (`?!`)** | Minor slip that weakens initiative or concedes equalizing counterplay. |
+| **Mistake** | `?` | Orange (`#f97316`) | $140 < CPL \le 275$ | **Yes (`?`)** | Significant error that turns a win into a draw or equality into disadvantage. |
+| **Blunder** | `??` | Red (`#ef4444`) | $CPL > 275$ | **Yes (`??`)** | Decisive tactical blunder, hanging major piece, or allowing mate. |
+| **Book Move** | `📖` | Purple (`#a855f7`) | Opening book theory | **Yes (`📖`)** | Established theoretical line. |
 
 ---
 
