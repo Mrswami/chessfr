@@ -1234,78 +1234,25 @@ export function App() {
                 </button>
               </div>
 
-              {/* Action Toolbar directly matching Picture 2: Show (? / 💡), Best (🔍), Retry (🔄), and Large Green Next Button */}
+              {/* Action Toolbar: Left side shows Top Engine Lines directly next to Next button */}
               <div className="chess-com-action-toolbar w-full flex items-center justify-between gap-2 mt-2 px-1">
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <button
-                    type="button"
-                    onClick={handleToggleBestMove}
-                    className="chess-toolbar-item flex flex-col items-center justify-center p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/60 transition-colors min-w-[54px]"
-                    title="Best Move / Hint"
-                  >
-                    <Lightbulb size={20} className={isBestMoveActive ? 'text-amber-400' : ''} />
-                    <span className="text-[10px] font-semibold mt-0.5 tracking-tight">Best</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    className="chess-toolbar-item flex flex-col items-center justify-center p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/60 transition-colors min-w-[54px]"
-                    title="Retry / Reset from Start"
-                  >
-                    <RotateCcw size={20} />
-                    <span className="text-[10px] font-semibold mt-0.5 tracking-tight">Retry</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setBoardOrientation(boardOrientation === 'w' ? 'b' : 'w')}
-                    className="chess-toolbar-item flex flex-col items-center justify-center p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/60 transition-colors min-w-[54px]"
-                    title="Flip Board"
-                  >
-                    <RefreshCw size={19} />
-                    <span className="text-[10px] font-semibold mt-0.5 tracking-tight">Flip</span>
-                  </button>
-                </div>
-
-                {/* Picture 2 Large Green Next Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
-                  disabled={currentMoveIdx >= moveHistory.length - 1}
-                  className="chess-com-next-btn flex-1 max-w-[200px] sm:max-w-[240px] py-3.5 px-6 rounded-2xl bg-[#81b64c] hover:bg-[#96c95d] active:bg-[#74a544] text-white font-black text-lg tracking-wide shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
-                  title="Next Move"
-                  aria-label="Next Move"
-                >
-                  Next
-                </button>
-              </div>
-
-              {/* Section Showing Top 3 or 4 Engine Lines & Continuations */}
-              <div className="engine-top-lines-box w-full mt-2 select-none">
-                <div className="engine-lines-header">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse inline-block" />
-                    <span className="text-[11px] font-bold text-stone-200 uppercase tracking-wider">
-                      Top Engine Lines
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-cyan-400 ml-1">
-                      {formatEvalPoints(evaluation)}
-                    </span>
+                {/* Compact Top Engine Lines display sitting to the left of Next button */}
+                <div className="engine-top-lines-compact flex-1 min-w-0 pr-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse inline-block" />
+                      <span className="text-[10px] font-bold text-stone-300 uppercase tracking-wider">
+                        Top Lines
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-cyan-400">
+                        ({formatEvalPoints(evaluation)})
+                      </span>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowEngineLines(!showEngineLines)}
-                    className="text-[10px] font-bold text-stone-400 hover:text-stone-100 px-2 py-0.5 rounded bg-stone-800/80 hover:bg-stone-700 transition-colors"
-                  >
-                    {showEngineLines ? 'Hide' : 'Show Top 4'}
-                  </button>
-                </div>
 
-                {showEngineLines && (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col gap-1 max-h-[85px] overflow-y-auto pr-0.5">
                     {topEngineLines.length > 0 ? (
-                      topEngineLines.map((line, idx) => {
+                      topEngineLines.slice(0, 3).map((line, idx) => {
                         const lineEvalText = formatEvalPoints(line.eval);
                         const isPlus = line.eval > 0;
                         const isZero = Math.abs(line.eval) < 15;
@@ -1344,25 +1291,20 @@ export function App() {
                                 }
                               } catch (e) {}
                             }}
-                            className="engine-line-row cursor-pointer active:scale-98 transition-transform"
+                            className="flex items-center justify-between gap-1.5 px-2 py-0.5 rounded bg-[#221f1b] hover:bg-[#2c2823] text-xs font-mono transition-colors border border-stone-800/80 cursor-pointer active:scale-98"
                             title={`Play ${line.moveSan} on board`}
                           >
-                            <div className="engine-line-pv">
-                              <span className="text-stone-500 font-bold w-4 shrink-0">
-                                {line.rank}.
-                              </span>
-                              <span className="font-bold text-white shrink-0">
-                                {line.moveSan}
-                              </span>
+                            <div className="flex items-center gap-1.5 overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                              <span className="text-[10px] font-bold text-stone-500 shrink-0">{line.rank}.</span>
+                              <span className="font-bold text-white shrink-0 text-[11px]">{line.moveSan}</span>
                               {line.pvSan.length > 1 && (
-                                <span className="text-stone-400 font-normal truncate opacity-85 ml-1">
-                                  {line.pvSan.slice(1).join(' ')}
+                                <span className="text-[10px] text-stone-400 font-normal truncate opacity-75">
+                                  {line.pvSan.slice(1, 3).join(' ')}
                                 </span>
                               )}
                             </div>
-
                             <span
-                              className={`engine-line-eval-badge ${
+                              className={`text-[10px] font-bold px-1 py-0.2 rounded shrink-0 ${
                                 isZero
                                   ? 'bg-stone-800 text-stone-300'
                                   : isPlus
@@ -1376,12 +1318,22 @@ export function App() {
                         );
                       })
                     ) : (
-                      <div className="text-[11px] text-stone-500 italic py-1 px-1">
-                        Game over or no legal lines available.
-                      </div>
+                      <div className="text-[10px] text-stone-500 italic py-1">No engine lines available.</div>
                     )}
                   </div>
-                )}
+                </div>
+
+                {/* Picture 2 Large Green Next Button */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
+                  disabled={currentMoveIdx >= moveHistory.length - 1}
+                  className="chess-com-next-btn shrink-0 w-[140px] sm:w-[170px] h-[78px] py-3 px-4 rounded-2xl bg-[#81b64c] hover:bg-[#96c95d] active:bg-[#74a544] text-white font-black text-xl tracking-wide shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
+                  title="Next Move"
+                  aria-label="Next Move"
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
@@ -1706,6 +1658,44 @@ export function App() {
           )}
         </section>
       </main>
+
+      {/* Picture 2 Style Fixed Bottom Action Bar: Best, Retry, and Flip docked at bottom of screen when analysis is active */}
+      {activeView === 'insights' && (
+        <div className="fixed-bottom-analysis-bar" role="toolbar" aria-label="Analysis Quick Controls">
+          <button
+            type="button"
+            className="fixed-bar-btn best-btn"
+            onClick={handleToggleBestMove}
+            title="Play the top engine move for whoever's turn it is"
+            aria-label="Best Move"
+          >
+            <Lightbulb size={22} className="btn-icon" />
+            <span className="btn-label">Best</span>
+          </button>
+
+          <button
+            type="button"
+            className="fixed-bar-btn retry-btn"
+            onClick={() => handleSelectReviewMove(-1)}
+            title="Retry: reset board to game start"
+            aria-label="Retry Game"
+          >
+            <RotateCcw size={22} className="btn-icon" />
+            <span className="btn-label">Retry</span>
+          </button>
+
+          <button
+            type="button"
+            className="fixed-bar-btn flip-btn"
+            onClick={() => setBoardOrientation(boardOrientation === 'w' ? 'b' : 'w')}
+            title="Flip Board Orientation"
+            aria-label="Flip Board"
+          >
+            <RefreshCw size={22} className="btn-icon" />
+            <span className="btn-label">Flip</span>
+          </button>
+        </div>
+      )}
 
       {/* Auth & Chess.com Modal */}
       <AuthModal

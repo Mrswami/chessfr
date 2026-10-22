@@ -2274,5 +2274,105 @@ body {
   100% { transform: translateX(200%); }
 }
 
+/* Picture 2 Style Fixed Bottom Action Bar: docked at the very bottom of the screen */
+.fixed-bottom-analysis-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(18, 15, 12, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 24px calc(8px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .fixed-bottom-analysis-bar {
+    border-radius: 18px 18px 0 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.fixed-bar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  padding: 6px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.fixed-bar-btn .btn-icon {
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.fixed-bar-btn .btn-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: capitalize;
+}
+
+.fixed-bar-btn:hover {
+  color: #f3f4f6;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fixed-bar-btn:active {
+  transform: scale(0.92);
+}
+
+.fixed-bar-btn.best-btn:hover,
+.fixed-bar-btn.best-btn:focus-visible {
+  color: #facc15;
+}
+
+.fixed-bar-btn.best-btn:hover .btn-icon {
+  color: #facc15;
+  transform: translateY(-1px);
+}
+
+.fixed-bar-btn.retry-btn:hover,
+.fixed-bar-btn.retry-btn:focus-visible {
+  color: #38bdf8;
+}
+
+.fixed-bar-btn.retry-btn:hover .btn-icon {
+  color: #38bdf8;
+  transform: rotate(-30deg);
+}
+
+.fixed-bar-btn.flip-btn:hover,
+.fixed-bar-btn.flip-btn:focus-visible {
+  color: #4ade80;
+}
+
+.fixed-bar-btn.flip-btn:hover .btn-icon {
+  color: #4ade80;
+  transform: rotate(90deg);
+}
+
+/* Ensure bottom padding in analysis mode so content is not covered by fixed bottom bar */
+.app-container:has(.fixed-bottom-analysis-bar) {
+  padding-bottom: 70px;
+}
+
 
 
