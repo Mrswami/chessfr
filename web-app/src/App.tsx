@@ -22,6 +22,14 @@ import {
   savePositionToArchive,
   deleteSavedPosition
 } from './services/masteryStorageService';
+import {
+  saveCachedGames,
+  loadCachedGames,
+  saveCachedProfile,
+  loadCachedProfile,
+  cacheSolvedPuzzle,
+  getCachedSolvedPuzzle
+} from './services/gameStorageService';
 import { InteractiveBoard, BoardArrow } from './components/InteractiveBoard';
 import { EngineEvalBar } from './components/EngineEvalBar';
 import { GameInsightsPanel, LoadedGameInfo } from './components/GameInsightsPanel';
@@ -178,9 +186,25 @@ export function App() {
       if (cachedSaved) {
         setSavedPositions(JSON.parse(cachedSaved));
       }
-      // Preload cached recent games and analyzed profile so all tabs are populated immediately on first launch
-      const cachedGamesRaw = localStorage.getItem('chessfr_recent_games');
       const cachedUser = localStorage.getItem('chessfr_chesscom_username');
+      
+      // Fast path: Instant load from IndexedDB for high-volume games & profile
+      if (cachedUser) {
+        setChessComUsername(cachedUser);
+        loadCachedGames(cachedUser).then((indexedGames) => {
+          if (indexedGames && indexedGames.length > 0) {
+            setRecentGames(indexedGames);
+            setTotalGamesAnalyzed(indexedGames.length);
+            loadCachedProfile(cachedUser).then((prof) => {
+              if (prof) setPlaystyleProfile(prof);
+            });
+            setIsInitialLoading(false);
+          }
+        });
+      }
+
+      // Preload fallback from localStorage
+      const cachedGamesRaw = localStorage.getItem('chessfr_recent_games');
       if (cachedGamesRaw && cachedUser) {
         try {
           const parsedGames: ChessComGame[] = JSON.parse(cachedGamesRaw);
@@ -204,7 +228,6 @@ export function App() {
       }
 
       if (cachedUser) {
-        setChessComUsername(cachedUser);
         loadChessComGames(cachedUser);
         hasLoaded = true;
       }
@@ -276,25 +299,43 @@ export function App() {
     setSyncStatus(`Syncing up to ${activeFilters.limit ?? 100} games from Chess.com for @${username}...`);
     try {
       const games = await fetchRecentChessComGames(username, activeFilters);
+      
+      // Stage 1 (Immediate UI Render): populate recent games immediately
       setRecentGames(games);
       setTotalGamesAnalyzed(games.length);
+      setIsInitialLoading(false);
+
+      // Async write to IndexedDB & localStorage
+      saveCachedGames(username, games);
       try {
         localStorage.setItem('chessfr_recent_games', JSON.stringify(games.slice(0, 50)));
-      } catch (e) {
-        // Ignore quota
-      }
+      } catch (e) {}
+
       if (games.length > 0) {
-        // 1. Extract blunders in BOTH won and lost games
-        const blunderPuzzles = extractBlundersFromGames(games, username);
-
-        // 2. Identify common positional scenarios based on positional history
-        const commonScenarioPuzzles = generateCommonPositionalScenarios(games, username);
-
-        // Compute Playstyle & Opening Conduciveness Diagnostics
+        // Stage 2 (Fast Diagnostics): compute playstyle & opening trees
         const style = analyzePlaystyle(games, username);
         setPlaystyleProfile(style);
+        saveCachedProfile(username, style);
 
-        // 3. Extract custom pattern puzzles from Most Challenging Variations (thematic losses)
+        // Sync profile summary to Firestore if logged in
+        if (uid && uid !== 'guest_local') {
+          try {
+            await setDoc(
+              doc(db, 'users', uid),
+              {
+                chessComUsername: username,
+                totalGamesAnalyzed: games.length,
+                lastSyncedAt: new Date().toISOString(),
+                playstyleArchetype: style.archetype
+              },
+              { merge: true }
+            );
+          } catch (e) {}
+        }
+
+        // Fast blunder extraction & scenario mapping (without blocking engine evaluations)
+        const blunderPuzzles = extractBlundersFromGames(games, username);
+        const commonScenarioPuzzles = generateCommonPositionalScenarios(games, username);
         const challengingVariationPuzzles = generateChallengingVariationPuzzles(style.problematicOpenings);
 
         const allCustomPuzzles = [
@@ -319,14 +360,14 @@ export function App() {
           handleSelectPuzzle(allCustomPuzzles[0]);
         }
 
-        // 3. Build personal opening trees for White & Black (openingtree.com style)
+        // Build personal opening trees for White & Black (openingtree.com style)
         const treeW = buildOpeningTree(games, username, 'white');
         const treeB = buildOpeningTree(games, username, 'black');
         setOpeningTreeWhite(treeW);
         setOpeningTreeBlack(treeB);
 
         setSyncStatus(
-          `Analyzed ${games.length} games! Built Opening Tree, extracted ${blunderPuzzles.length} blunders (won/lost games) & generated ${commonScenarioPuzzles.length} 3-move scenarios.`
+          `Analyzed ${games.length} games! Built Opening Tree, extracted ${blunderPuzzles.length} blunders & generated ${commonScenarioPuzzles.length} 3-move scenarios.`
         );
       } else {
         setSyncStatus(`No recent games found for @${username}.`);
@@ -347,11 +388,36 @@ export function App() {
     setEvaluation(matEval);
   };
 
-  // Select puzzle and reset solving state
+  // Select puzzle and reset solving state with ON-DEMAND engine calculation
   const handleSelectPuzzle = (p: TacticalPuzzle) => {
-    setCurrentPuzzle(p);
-    chess.load(p.fen);
-    setBoardOrientation(p.playerColor);
+    let puzzleToLoad = p;
+
+    // If this drill does not have its 3-move plan calculated yet, solve it on-demand in <50ms
+    if ((!puzzleToLoad.solutionUci || puzzleToLoad.solutionUci.length === 0) && puzzleToLoad.fen) {
+      try {
+        const searchChess = new Chess(puzzleToLoad.fen);
+        const bestLine = findBestLine(searchChess, 3);
+        if (bestLine && bestLine.line.length > 0) {
+          puzzleToLoad = {
+            ...puzzleToLoad,
+            solutionUci: bestLine.line,
+            solutionSan: bestLine.lineSan,
+            explanation: puzzleToLoad.playedBlunder
+              ? `In your game you played ${puzzleToLoad.playedBlunder}. Instead, ${bestLine.lineSan.join(' ')} stabilizes the position and maintains a ${formatEvalPoints(bestLine.eval)} evaluation.`
+              : `The optimal 3-move plan sequence is ${bestLine.lineSan.join(' ')}.`
+          };
+          // Persist calculated solution in IndexedDB cache and in active state
+          cacheSolvedPuzzle(puzzleToLoad);
+          setPuzzlesList((prev) => prev.map((item) => (item.id === puzzleToLoad.id ? puzzleToLoad : item)));
+        }
+      } catch (err) {
+        console.warn('On-demand drill calculation failed:', err);
+      }
+    }
+
+    setCurrentPuzzle(puzzleToLoad);
+    chess.load(puzzleToLoad.fen);
+    setBoardOrientation(puzzleToLoad.playerColor);
     setLastMove(null);
     setSelectedSquare(null);
     setValidMoves([]);

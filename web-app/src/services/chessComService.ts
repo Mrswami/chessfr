@@ -212,34 +212,28 @@ export function extractBlundersFromGames(
 
           // If blunder detected (eval drop >= 180 cp or clear tactical mistake in middlegame)
           if (evalDrop >= 180 && i >= 6) {
-            // Find 3-move optimal continuation from preFen
-            const searchChess = new Chess(preFen);
-            const bestLine = findBestLine(searchChess, 3);
-
-            if (bestLine && bestLine.line.length > 0) {
-              const outcomeLabel = gameOutcome === 'win' ? 'Won Game' : (gameOutcome === 'draw' ? 'Drawn Game' : 'Lost Game');
-              
-              puzzles.push({
-                id: `blunder-${game.end_time}-${i}`,
-                title: `Blunder Recovery (${outcomeLabel} vs ${opponentName})`,
-                theme: gameOutcome === 'win' ? 'Weakness in Won Game' : 'Personal Blunder Recovery',
-                rating: opponentRating || 1350,
-                description: `In your ${outcomeLabel} vs ${opponentName} on ${gameDateStr}, you played ${move.san} (a blunder). Fix this weakness! What is the three move answer to this position?`,
-                fen: preFen,
-                solutionUci: bestLine.line,
-                solutionSan: bestLine.lineSan,
-                playerColor,
-                explanation: `In your game you played ${move.san}. Instead, ${bestLine.lineSan.join(' ')} stabilizes the position and maintains a +${((bestLine.eval) / 100).toFixed(1)} evaluation.`,
-                isThreeMovePlan: true,
-                playedBlunder: move.san,
-                opponent: opponentName,
-                gameDate: gameDateStr,
-                gameOutcome,
-                gameUrl: game.url
-              });
-              // Only 1 major blunder per game to keep drills diverse
-              break;
-            }
+            const outcomeLabel = gameOutcome === 'win' ? 'Won Game' : (gameOutcome === 'draw' ? 'Drawn Game' : 'Lost Game');
+            
+            puzzles.push({
+              id: `blunder-${game.end_time}-${i}`,
+              title: `Blunder Recovery (${outcomeLabel} vs ${opponentName})`,
+              theme: gameOutcome === 'win' ? 'Weakness in Won Game' : 'Personal Blunder Recovery',
+              rating: opponentRating || 1350,
+              description: `In your ${outcomeLabel} vs ${opponentName} on ${gameDateStr}, you played ${move.san} (a blunder). Fix this weakness! What is the three move answer to this position?`,
+              fen: preFen,
+              solutionUci: [], // Evaluated on-demand when drill is opened
+              solutionSan: [],
+              playerColor,
+              explanation: `In your game you played ${move.san}. Find the optimal response that stabilizes the position!`,
+              isThreeMovePlan: true,
+              playedBlunder: move.san,
+              opponent: opponentName,
+              gameDate: gameDateStr,
+              gameOutcome,
+              gameUrl: game.url
+            });
+            // Only 1 major blunder per game to keep drills diverse
+            break;
           }
           lastEval = postEval;
         } else {
@@ -314,30 +308,21 @@ export function generateCommonPositionalScenarios(
 
   for (let idx = 0; idx < sortedPositions.length; idx++) {
     const item = sortedPositions[idx];
-    try {
-      const searchChess = new Chess(item.sampleFen);
-      const bestLine = findBestLine(searchChess, 3);
-
-      if (bestLine && bestLine.line.length > 0) {
-        scenarioPuzzles.push({
-          id: `common-pos-${idx}-${Date.now()}`,
-          title: `Positional Plan: High-Frequency Motif #${idx + 1}`,
-          theme: 'Most Common Game Scenario',
-          rating: 1400,
-          description: 'Here is a position you are likely to see based on your games: what is the three move answer to this position?',
-          fen: item.sampleFen,
-          solutionUci: bestLine.line,
-          solutionSan: bestLine.lineSan,
-          playerColor: item.turn,
-          explanation: `This critical position occurred in ${item.count} of your games. The optimal 3-move plan sequence is ${bestLine.lineSan.join(' ')}.`,
-          isThreeMovePlan: true,
-          frequencyScore: item.count,
-          gameUrl: item.gameUrl
-        });
-      }
-    } catch (e) {
-      console.warn('Failed to calculate 3-move plan for common position:', e);
-    }
+    scenarioPuzzles.push({
+      id: `common-pos-${idx}`,
+      title: `Positional Plan: High-Frequency Motif #${idx + 1}`,
+      theme: 'Most Common Game Scenario',
+      rating: 1400,
+      description: 'Here is a position you are likely to see based on your games: what is the three move answer to this position?',
+      fen: item.sampleFen,
+      solutionUci: [], // Evaluated on-demand when drill is opened
+      solutionSan: [],
+      playerColor: item.turn,
+      explanation: `This critical position occurred in ${item.count} of your games. Find the 3-move optimal continuation.`,
+      isThreeMovePlan: true,
+      frequencyScore: item.count,
+      gameUrl: item.gameUrl
+    });
   }
 
   return scenarioPuzzles;
