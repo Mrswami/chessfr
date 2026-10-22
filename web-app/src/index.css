@@ -115,16 +115,17 @@ body {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 14px;
+  gap: 10px;
   width: 100%;
-  max-width: 720px;
+  max-width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Vertical Engine Evaluation Bar (Modern Chess App Style) */
 .engine-eval-bar-wrapper {
-  width: 28px;
-  min-width: 28px;
+  width: 24px;
+  min-width: 24px;
   display: flex;
   flex-direction: column;
   border-radius: 6px;
@@ -133,6 +134,7 @@ body {
   user-select: none;
   background: #1e293b;
   position: relative;
+  flex-shrink: 0;
 }
 
 .engine-eval-track {
@@ -208,11 +210,12 @@ body {
   .board-eval-wrapper {
     gap: 6px;
     max-width: 100%;
+    width: 100%;
   }
 
   .engine-eval-bar-wrapper {
-    width: 20px;
-    min-width: 20px;
+    width: 18px;
+    min-width: 18px;
     border-radius: 4px;
   }
 
@@ -228,6 +231,8 @@ body {
   align-items: center;
   flex: 1;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .chess-board {
@@ -236,9 +241,9 @@ body {
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   width: 100%;
-  max-width: 680px;
+  max-width: min(calc(100vw - 50px), 680px);
   aspect-ratio: 1 / 1;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
   user-select: none;
@@ -1628,7 +1633,7 @@ body {
 
   /* Adaptive Board Height to guarantee all controls fit on screen */
   .chess-board {
-    max-width: min(92vw, 480px, 54vh);
+    max-width: min(calc(100vw - 44px), 480px, 54vh);
     border-radius: 12px;
   }
 
@@ -1701,25 +1706,27 @@ body {
   }
 
   .board-eval-wrapper {
-    gap: 8px;
+    gap: 6px;
     width: 100%;
     max-width: 100%;
+    justify-content: center;
+    align-items: center;
   }
 
-  /* Make board bigger so it takes majority of mobile width and height */
+  /* Make board fit screen completely with eval bar, 0 horizontal scroll/clipping */
   .chess-board {
-    max-width: min(91vw, 440px, 56vh);
+    max-width: min(calc(100vw - 38px), 430px, 54vh);
     border-radius: 12px;
   }
 
   .engine-eval-bar-wrapper {
-    width: 22px;
-    min-width: 22px;
-    border-radius: 6px;
+    width: 18px;
+    min-width: 18px;
+    border-radius: 5px;
   }
 
   .eval-badge {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
   }
 
@@ -1791,87 +1798,177 @@ body {
     flex-shrink: 0;
   }
 
-  .board-review-nav-container {
-    max-width: min(94vw, 440px, 56vh);
-  }
-
-  .board-nav-secondary-row {
-    max-width: min(94vw, 440px, 56vh);
-  }
-
-  .board-nav-btn {
-    min-height: 48px;
-  }
-
-  .board-nav-next-main {
-    min-height: 54px;
-    font-size: 1.05rem;
-  }
-
-  .board-moves-scrollbox {
-    max-width: min(94vw, 440px, 56vh);
+  .chess-review-control-panel {
+    max-width: min(calc(100vw - 38px), 430px, 54vh);
   }
 }
 
-/* Base styles for Move Review Navigation Bar */
-.board-review-nav-container {
+/* Picture 2 Style Chess.com Review Controls */
+.chess-review-control-panel {
   width: 100%;
-  max-width: 680px;
-  margin: 0.5rem auto 0.25rem auto;
-}
-
-.board-nav-btn {
-  min-height: 48px;
-  cursor: pointer;
-  user-select: none;
-  font-family: inherit;
-}
-
-.board-nav-next-main {
-  min-height: 52px;
-  cursor: pointer;
-  user-select: none;
-  font-family: inherit;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.board-nav-next-main:hover {
-  filter: brightness(1.12);
-  transform: translateY(-1.5px);
-}
-
-.board-nav-next-main:active {
-  transform: scale(0.98);
-}
-
-.board-moves-scrollbox {
-  width: 100%;
-  max-width: 680px;
-  margin: 0.4rem auto;
-}
-
-.moves-box-chips {
+  max-width: min(calc(100vw - 38px), 680px);
+  margin: 0.6rem auto 0.25rem auto;
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chess-com-move-strip {
+  height: 44px;
+  background-color: #211e1b;
+  border: 1px solid #36322d;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  overflow: hidden;
+}
+
+.chess-tape-arrow-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 6px;
+  color: #a8a29e;
+  transition: all 0.15s ease;
+}
+
+.chess-tape-arrow-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.chess-tape-arrow-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.chess-com-moves-scroll {
+  scrollbar-width: none; /* Hide scrollbar for ultra sleek thin line */
+  -ms-overflow-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   overflow-x: auto;
   overflow-y: hidden;
-  height: 48px;
-  max-height: 48px;
   white-space: nowrap;
-  scrollbar-width: thin;
-  scrollbar-color: #38bdf8 #020617;
-  -webkit-overflow-scrolling: touch;
+  padding: 2px 4px;
+  flex: 1;
 }
 
-.moves-box-chips::-webkit-scrollbar {
-  height: 4px;
+.chess-com-moves-scroll::-webkit-scrollbar {
+  display: none;
 }
 
-.moves-box-chips::-webkit-scrollbar-thumb {
-  background: #0ea5e9;
-  border-radius: 9999px;
+.chess-com-move-chip {
+  cursor: pointer;
+  border: none;
+  user-select: none;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #d6d3d1;
+  background: transparent;
+  transition: all 0.12s ease;
+}
+
+.chess-com-move-chip:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.chess-com-move-chip.inline-move-chip-active {
+  background-color: #383430 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  border-bottom: 2px solid #81b64c !important;
+  font-weight: 800;
+}
+
+.chess-com-action-toolbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 2px;
+}
+
+.chess-toolbar-item {
+  background: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 10px;
+  color: #8c8883;
+  transition: all 0.15s ease;
+  min-width: 52px;
+}
+
+.chess-toolbar-item:hover {
+  color: #f5f5f4;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.chess-toolbar-item span {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.chess-com-next-btn {
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  background: #81b64c;
+  padding: 12px 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(129, 182, 76, 0.35), 0 2px 0 #588033;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 48px;
+}
+
+.chess-com-next-btn:hover:not(:disabled) {
+  background: #96c95d;
+  box-shadow: 0 6px 18px rgba(129, 182, 76, 0.45), 0 2px 0 #588033;
+  transform: translateY(-1px);
+}
+
+.chess-com-next-btn:active:not(:disabled) {
+  background: #73a543;
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(129, 182, 76, 0.3), 0 1px 0 #588033;
+}
+
+.chess-com-next-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .nav-step-btn {

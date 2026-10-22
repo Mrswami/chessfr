@@ -1042,264 +1042,176 @@ export function App() {
             </div>
           )}
 
-          {/* Primary Move Navigation Controls: Central, Lower, Extra-Large Next Button with First, Prev, Last */}
+          {/* Picture 2 Style Chess.com Game Review Controls */}
           {activeView === 'insights' && moveHistory.length > 0 && (
-            <div className="board-review-nav-container mt-3 mb-2 flex flex-col items-center w-full">
-              {/* Row 1: First, Prev, Move Counter, and Last Move */}
-              <div className="board-nav-secondary-row flex items-center justify-between w-full gap-2 px-1">
-                <button
-                  type="button"
-                  onClick={() => handleSelectReviewMove(-1)}
-                  disabled={currentMoveIdx < 0}
-                  className="board-nav-btn px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-xs"
-                  title="First Move (Start)"
-                  aria-label="First Move"
-                >
-                  <SkipBack size={18} />
-                  <span className="hidden sm:inline">Start</span>
-                </button>
-
+            <div className="chess-review-control-panel mt-2 mb-2 w-full flex flex-col items-center">
+              {/* Thin Horizontal Move Tape with ‹ and › arrows */}
+              <div className="chess-com-move-strip w-full flex items-center justify-between gap-1 px-1 py-1.5 bg-[#181512] rounded-xl border border-[#2b2723] select-none">
                 <button
                   type="button"
                   onClick={() => handleSelectReviewMove(currentMoveIdx - 1)}
                   disabled={currentMoveIdx < 0}
-                  className="board-nav-btn flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-cyan-950/60 text-cyan-300 disabled:opacity-25 disabled:pointer-events-none transition-all border border-cyan-800/60 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm"
+                  className="chess-tape-arrow-btn p-1.5 text-stone-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-colors"
                   title="Previous Move"
                   aria-label="Previous Move"
                 >
-                  <ChevronLeft size={20} />
-                  <span>Prev Move</span>
+                  <ChevronLeft size={22} strokeWidth={2.5} />
                 </button>
 
-                <div className="board-nav-counter flex flex-col items-center justify-center px-3 py-1.5 bg-slate-950/90 rounded-xl border border-slate-800 text-center min-w-[76px] select-none shadow-inner">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Move</span>
-                  <span className="text-xs font-mono font-black text-cyan-300">
-                    {currentMoveIdx >= 0 ? `${currentMoveIdx + 1} / ${moveHistory.length}` : `Start`}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleSelectReviewMove(moveHistory.length - 1)}
-                  disabled={currentMoveIdx >= moveHistory.length - 1}
-                  className="board-nav-btn px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-25 disabled:pointer-events-none transition-all border border-slate-700 active:scale-95 flex items-center justify-center gap-1.5 font-bold text-xs"
-                  title="Last Move (End)"
-                  aria-label="Last Move"
-                >
-                  <span className="hidden sm:inline">End</span>
-                  <SkipForward size={18} />
-                </button>
-              </div>
-
-              {/* Row 2: Central, Lower, Prominent NEXT MOVE Button */}
-              <div className="w-full mt-2 px-1">
-                <button
-                  type="button"
-                  onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
-                  disabled={currentMoveIdx >= moveHistory.length - 1}
-                  className="board-nav-next-main w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-cyan-400 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-slate-950 font-black text-base tracking-wider disabled:opacity-30 disabled:pointer-events-none transition-all border border-cyan-300 shadow-xl shadow-cyan-950/40 active:scale-98 flex items-center justify-center gap-2"
-                  title="Next Move"
-                  aria-label="Next Move"
-                >
-                  <span>NEXT MOVE</span>
-                  <ChevronRight size={26} strokeWidth={3} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Moves List in a Separate, Dedicated Scrollable Box with Filter Settings & Visibility Toggle */}
-          {activeView === 'insights' && moveHistory.length > 0 && (
-            <div className="board-moves-scrollbox mt-2 mb-2 p-2.5 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl flex flex-col w-full">
-              <div className="flex items-center justify-between mb-2 px-1 gap-2 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
-                    <span>Move Order</span>
-                    <span className="text-[10px] text-cyan-400 font-mono">({moveHistory.length} ply)</span>
-                  </span>
-                </div>
-
-                {/* Filter Settings and Visibility Controls */}
-                <div className="flex items-center gap-1.5">
-                  {showBoardMoveChips && (
-                    <div className="flex items-center bg-slate-950/90 rounded-lg p-0.5 border border-slate-800 text-[10px]">
-                      <button
-                        type="button"
-                        onClick={() => setMoveQualityFilter('all')}
-                        className={`px-2 py-0.5 rounded font-bold transition-all ${
-                          moveQualityFilter === 'all'
-                            ? 'bg-cyan-500 text-slate-950 shadow-sm'
-                            : 'text-slate-400 hover:text-slate-200'
-                        }`}
-                        title="Show all moves"
-                      >
-                        All
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setMoveQualityFilter('mistakes')}
-                        className={`px-2 py-0.5 rounded font-bold transition-all ${
-                          moveQualityFilter === 'mistakes'
-                            ? 'bg-rose-500 text-slate-950 shadow-sm'
-                            : 'text-slate-400 hover:text-rose-300'
-                        }`}
-                        title="Filter to inaccuracies, mistakes and blunders (? / ?? / ?!)"
-                      >
-                        Mistakes
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setMoveQualityFilter('best')}
-                        className={`px-2 py-0.5 rounded font-bold transition-all ${
-                          moveQualityFilter === 'best'
-                            ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                            : 'text-slate-400 hover:text-emerald-300'
-                        }`}
-                        title="Filter to best and brilliant moves (! / !!)"
-                      >
-                        Best
-                      </button>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => setShowBoardMoveChips(!showBoardMoveChips)}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold transition-all border border-slate-700 active:scale-95"
-                    title={showBoardMoveChips ? 'Compact/Hide move list into Game Review tab' : 'Show move list'}
-                  >
-                    {showBoardMoveChips ? (
-                      <>
-                        <EyeOff size={13} className="text-slate-400" />
-                        <span>Hide</span>
-                      </>
-                    ) : (
-                      <>
-                        <Eye size={13} className="text-cyan-400" />
-                        <span>Show Moves</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {showBoardMoveChips && (
                 <div
                   ref={movesBoxChipsRef}
-                  className="moves-box-chips flex flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden p-1.5 rounded-xl bg-slate-950/70 border border-slate-800/90 h-[48px] max-w-full"
+                  className="chess-com-moves-scroll flex-1 flex items-center gap-2 overflow-x-auto overflow-y-hidden px-1 scroll-smooth whitespace-nowrap"
                 >
                   <button
                     type="button"
                     onClick={() => handleSelectReviewMove(-1)}
-                    className={`inline-move-chip text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all shrink-0 font-bold whitespace-nowrap ${
+                    className={`chess-com-move-chip text-xs font-mono px-2 py-0.5 rounded transition-all shrink-0 font-bold ${
                       currentMoveIdx === -1
-                        ? 'inline-move-chip-active bg-cyan-500 text-slate-950 shadow'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 border border-slate-800'
+                        ? 'inline-move-chip-active bg-stone-700 text-white font-extrabold shadow-sm'
+                        : 'text-stone-400 hover:text-stone-200'
                     }`}
-                    title="Starting Position (Move 1)"
+                    title="Starting Position"
                   >
                     Start
                   </button>
-                  {moveHistory
-                    .map((m, idx) => ({ ...m, originalIdx: idx }))
-                    .filter((m) => {
-                      if (moveQualityFilter === 'mistakes') {
-                        return ['inaccuracy', 'mistake', 'blunder'].includes(m.rating);
-                      }
-                      if (moveQualityFilter === 'best') {
-                        return ['brilliant', 'best', 'excellent'].includes(m.rating);
-                      }
-                      return true;
-                    })
-                    .map((m) => {
-                      const idx = m.originalIdx;
-                      const moveNum = Math.floor(idx / 2) + 1;
-                      const isWhiteMove = idx % 2 === 0;
-                      const isSelected = idx === currentMoveIdx;
-                      const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
-                      const evalText = formatEvalPoints(m.evalAfter ?? 0);
+                  {moveHistory.map((m, idx) => {
+                    const moveNum = Math.floor(idx / 2) + 1;
+                    const isWhiteMove = idx % 2 === 0;
+                    const isSelected = idx === currentMoveIdx;
+                    const annot = MOVE_NOTATION_MAP[m.rating] || MOVE_NOTATION_MAP.good;
 
-                      return (
-                        <div key={idx} className="flex items-center shrink-0">
-                          {isWhiteMove && (
-                            <span className="text-[11px] text-slate-500 font-mono font-medium mr-0.5">
-                              {moveNum}.
+                    return (
+                      <React.Fragment key={idx}>
+                        {isWhiteMove && (
+                          <span className="text-stone-500 font-mono text-xs font-medium shrink-0 ml-1">
+                            {moveNum}.
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleSelectReviewMove(idx)}
+                          className={`chess-com-move-chip group relative inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-mono font-bold transition-all shrink-0 ${
+                            isSelected
+                              ? 'inline-move-chip-active bg-[#312e2b] text-white ring-1 ring-stone-400 shadow font-black border-b-2 border-stone-200'
+                              : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                          }`}
+                          title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san} ${annot.glyph || ''} (${annot.name}) • Eval: ${formatEvalPoints(m.evalAfter ?? 0)}`}
+                        >
+                          <span>{m.san}</span>
+                          {annot.glyph && (
+                            <span
+                              className="font-bold text-[11px]"
+                              style={{ color: annot.color }}
+                            >
+                              {annot.glyph}
                             </span>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => handleSelectReviewMove(idx)}
-                            className={`inline-move-chip group relative inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-bold transition-all border shrink-0 whitespace-nowrap ${
-                              isSelected
-                                ? 'inline-move-chip-active bg-cyan-500 text-slate-950 border-cyan-400 shadow-md font-black'
-                                : 'bg-slate-900/80 text-slate-200 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'
-                            }`}
-                            title={`${moveNum}${isWhiteMove ? '.' : '...'} ${m.san} ${annot.glyph || ''} (${annot.name}) • Eval: ${evalText}`}
-                          >
-                            <span>{m.san}</span>
-                            {annot.glyph && (
-                              <span
-                                className="font-bold text-[11px]"
-                                style={{
-                                  color: isSelected ? '#020617' : annot.color
-                                }}
-                              >
-                                {annot.glyph}
-                              </span>
-                            )}
-                            <span
-                              className={`text-[9px] font-mono font-normal opacity-70 ${
-                                isSelected ? 'text-slate-900' : 'text-slate-400'
-                              }`}
-                            >
-                              {evalText}
-                            </span>
-                          </button>
-                        </div>
-                      );
-                    })}
+                        </button>
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
-              )}
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
+                  disabled={currentMoveIdx >= moveHistory.length - 1}
+                  className="chess-tape-arrow-btn p-1.5 text-stone-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                  title="Next Move"
+                  aria-label="Next Move"
+                >
+                  <ChevronRight size={22} strokeWidth={2.5} />
+                </button>
+              </div>
+
+              {/* Action Toolbar directly matching Picture 2: Show (? / 💡), Best (🔍), Retry (🔄), and Large Green Next Button */}
+              <div className="chess-com-action-toolbar w-full flex items-center justify-between gap-2 mt-2 px-1">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={handleToggleBestMove}
+                    className="chess-toolbar-item flex flex-col items-center justify-center p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/60 transition-colors min-w-[54px]"
+                    title="Best Move / Hint"
+                  >
+                    <Lightbulb size={20} className={isBestMoveActive ? 'text-amber-400' : ''} />
+                    <span className="text-[10px] font-semibold mt-0.5 tracking-tight">Best</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="chess-toolbar-item flex flex-col items-center justify-center p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/60 transition-colors min-w-[54px]"
+                    title="Retry / Reset from Start"
+                  >
+                    <RotateCcw size={20} />
+                    <span className="text-[10px] font-semibold mt-0.5 tracking-tight">Retry</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBoardOrientation(boardOrientation === 'w' ? 'b' : 'w')}
+                    className="chess-toolbar-item flex flex-col items-center justify-center p-2 rounded-xl text-stone-400 hover:text-white hover:bg-stone-800/60 transition-colors min-w-[54px]"
+                    title="Flip Board"
+                  >
+                    <RefreshCw size={19} />
+                    <span className="text-[10px] font-semibold mt-0.5 tracking-tight">Flip</span>
+                  </button>
+                </div>
+
+                {/* Picture 2 Large Green Next Button */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectReviewMove(currentMoveIdx + 1)}
+                  disabled={currentMoveIdx >= moveHistory.length - 1}
+                  className="chess-com-next-btn flex-1 max-w-[200px] sm:max-w-[240px] py-3.5 px-6 rounded-2xl bg-[#81b64c] hover:bg-[#96c95d] active:bg-[#74a544] text-white font-black text-lg tracking-wide shadow-lg transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
+                  title="Next Move"
+                  aria-label="Next Move"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Board Actions */}
-          <div className="board-actions flex flex-wrap items-center gap-2 mt-3">
-            {activeView === 'training' && (
+          {/* Board Actions (Shown in Training/Tree/Diagnostics; in Insights/Review, the Picture 2 Chess.com toolbar is used) */}
+          {activeView !== 'insights' && (
+            <div className="board-actions flex flex-wrap items-center gap-2 mt-3">
+              {activeView === 'training' && (
+                <button
+                  className={`action-btn font-semibold flex items-center gap-1.5 transition-all ${
+                    isBestMoveActive
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                      : 'text-amber-400 hover:bg-amber-950/40 hover:border-amber-600'
+                  }`}
+                  onClick={handleToggleBestMove}
+                  title="Show candidate / best move arrow for this 3-move drill"
+                >
+                  <Lightbulb size={16} />
+                  <span>{isBestMoveActive ? 'Hide Best Move' : 'Best Move'}</span>
+                </button>
+              )}
+
               <button
-                className={`action-btn font-semibold flex items-center gap-1.5 transition-all ${
-                  isBestMoveActive
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-                    : 'text-amber-400 hover:bg-amber-950/40 hover:border-amber-600'
-                }`}
-                onClick={handleToggleBestMove}
-                title="Show candidate / best move arrow for this 3-move drill"
+                className="action-btn text-cyan-300 hover:bg-cyan-950/40 hover:border-cyan-600 flex items-center gap-1.5 font-semibold"
+                onClick={handleSavePosition}
+                title="Save this position & optimal 3-move answer to your Positional Archive"
               >
-                <Lightbulb size={16} />
-                <span>{isBestMoveActive ? 'Hide Best Move' : 'Best Move'}</span>
+                <Bookmark size={15} />
+                <span>Save to Archive</span>
               </button>
-            )}
 
-            <button
-              className="action-btn text-cyan-300 hover:bg-cyan-950/40 hover:border-cyan-600 flex items-center gap-1.5 font-semibold"
-              onClick={handleSavePosition}
-              title="Save this position & optimal 3-move answer to your Positional Archive"
-            >
-              <Bookmark size={15} />
-              <span>Save to Archive</span>
-            </button>
-
-            <button className="action-btn" onClick={handleReset}>
-              <RotateCcw size={16} />
-              <span>Reset Board</span>
-            </button>
-            <button
-              className="action-btn"
-              onClick={() => setBoardOrientation(boardOrientation === 'w' ? 'b' : 'w')}
-            >
-              <span>Flip Board</span>
-            </button>
-          </div>
+              <button className="action-btn" onClick={handleReset}>
+                <RotateCcw size={16} />
+                <span>Reset Board</span>
+              </button>
+              <button
+                className="action-btn"
+                onClick={() => setBoardOrientation(boardOrientation === 'w' ? 'b' : 'w')}
+              >
+                <span>Flip Board</span>
+              </button>
+            </div>
+          )}
         </section>
 
         {/* Right Side: Insights, Playstyle & Training Panels */}
