@@ -827,42 +827,116 @@ export function App() {
     : [];
 
   // Toggle/display best move for the active 3-move drill step
+  // Best Move button handler: Plays the top engine move for whoever's turn it is
   const handleToggleBestMove = () => {
-    if (isBestMoveActive) {
-      setDrillBestMoveArrow(null);
-      setIsBestMoveActive(false);
+    if (chess.isGameOver()) {
+      setSyncStatus('Position is already game over.');
+      setTimeout(() => setSyncStatus(null), 3000);
       return;
     }
 
-    const solution = currentPuzzle.solutionUci || [];
-    const targetMoveUci = solution[puzzleStep];
-    if (targetMoveUci && targetMoveUci.length >= 4) {
-      const from = targetMoveUci.slice(0, 2);
-      const to = targetMoveUci.slice(2, 4);
-      setDrillBestMoveArrow({
-        from,
-        to,
-        winRate: 85,
-        frequency: 90
-      });
-      setIsBestMoveActive(true);
-      const targetSan = currentPuzzle.solutionSan ? currentPuzzle.solutionSan[puzzleStep] : targetMoveUci;
-      setPuzzleFeedback(`💡 Best move is ${targetSan} (${from} → ${to}). Play it to continue your 3-move plan!`);
-    } else {
-      // Compute engine best move dynamically from current position
-      const best = findBestLine(chess, 3);
-      if (best && best.bestMove) {
-        const from = best.bestMove.slice(0, 2);
-        const to = best.bestMove.slice(2, 4);
-        setDrillBestMoveArrow({
-          from,
-          to,
-          winRate: 85,
-          frequency: 90
-        });
-        setIsBestMoveActive(true);
-        setPuzzleFeedback(`💡 Best move is ${best.bestSan} (${from} → ${to}).`);
+    // 1. In training mode with a predetermined puzzle step
+    if (activeView === 'training') {
+      const solution = currentPuzzle.solutionUci || [];
+      const targetMoveUci = solution[puzzleStep];
+      if (targetMoveUci && targetMoveUci.length >= 4) {
+        const from = targetMoveUci.slice(0, 2);
+        const to = targetMoveUci.slice(2, 4);
+        try {
+          const move = chess.move({ from, to, promotion: 'q' });
+          if (move) {
+            setLastMove({ from: move.from, to: move.to });
+            refreshBoard();
+            handlePuzzleMoveAttempt(move);
+            return;
+          }
+        } catch (e) {}
       }
+    }
+
+    // 2. In Analysis / Game Review / Free Play mode:
+    // Determine the top engine move for whoever's turn it is
+    let targetMoveSan: string | null = null;
+    let targetMoveUci: string | null = null;
+
+    if (topEngineLines.length > 0 && topEngineLines[0].moveSan) {
+      targetMoveSan = topEngineLines[0].moveSan;
+      targetMoveUci = topEngineLines[0].moveUci;
+    } else {
+      const best = findBestLine(chess, 3);
+      if (best) {
+        targetMoveSan = best.bestSan;
+        targetMoveUci = best.bestMove;
+      }
+    }
+
+    if (!targetMoveSan && !targetMoveUci) {
+      setSyncStatus('No legal engine moves found.');
+      setTimeout(() => setSyncStatus(null), 3000);
+      return;
+    }
+
+    const evalBefore = evaluation;
+    try {
+      let move = null;
+      if (targetMoveSan) {
+        try {
+          move = chess.move(targetMoveSan);
+        } catch (e) {
+          move = null;
+        }
+      }
+      if (!move && targetMoveUci && targetMoveUci.length >= 4) {
+        move = chess.move({
+          from: targetMoveUci.slice(0, 2),
+          to: targetMoveUci.slice(2, 4),
+          promotion: 'q'
+        });
+      }
+
+      if (move) {
+        const evalAfter = evaluatePosition(chess);
+        const enemyColor = move.color === 'w' ? 'b' : 'w';
+        const isTargetAttacked = chess.isAttacked(move.to as Square, enemyColor);
+        const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
+        const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
+        const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
+        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter);
+        const cpl = Math.abs(evalBefore - evalAfter);
+
+        const analysis: MoveAnalysis = {
+          san: move.san,
+          from: move.from,
+          to: move.to,
+          color: move.color,
+          evalBefore,
+          evalAfter,
+          centipawnLoss: cpl,
+          rating: 'best' // It is literally the top engine move
+        };
+
+        // If reviewing earlier moves in moveHistory, branch continuation or append
+        let updatedHistory: MoveAnalysis[];
+        if (currentMoveIdx >= -1 && currentMoveIdx < moveHistory.length - 1) {
+          // Truncate future moves to form new engine variation
+          updatedHistory = [...moveHistory.slice(0, currentMoveIdx + 1), analysis];
+        } else {
+          updatedHistory = [...moveHistory, analysis];
+        }
+
+        setMoveHistory(updatedHistory);
+        setCurrentMoveIdx(updatedHistory.length - 1);
+        setLastMove({ from: move.from, to: move.to });
+        setEvaluation(evalAfter);
+        setSelectedSquare(null);
+        setValidMoves([]);
+        refreshBoard();
+
+        setSyncStatus(`Played Top Engine Move: ${move.san} (${formatEvalPoints(evalAfter)})`);
+        setTimeout(() => setSyncStatus(null), 3000);
+      }
+    } catch (err) {
+      console.error('Error executing best engine move:', err);
     }
   };
 
@@ -1237,7 +1311,42 @@ export function App() {
                         const isZero = Math.abs(line.eval) < 15;
 
                         return (
-                          <div key={idx} className="engine-line-row">
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              try {
+                                const move = chess.move(line.moveSan);
+                                if (move) {
+                                  const evalAfter = evaluatePosition(chess);
+                                  const analysis: MoveAnalysis = {
+                                    san: move.san,
+                                    from: move.from,
+                                    to: move.to,
+                                    color: move.color,
+                                    evalBefore: evaluation,
+                                    evalAfter,
+                                    centipawnLoss: 0,
+                                    rating: 'best'
+                                  };
+                                  let updatedHistory: MoveAnalysis[];
+                                  if (currentMoveIdx >= -1 && currentMoveIdx < moveHistory.length - 1) {
+                                    updatedHistory = [...moveHistory.slice(0, currentMoveIdx + 1), analysis];
+                                  } else {
+                                    updatedHistory = [...moveHistory, analysis];
+                                  }
+                                  setMoveHistory(updatedHistory);
+                                  setCurrentMoveIdx(updatedHistory.length - 1);
+                                  setLastMove({ from: move.from, to: move.to });
+                                  setEvaluation(evalAfter);
+                                  setSelectedSquare(null);
+                                  setValidMoves([]);
+                                  refreshBoard();
+                                }
+                              } catch (e) {}
+                            }}
+                            className="engine-line-row cursor-pointer active:scale-98 transition-transform"
+                            title={`Play ${line.moveSan} on board`}
+                          >
                             <div className="engine-line-pv">
                               <span className="text-stone-500 font-bold w-4 shrink-0">
                                 {line.rank}.
