@@ -54,17 +54,26 @@ export const GameInsightsPanel: React.FC<GameInsightsProps> = ({
   const safeMoves = Array.isArray(moves) ? moves : [];
   const movesContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll the active move into view smoothly whenever currentMoveIndex changes
+  // Auto-scroll the active move into view smoothly within the moves panel container ONLY
   useEffect(() => {
     if (panelTab === 'moves' && movesContainerRef.current) {
+      const container = movesContainerRef.current;
       if (currentMoveIndex >= 0) {
-        const activeEl = movesContainerRef.current.querySelector<HTMLElement>('.move-active');
+        const activeEl = container.querySelector<HTMLElement>('.move-active');
         if (activeEl) {
-          activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          const containerRect = container.getBoundingClientRect();
+          const elRect = activeEl.getBoundingClientRect();
+          const offsetTop = elRect.top - containerRect.top;
+          const targetScrollTop = container.scrollTop + offsetTop - (containerRect.height / 2) + (elRect.height / 2);
+
+          container.scrollTo({
+            top: targetScrollTop,
+            behavior: 'smooth'
+          });
         }
       } else {
         // Scrolled to beginning (Start position)
-        movesContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        container.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   }, [currentMoveIndex, panelTab]);

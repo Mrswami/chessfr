@@ -128,16 +128,26 @@ export function App() {
   const [moveQualityFilter, setMoveQualityFilter] = useState<'all' | 'mistakes' | 'best'>('all');
   const movesBoxChipsRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll the move chip under the board into view when currentMoveIdx changes
+  // Auto-scroll the move chip under the board into view horizontally ONLY without vertical page jumps
   useEffect(() => {
     if (activeView === 'insights' && movesBoxChipsRef.current) {
+      const container = movesBoxChipsRef.current;
       if (currentMoveIdx >= 0) {
-        const activeChip = movesBoxChipsRef.current.querySelector<HTMLElement>('.inline-move-chip-active');
+        const activeChip = container.querySelector<HTMLElement>('.inline-move-chip-active');
         if (activeChip) {
-          activeChip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          // Calculate container's relative horizontal scroll position
+          const containerRect = container.getBoundingClientRect();
+          const chipRect = activeChip.getBoundingClientRect();
+          const offsetLeft = chipRect.left - containerRect.left;
+          const targetScrollLeft = container.scrollLeft + offsetLeft - (containerRect.width / 2) + (chipRect.width / 2);
+          
+          container.scrollTo({
+            left: targetScrollLeft,
+            behavior: 'smooth'
+          });
         }
       } else {
-        movesBoxChipsRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        container.scrollTo({ left: 0, behavior: 'smooth' });
       }
     }
   }, [currentMoveIdx, activeView]);
@@ -359,9 +369,12 @@ export function App() {
         });
 
         if (move) {
-          const evalAfter = getMaterialEval(chess);
-          const isSac = Boolean(move.captured) === false && ['q', 'r'].includes(move.piece);
-          const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, evalAfter > 0);
+          const enemyColor = move.color === 'w' ? 'b' : 'w';
+          const isTargetAttacked = chess.isAttacked(move.to as Square, enemyColor);
+          const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
+          const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
+          const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
+          const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter);
           const cpl = Math.abs(evalBefore - evalAfter);
 
           const analysis: MoveAnalysis = {
@@ -636,10 +649,19 @@ export function App() {
       for (let i = 0; i < history.length; i++) {
         const move = history[i];
         const evalBefore = lastEval;
+        // Check if destination square is attacked before making move
+        const enemyColor = move.color === 'w' ? 'b' : 'w';
+        const isTargetAttacked = replayChess.isAttacked(move.to as Square, enemyColor);
+
+        // Execute move
         replayChess.move(move);
         const evalAfter = evaluatePosition(replayChess);
-        const isSac = Boolean(move.captured) === false && ['q', 'r'].includes(move.piece);
-        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, evalAfter > 0);
+
+        // A true sacrifice puts a piece (Q, R, B, N) en prise on a defended square without capturing higher value
+        const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
+        const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
+        const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
+        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter);
         const cpl = Math.abs(evalBefore - evalAfter);
 
         newHistory.push({

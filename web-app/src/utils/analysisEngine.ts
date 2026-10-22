@@ -33,19 +33,33 @@ export function classifyMove(
   isWinningAfter: boolean
 ): MoveRating {
   // Centipawn delta from the perspective of the player making the move
+  // Positive cpLoss means player position worsened; negative cpLoss means position improved
   const cpLoss = turn === 'w' ? (evalBefore - evalAfter) : (evalAfter - evalBefore);
+  const evalForPlayer = turn === 'w' ? evalAfter : -evalAfter;
 
-  // Brilliant move: A sacrifice that maintains or increases a strong winning advantage
-  if (isSacrifice && cpLoss <= 25 && isWinningAfter) {
+  // Brilliant move (!!): Truly rare and exceptional.
+  // Requires:
+  // 1. A genuine piece sacrifice (isSacrifice = true)
+  // 2. The player was not already completely losing
+  // 3. The move retains or generates a decisive or solid advantage (evalForPlayer >= 150)
+  // 4. Centipawn loss is practically zero (top engine move / no blunder)
+  if (isSacrifice && isWinningAfter && cpLoss <= 10 && evalForPlayer >= 150) {
     return 'brilliant';
   }
 
-  if (cpLoss <= 15) return 'best';
-  if (cpLoss <= 45) return 'excellent';
-  if (cpLoss <= 90) return 'good';
-  if (cpLoss <= 180) return 'inaccuracy';
-  if (cpLoss <= 320) return 'mistake';
-  return 'blunder';
+  // Great Move (!?): Rare critical move, e.g. finding the only move in an uncomfortable situation or turning the game around
+  // Should occur sparingly (at most 1-2 per game when an advantage is saved or seized)
+  if (cpLoss <= -120 && evalForPlayer >= 80) {
+    return 'excellent';
+  }
+
+  // Standard Engine classifications:
+  if (cpLoss <= 12) return 'best';       // Top engine choice (!)
+  if (cpLoss <= 35) return 'good';       // Solid natural move (Good Move)
+  if (cpLoss <= 80) return 'good';       // Standard reasonable move
+  if (cpLoss <= 160) return 'inaccuracy'; // Slight slip (?!)
+  if (cpLoss <= 300) return 'mistake';    // Mistake (?)
+  return 'blunder';                       // Serious blunder (??)
 }
 
 export function calculateAccuracy(moves: MoveAnalysis[], color: 'w' | 'b'): number {
