@@ -136,6 +136,7 @@ export function App() {
   const [moveQualityFilter, setMoveQualityFilter] = useState<'all' | 'mistakes' | 'best'>('all');
   const [topEngineLines, setTopEngineLines] = useState<EngineLine[]>([]);
   const [showEngineLines, setShowEngineLines] = useState<boolean>(true);
+  const [engineLineArrow, setEngineLineArrow] = useState<BoardArrow | null>(null);
   const movesBoxChipsRef = useRef<HTMLDivElement>(null);
 
   // Compute top 3-4 engine lines whenever the board position (fen) or move changes in analysis mode
@@ -733,6 +734,15 @@ export function App() {
         const enemyColor = move.color === 'w' ? 'b' : 'w';
         const isTargetAttacked = replayChess.isAttacked(move.to as Square, enemyColor);
 
+        // Find best engine move from the position to accurately measure player's centipawn loss
+        let bestEngineEval: number | undefined;
+        try {
+          const best = findBestLine(replayChess, 2);
+          if (best) {
+            bestEngineEval = best.eval;
+          }
+        } catch (e) {}
+
         // Execute move
         replayChess.move(move);
         const evalAfter = evaluatePosition(replayChess);
@@ -741,8 +751,15 @@ export function App() {
         const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
         const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
         const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
-        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter);
-        const cpl = Math.abs(evalBefore - evalAfter);
+        const rating = classifyMove(evalBefore, evalAfter, move.color, isSac, isWinningAfter, bestEngineEval);
+        
+        // CPL relative to the best engine move if available, else static delta
+        let cpl: number;
+        if (typeof bestEngineEval === 'number') {
+          cpl = Math.max(0, move.color === 'w' ? (bestEngineEval - evalAfter) : (evalAfter - bestEngineEval));
+        } else {
+          cpl = Math.abs(evalBefore - evalAfter);
+        }
 
         newHistory.push({
           san: move.san,
@@ -801,6 +818,7 @@ export function App() {
       chess.move(moveHistory[i].san);
     }
     setCurrentMoveIdx(targetIdx);
+    setEngineLineArrow(null);
     if (targetIdx >= 0) {
       const current = moveHistory[targetIdx];
       setLastMove({ from: current.from, to: current.to });
@@ -890,6 +908,8 @@ export function App() {
       }))
     : (activeView === 'training' && drillBestMoveArrow)
     ? [drillBestMoveArrow]
+    : (activeView === 'insights' && engineLineArrow)
+    ? [engineLineArrow]
     : [];
 
   // Toggle/display best move for the active 3-move drill step
@@ -1328,7 +1348,21 @@ export function App() {
                             key={idx}
                             onClick={() => {
                               try {
-                                const move = chess.move(line.moveSan);
+                                let move = null;
+                                try {
+                                  move = chess.move(line.moveSan);
+                                } catch (e) {
+                                  move = null;
+                                }
+
+                                if (!move && line.moveUci && line.moveUci.length >= 4) {
+                                  move = chess.move({
+                                    from: line.moveUci.slice(0, 2),
+                                    to: line.moveUci.slice(2, 4),
+                                    promotion: 'q'
+                                  });
+                                }
+
                                 if (move) {
                                   const evalAfter = evaluatePosition(chess);
                                   const analysis: MoveAnalysis = {
@@ -1350,12 +1384,15 @@ export function App() {
                                   setMoveHistory(updatedHistory);
                                   setCurrentMoveIdx(updatedHistory.length - 1);
                                   setLastMove({ from: move.from, to: move.to });
+                                  setEngineLineArrow({ from: move.from, to: move.to });
                                   setEvaluation(evalAfter);
                                   setSelectedSquare(null);
                                   setValidMoves([]);
                                   refreshBoard();
                                 }
-                              } catch (e) {}
+                              } catch (e) {
+                                console.warn('Failed to play engine line:', e);
+                              }
                             }}
                             className="flex items-center justify-between gap-1.5 px-2 py-0.5 rounded bg-[#221f1b] hover:bg-[#2c2823] text-xs font-mono transition-colors border border-stone-800/80 cursor-pointer active:scale-98"
                             title={`Play ${line.moveSan} on board`}
