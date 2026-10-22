@@ -46,7 +46,7 @@ import {
   formatEvalPoints,
   MOVE_NOTATION_MAP
 } from './utils/analysisEngine';
-import { evaluatePosition, findBestLine } from './utils/chessSearch';
+import { evaluatePosition, findBestLine, findTopEngineLines, EngineLine } from './utils/chessSearch';
 import {
   BarChart3,
   Compass,
@@ -126,7 +126,21 @@ export function App() {
   const [loadedAnalyzedGame, setLoadedAnalyzedGame] = useState<LoadedGameInfo | null>(null);
   const [showBoardMoveChips, setShowBoardMoveChips] = useState<boolean>(true);
   const [moveQualityFilter, setMoveQualityFilter] = useState<'all' | 'mistakes' | 'best'>('all');
+  const [topEngineLines, setTopEngineLines] = useState<EngineLine[]>([]);
+  const [showEngineLines, setShowEngineLines] = useState<boolean>(true);
   const movesBoxChipsRef = useRef<HTMLDivElement>(null);
+
+  // Compute top 3-4 engine lines whenever the board position (fen) or move changes in analysis mode
+  useEffect(() => {
+    if (activeView === 'insights' || activeView === 'tree') {
+      try {
+        const lines = findTopEngineLines(chess, 4, 2);
+        setTopEngineLines(lines);
+      } catch (e) {
+        setTopEngineLines([]);
+      }
+    }
+  }, [fen, activeView, currentMoveIdx]);
 
   // Auto-scroll the move chip under the board into view horizontally ONLY without vertical page jumps
   useEffect(() => {
@@ -1191,6 +1205,74 @@ export function App() {
                 >
                   Next
                 </button>
+              </div>
+
+              {/* Section Showing Top 3 or 4 Engine Lines & Continuations */}
+              <div className="engine-top-lines-box w-full mt-2 select-none">
+                <div className="engine-lines-header">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse inline-block" />
+                    <span className="text-[11px] font-bold text-stone-200 uppercase tracking-wider">
+                      Top Engine Lines
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-cyan-400 ml-1">
+                      {formatEvalPoints(evaluation)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowEngineLines(!showEngineLines)}
+                    className="text-[10px] font-bold text-stone-400 hover:text-stone-100 px-2 py-0.5 rounded bg-stone-800/80 hover:bg-stone-700 transition-colors"
+                  >
+                    {showEngineLines ? 'Hide' : 'Show Top 4'}
+                  </button>
+                </div>
+
+                {showEngineLines && (
+                  <div className="flex flex-col">
+                    {topEngineLines.length > 0 ? (
+                      topEngineLines.map((line, idx) => {
+                        const lineEvalText = formatEvalPoints(line.eval);
+                        const isPlus = line.eval > 0;
+                        const isZero = Math.abs(line.eval) < 15;
+
+                        return (
+                          <div key={idx} className="engine-line-row">
+                            <div className="engine-line-pv">
+                              <span className="text-stone-500 font-bold w-4 shrink-0">
+                                {line.rank}.
+                              </span>
+                              <span className="font-bold text-white shrink-0">
+                                {line.moveSan}
+                              </span>
+                              {line.pvSan.length > 1 && (
+                                <span className="text-stone-400 font-normal truncate opacity-85 ml-1">
+                                  {line.pvSan.slice(1).join(' ')}
+                                </span>
+                              )}
+                            </div>
+
+                            <span
+                              className={`engine-line-eval-badge ${
+                                isZero
+                                  ? 'bg-stone-800 text-stone-300'
+                                  : isPlus
+                                  ? 'bg-stone-100 text-stone-900'
+                                  : 'bg-stone-900 text-stone-200 border border-stone-700'
+                              }`}
+                            >
+                              {lineEvalText}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-[11px] text-stone-500 italic py-1 px-1">
+                        Game over or no legal lines available.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -1971,6 +1971,61 @@ body {
   box-shadow: none;
 }
 
+.engine-top-lines-box {
+  background: #1b1714;
+  border: 1px solid #2e2924;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.engine-lines-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.engine-line-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #231f1b;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.engine-line-row:hover {
+  background: #2c2722;
+}
+
+.engine-line-pv {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+.engine-line-eval-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
 .nav-step-btn {
   min-height: 44px;
   cursor: pointer;

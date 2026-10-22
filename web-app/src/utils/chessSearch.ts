@@ -44,6 +44,39 @@ const BISHOP_TABLE = [
   -20,-10,-10,-10,-10,-10,-10,-20
 ];
 
+const ROOK_TABLE = [
+  0,   0,   0,   0,   0,   0,   0,   0,
+  5,  10,  10,  10,  10,  10,  10,   5,
+ -5,   0,   0,   0,   0,   0,   0,  -5,
+ -5,   0,   0,   0,   0,   0,   0,  -5,
+ -5,   0,   0,   0,   0,   0,   0,  -5,
+ -5,   0,   0,   0,   0,   0,   0,  -5,
+ -5,   0,   0,   0,   0,   0,   0,  -5,
+  0,   0,   0,   5,   5,   0,   0,   0
+];
+
+const QUEEN_TABLE = [
+ -20, -10, -10,  -5,  -5, -10, -10, -20,
+ -10,   0,   0,   0,   0,   0,   0, -10,
+ -10,   0,   5,   5,   5,   5,   0, -10,
+  -5,   0,   5,   5,   5,   5,   0,  -5,
+   0,   0,   5,   5,   5,   5,   0,  -5,
+ -10,   5,   5,   5,   5,   5,   0, -10,
+ -10,   0,   5,   0,   0,   0,   0, -10,
+ -20, -10, -10,  -5,  -5, -10, -10, -20
+];
+
+const KING_TABLE_MID = [
+ -30, -40, -40, -50, -50, -40, -40, -30,
+ -30, -40, -40, -50, -50, -40, -40, -30,
+ -30, -40, -40, -50, -50, -40, -40, -30,
+ -30, -40, -40, -50, -50, -40, -40, -30,
+ -20, -30, -30, -40, -40, -30, -30, -20,
+ -10, -20, -20, -20, -20, -20, -20, -10,
+  20,  20,   0,   0,   0,   0,  20,  20,
+  20,  30,  10,   0,   0,  10,  30,  20
+];
+
 export function evaluatePosition(chess: Chess): number {
   if (chess.isCheckmate()) {
     return chess.turn() === 'w' ? -30000 : 30000;
@@ -71,6 +104,12 @@ export function evaluatePosition(chess: Chess): number {
         posBonus = piece.color === 'w' ? KNIGHT_TABLE[idx] : KNIGHT_TABLE[flippedIdx];
       } else if (piece.type === 'b') {
         posBonus = piece.color === 'w' ? BISHOP_TABLE[idx] : BISHOP_TABLE[flippedIdx];
+      } else if (piece.type === 'r') {
+        posBonus = piece.color === 'w' ? ROOK_TABLE[idx] : ROOK_TABLE[flippedIdx];
+      } else if (piece.type === 'q') {
+        posBonus = piece.color === 'w' ? QUEEN_TABLE[idx] : QUEEN_TABLE[flippedIdx];
+      } else if (piece.type === 'k') {
+        posBonus = piece.color === 'w' ? KING_TABLE_MID[idx] : KING_TABLE_MID[flippedIdx];
       }
 
       const total = val + posBonus;
@@ -87,6 +126,14 @@ export interface BestLineResult {
   line: string[];   // Sequence of UCI moves e.g. ["e2e4", "e7e5", "g1f3"]
   lineSan: string[];
   eval: number;
+}
+
+export interface EngineLine {
+  rank: number;
+  moveSan: string;
+  moveUci: string;
+  eval: number; // Centipawns from White's perspective
+  pvSan: string[];
 }
 
 /**
@@ -172,5 +219,41 @@ export function findBestLine(chess: Chess, maxPlies: number = 3): BestLineResult
     lineSan: res.lineSan.slice(0, maxPlies),
     eval: res.eval
   };
+}
+
+/**
+ * Evaluates and returns the Top N (e.g. 3 or 4) engine lines for the current board position.
+ * Each line includes the initial move, evaluation (from White's perspective), and continuation line.
+ */
+export function findTopEngineLines(chess: Chess, topN: number = 4, depth: number = 2): EngineLine[] {
+  if (chess.isGameOver()) return [];
+  const moves = chess.moves({ verbose: true });
+  if (moves.length === 0) return [];
+
+  const isWhite = chess.turn() === 'w';
+  const lineCandidates: EngineLine[] = [];
+
+  for (const move of moves) {
+    chess.move(move);
+    // Search the opponent's best response up to remaining depth
+    const res = searchPV(chess, depth - 1, -Infinity, Infinity, !isWhite);
+    chess.undo();
+
+    lineCandidates.push({
+      rank: 1,
+      moveSan: move.san,
+      moveUci: `${move.from}${move.to}`,
+      eval: res.eval,
+      pvSan: [move.san, ...res.lineSan]
+    });
+  }
+
+  // Sort: If White to move, highest eval first; if Black to move, lowest eval first
+  lineCandidates.sort((a, b) => isWhite ? b.eval - a.eval : a.eval - b.eval);
+
+  return lineCandidates.slice(0, topN).map((item, idx) => ({
+    ...item,
+    rank: idx + 1
+  }));
 }
 

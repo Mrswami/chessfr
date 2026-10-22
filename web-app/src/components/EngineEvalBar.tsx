@@ -22,12 +22,6 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
   const pawns = safeEval / 100;
   const isMate = Math.abs(safeEval) >= 20000;
 
-  // Modern chess app eval percentage formula with sigmoid/log scale:
-  // 0 -> 50%
-  // +1 pawn (+100) -> ~60%
-  // +3 pawns (+300) -> ~75%
-  // +5 pawns (+500) -> ~88%
-  // Mate -> 100% or 0%
   let whitePercent = 50;
   if (isMate) {
     whitePercent = safeEval > 0 ? 100 : 0;
@@ -43,8 +37,8 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
 
   // Eval formatted string (+1.5, -2.4, M1, 0.0)
   const evalText = formatEvalPoints(safeEval, isMate);
-  const isWhiteAdvantage = safeEval > 0;
-  const isZero = Math.abs(safeEval) < 15;
+  const isWhiteAdvantage = safeEval > 15;
+  const isBlackAdvantage = safeEval < -15;
 
   return (
     <div
@@ -57,8 +51,8 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
           className={`eval-top-half ${bottomColorIsWhite ? 'eval-side-black' : 'eval-side-white'}`}
           style={{ height: `${100 - bottomFillPercent}%` }}
         >
-          {/* Label on top when that side has significant advantage */}
-          {((bottomColorIsWhite && !isWhiteAdvantage && !isZero) || (!bottomColorIsWhite && isWhiteAdvantage && !isZero)) && (
+          {/* Label on top if that side has the advantage or if bar height is sufficient */}
+          {((bottomColorIsWhite && isBlackAdvantage) || (!bottomColorIsWhite && isWhiteAdvantage)) && (
             <span className="eval-badge top-badge font-mono">
               {evalText}
             </span>
@@ -70,17 +64,17 @@ export const EngineEvalBar: React.FC<EvalBarProps> = ({
           className={`eval-bottom-half ${bottomColorIsWhite ? 'eval-side-white' : 'eval-side-black'}`}
           style={{ height: `${bottomFillPercent}%` }}
         >
-          {/* Label on bottom when that side has advantage */}
-          {((bottomColorIsWhite && isWhiteAdvantage && !isZero) || (!bottomColorIsWhite && !isWhiteAdvantage && !isZero)) && (
+          {/* Label on bottom if that side has the advantage */}
+          {((bottomColorIsWhite && isWhiteAdvantage) || (!bottomColorIsWhite && isBlackAdvantage)) && (
             <span className="eval-badge bottom-badge font-mono">
               {evalText}
             </span>
           )}
 
           {/* Equal balance indicator in center when near 0.0 */}
-          {isZero && (
+          {!isWhiteAdvantage && !isBlackAdvantage && (
             <span className="eval-badge center-badge font-mono">
-              0.0
+              {evalText}
             </span>
           )}
         </div>
