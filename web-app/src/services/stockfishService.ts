@@ -89,7 +89,10 @@ class StockfishEngineService {
         scoreCp = parseInt(cpMatch[1], 10);
       }
 
-      const pv = pvMatch ? pvMatch[1].trim().split(/\s+/) : [];
+      const rawPvTokens = pvMatch ? pvMatch[1].trim().split(/\s+/) : [];
+      // Strictly keep only valid UCI moves (e.g. e2e4, g8f6, e7e8q)
+      const uciMoveRegex = /^[a-h][1-8][a-h][1-8][qrbn]?$/i;
+      const pv = rawPvTokens.filter(token => uciMoveRegex.test(token));
       const bestMoveUci = pv.length > 0 ? pv[0] : '';
 
       // Only update top eval on multipv 1
@@ -155,7 +158,9 @@ class StockfishEngineService {
       scoreCp = -scoreCp;
     }
 
-    const pv = pvMatch ? pvMatch[1].trim().split(/\s+/) : [];
+    const rawPvTokens = pvMatch ? pvMatch[1].trim().split(/\s+/) : [];
+    const uciMoveRegex = /^[a-h][1-8][a-h][1-8][qrbn]?$/i;
+    const pv = rawPvTokens.filter(token => uciMoveRegex.test(token));
     const moveUci = pv.length > 0 ? pv[0] : '';
 
     if (moveUci) {

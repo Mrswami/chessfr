@@ -168,6 +168,25 @@ export function App() {
               promotion: 'q'
             });
             if (m) {
+              // Convert continuation moves to SAN using probeChess
+              const continuationSan: string[] = [m.san];
+              for (const uciStep of sfEval.pv.slice(1, 5)) {
+                try {
+                  const stepMove = probeChess.move({
+                    from: uciStep.slice(0, 2),
+                    to: uciStep.slice(2, 4),
+                    promotion: uciStep.length > 4 ? uciStep[4] : 'q'
+                  });
+                  if (stepMove) {
+                    continuationSan.push(stepMove.san);
+                  } else {
+                    break;
+                  }
+                } catch (e) {
+                  break;
+                }
+              }
+
               setTopEngineLines(prev => {
                 const updated = [...prev];
                 if (updated.length > 0) {
@@ -176,7 +195,7 @@ export function App() {
                     moveSan: m.san,
                     moveUci: sfEval.bestMoveUci,
                     eval: sfEval.scoreCp,
-                    pvSan: [m.san, ...(sfEval.pv.slice(1))]
+                    pvSan: continuationSan
                   };
                 }
                 return updated;
@@ -243,6 +262,10 @@ export function App() {
             loadCachedProfile(cachedUser).then((prof) => {
               if (prof) setPlaystyleProfile(prof);
             });
+            // Auto-preload first game into Game Review analysis board
+            if (indexedGames[0]) {
+              handleAnalyzeGame(indexedGames[0]);
+            }
             setIsInitialLoading(false);
           }
         });
@@ -410,6 +433,11 @@ export function App() {
         const treeB = buildOpeningTree(games, username, 'black');
         setOpeningTreeWhite(treeW);
         setOpeningTreeBlack(treeB);
+
+        // Auto-analyze the latest game into Game Review if not already analyzed
+        if (!loadedAnalyzedGame && games[0]) {
+          handleAnalyzeGame(games[0]);
+        }
 
         setSyncStatus(
           `Analyzed ${games.length} games! Built Opening Tree, extracted ${blunderPuzzles.length} blunders & generated ${commonScenarioPuzzles.length} 3-move scenarios.`
@@ -776,7 +804,7 @@ export function App() {
    * Loads a full Chess.com game into the Game Review analysis engine
    */
   const handleAnalyzeGame = (game: ChessComGame) => {
-    if (!game.pgn) return;
+    if (!game || !game.pgn) return;
 
     try {
       const isUserWhite = game.white.username.toLowerCase() === chessComUsername.toLowerCase();
@@ -802,12 +830,11 @@ export function App() {
       for (let i = 0; i < history.length; i++) {
         const move = history[i];
         const evalBefore = lastEval;
-        // Check if destination square is attacked before making move
         const enemyColor = move.color === 'w' ? 'b' : 'w';
         const isTargetAttacked = replayChess.isAttacked(move.to as Square, enemyColor);
 
-        // Search candidate engine lines from current position before making the move
-        const lines = findTopEngineLines(replayChess, 5, 2);
+        // Fast responsive heuristic lines (depth 1 search) for instant move list populating
+        const lines = findTopEngineLines(replayChess, 3, 1);
         const bestLine = lines.length > 0 ? lines[0] : null;
         const playedLine = lines.find(l => l.moveSan === move.san || l.moveUci === `${move.from}${move.to}`);
 
@@ -815,7 +842,6 @@ export function App() {
         replayChess.move(move);
         const evalAfter = evaluatePosition(replayChess);
 
-        // Centipawn loss is computed on the same search horizon:
         let cpl: number;
         let bestEngineEval: number | undefined;
 
@@ -829,12 +855,10 @@ export function App() {
           cpl = Math.abs(evalBefore - evalAfter);
         }
 
-        // A true sacrifice puts a piece (Q, R, B, N) en prise on a defended square without capturing higher value
         const isPiece = ['q', 'r', 'b', 'n'].includes(move.piece);
         const isSac = isPiece && isTargetAttacked && !move.captured && !move.san.includes('O-O');
         const isWinningAfter = move.color === 'w' ? evalAfter >= 150 : evalAfter <= -150;
 
-        // Verify if this was the sole saving/winning move when alternatives lose significant advantage
         let isOnlyGoodMove = false;
         if (lines.length >= 2 && bestLine) {
           const secondBest = lines[1];
@@ -888,6 +912,7 @@ export function App() {
       setSyncStatus(`Loaded game vs @${isUserWhite ? game.black.username : game.white.username} into Game Review (${newHistory.length} moves).`);
       setTimeout(() => setSyncStatus(null), 5000);
     } catch (e) {
+      console.error('Failed to parse and analyze game:', e);
       setSyncStatus('Failed to parse game PGN.');
       setTimeout(() => setSyncStatus(null), 4000);
     }
@@ -1220,6 +1245,10 @@ export function App() {
               ? `Crunching @${chessComUsername}'s games, blunders & 3-move response patterns`
               : 'Loading tactical puzzles, mastery storage & master opening trees'
           }
+          onDismiss={() => {
+            setIsInitialLoading(false);
+            setIsSyncing(false);
+          }}
         />
       )}
 

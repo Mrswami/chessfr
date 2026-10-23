@@ -4,17 +4,13 @@ import knightImg from '../assets/justtheknight.png';
 interface LoadingScreenProps {
   statusMessage?: string | null;
   subMessage?: string;
+  onDismiss?: () => void;
 }
 
-/**
- * Dedicated Full-Screen Dimmed Loading Screen
- * Centers user's knight emblem, displays prominent "LOADING..." text,
- * and dims the entire screen with z-index 99999 and pointer-events all
- * so users cannot click or interact with the website until sync finishes.
- */
 export const DedicatedLoadingOverlay: React.FC<LoadingScreenProps> = ({
   statusMessage = 'Analyzing games & synchronizing opening tree...',
-  subMessage = 'Please wait while positions, blunders & 3-move response patterns load'
+  subMessage = 'Please wait while positions, blunders & 3-move response patterns load',
+  onDismiss
 }) => {
   return (
     <div className="dedicated-loading-backdrop" aria-busy="true" aria-live="polite">
@@ -60,15 +56,20 @@ export const DedicatedLoadingOverlay: React.FC<LoadingScreenProps> = ({
           </div>
         )}
 
-        {/* Interaction Locked Badge */}
-        <div className="loading-lock-pill">
-          <span>🔒 Screen locked until sync finishes</span>
-        </div>
-
         {/* Indeterminate Shimmering Progress Bar */}
         <div className="loading-progress-bar-wrap">
           <div className="loading-progress-bar-fill" />
         </div>
+
+        {onDismiss && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="mt-3 px-3 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-colors"
+          >
+            Continue in Background
+          </button>
+        )}
       </div>
     </div>
   );
